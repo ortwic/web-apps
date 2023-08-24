@@ -1,4 +1,4 @@
-import { Appointment } from '../model/appointment.model';
+import { calendar_v3 as C3 } from 'googleapis';
 
 const anyDash = /\s?\p{Dash}\s?/u;
 const anyMonth = [ "Jän", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
@@ -54,16 +54,28 @@ export class OpenPianoAppointmentService {
     readonly url = 'https://openpianoforrefugees.com/standorte/#termine';
     readonly selector = 'div.et_pb_text_inner';
 
-    toObject(text: string): Appointment {
+    toObject(text: string): C3.Schema$Event {
         const [h4, p] = text.split('\n');
         if (h4 && p) {
             const [ startDate, endDate ] = parseDateSpan(h4);
             const [ startTime, endTime ] = parseTimeSpan(p);
-            const location = parseLocation(p);
+            const location = parseLocation(p) ?? '';
             
-            return { startDate, endDate, startTime, endTime, location, text };
+            return { 
+                summary: `OpenPiano @${location}`,
+                description: `${text}\n\n${this.url}`,
+                location, 
+                start: {
+                    dateTime: `${startDate}T${startTime}:00`,
+                    timeZone: 'Europe/Vienna'
+                },
+                end: {
+                    dateTime: `${endDate}T${endTime}:00`,
+                    timeZone: 'Europe/Vienna'
+                }
+            };
         }
 
-        return { text } as Appointment;
+        return {};
     }
 }
