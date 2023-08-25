@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { createLogger, transports, format } from 'winston';
 
 const custom = format.combine(
@@ -5,12 +6,13 @@ const custom = format.combine(
     format.printf(({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`)
 );
 
+export const date = moment().format('YYYY-MM-DD');
 export const logger = createLogger({
     level: 'debug',
     format: format.simple(),
     transports: [
         new transports.File({
-            filename: 'result.log',
+            filename: `${date}.log`,
             format: custom,
             options: { flags: 'w' }
         })

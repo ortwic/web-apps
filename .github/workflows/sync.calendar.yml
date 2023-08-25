@@ -31,4 +31,4 @@ jobs:
         CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
         CLIENT_EMAIL: ${{ secrets.CLIENT_EMAIL }}
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-    - run: npm run dev --if-present
+      run: npm run dev --if-present
