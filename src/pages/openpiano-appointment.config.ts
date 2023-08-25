@@ -1,4 +1,5 @@
 import { calendar_v3 as C3 } from 'googleapis';
+import { date } from '../service/logger';
 
 const anyDash = /\s?\p{Dash}\s?/u;
 const anyMonth = [ "Jän", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
@@ -62,8 +63,8 @@ export class OpenPianoAppointmentService {
             const location = parseLocation(p) ?? '';
             
             return { 
-                summary: `OpenPiano @${location}`,
-                description: `${text}\n\n${this.url}`,
+                summary: `OpenPiano ${currentYear}`,
+                description: `${text}\n\n${this.url}\nSync: ${date}`,
                 location, 
                 start: {
                     dateTime: `${startDate}T${startTime}:00`,

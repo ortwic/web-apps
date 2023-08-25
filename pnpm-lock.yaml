@@ -17,6 +17,9 @@ dependencies:
   googleapis:
     specifier: ^126.0.0
     version: 126.0.0
+  moment:
+    specifier: ^2.29.4
+    version: 2.29.4
   winston:
     specifier: ^3.10.0
     version: 3.10.0
