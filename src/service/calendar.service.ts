@@ -8,6 +8,10 @@ const email = process.env.CLIENT_EMAIL,
     calendarId = process.env.CALENDAR_ID,
     scopes = ['https://www.googleapis.com/auth/calendar'];
 
+const normalizeDescription = (text: string | null | undefined) => {
+    return text && text.split('\nSync: ')[0]?.replace(/\s/, '');
+};
+
 export async function createCalendar() {
     const auth = new google.auth.JWT(email, undefined, key, scopes);
     const calendar = google.calendar({ version: 'v3', auth });
@@ -20,7 +24,8 @@ export async function createCalendar() {
     const eventExists = (event: C3.Schema$Event) => {
         return events.some(e => e.summary === event.summary 
             && e.creator?.email === email
-            && e.description === e.description);
+            // && e.description === event.description
+            && e.location === event.location);
     };
 
     async function insertEvent(resource: C3.Schema$Event): Promise<C3.Schema$Event> {
@@ -53,11 +58,30 @@ export async function createCalendar() {
         }
         return [];
     }
+    
+    async function deleteEvents(predicate: (ev: C3.Schema$Event) => boolean | undefined): Promise<C3.Schema$Event[]> {
+        const items = events.filter(predicate);
+        if (items.length) {
+            return await RunBatch({
+                accessToken: auth.credentials.access_token ?? '',
+                api: {
+                    name: 'calendar',
+                    version: 'v3'
+                },
+                requests: items.map((ev) => ({
+                    method: 'DELETE',
+                    endpoint: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${ev.id}`
+                }))
+            });
+        }
+        return [];
+    }
 
     return {
         events,
         eventExists,
         insertEvent,
-        insertEvents
+        insertEvents,
+        deleteEvents
     };
 }
