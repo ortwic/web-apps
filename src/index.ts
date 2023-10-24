@@ -9,15 +9,16 @@ const openPianoConfig = new OpenPianoAppointmentService();
 (async () => {
     try {
         const calendar = await createCalendar();
-        // await calendar.deleteEvents(ev => ev.description?.includes('2023-10-13'));
-        // return;
-
+        
         const events = await scrapePages(openPianoConfig)
             .then(e => e.filter(e => e.summary));
-
+        
         logger.info(`Scraped ${events.length} events from ${openPianoConfig.url}`);
         logger.debug(inspect(events));
-      
+        
+        logger.info(`Removing ${calendar.events?.length ?? 0} existing events.`);
+        await calendar.deleteEvents(ev => ev.creator?.email === process.env.CLIENT_EMAIL);
+
         const result = await calendar.insertEvents(events);
         logger.info(`Added ${result.length} events to calendar.`);
     } catch (error) {
