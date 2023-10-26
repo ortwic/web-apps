@@ -3,7 +3,6 @@ import { date } from '../service/logger';
 
 const anyDash = /\s?\p{Dash}\s?/u;
 const anyMonth = [ "Jän", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
-const currentYear = new Date().getFullYear();
 const leading0 = (n?: number) => (n ? `${n}`.padStart(2, '0') : undefined);
 
 const parseDate = (text: string) => {
@@ -19,18 +18,6 @@ const parseDate = (text: string) => {
         }
     }
     return [];
-};
-
-const parseDateSpan = (text: string) => {
-    const dates = text.split(anyDash);
-    const [ startMonth, startDay ] = parseDate(dates[0]);
-    const [ endMonth, endDay ] = parseDate(dates[1]);
-    const endYear = startMonth && endMonth && +startMonth > +endMonth 
-        ? currentYear + 1 : currentYear;
-    return [ 
-        `${currentYear}-${startMonth}-${startDay}`, 
-        `${endYear}-${endMonth || startMonth}-${endDay || startDay}`
-    ];
 };
 
 const parseTimeSpan = (text: string) => {
@@ -54,16 +41,37 @@ const parseLocation = (text: string) => (text.match(/\b(\D+ \(\w+\) – .+?),\s/
 export class OpenPianoAppointmentService {
     readonly url = 'https://openpianoforrefugees.com/standorte/#termine';
     readonly selector = 'div.et_pb_text_inner';
+    readonly currentMonth: number;
+    readonly currentYear: number;
+
+    constructor(now = new Date()) {
+        this.currentMonth = now.getMonth();
+        this.currentYear = now.getFullYear();
+    }
+
+    private parseDateSpan = (text: string) => {
+        const dates = text.split(anyDash);
+        const [ startMonth, startDay ] = parseDate(dates[0]);
+        const [ endMonth, endDay ] = parseDate(dates[1]);
+        const startYear = startMonth && +startMonth < +this.currentMonth 
+            ? this.currentYear + 1 : this.currentYear;
+        const endYear = endMonth && +endMonth < +this.currentMonth 
+            ? this.currentYear + 1 : startYear;
+        return [ 
+            `${startYear}-${startMonth}-${startDay}`, 
+            `${endYear}-${endMonth || startMonth}-${endDay || startDay}`
+        ];
+    };
 
     toObject(text: string): C3.Schema$Event {
         const [h4, p] = text.split('\n');
         if (h4 && p) {
-            const [ startDate, endDate ] = parseDateSpan(h4);
+            const [ startDate, endDate ] = this.parseDateSpan(h4);
             const [ startTime, endTime ] = parseTimeSpan(p);
             const location = parseLocation(p) ?? '';
             
             return { 
-                summary: `OpenPiano ${currentYear}`,
+                summary: `OpenPiano ${this.currentYear}`,
                 description: `${text}\n\n${this.url}\nSync: ${date}`,
                 location, 
                 start: {
