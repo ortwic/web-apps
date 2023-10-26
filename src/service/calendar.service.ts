@@ -41,8 +41,7 @@ export async function createCalendar() {
      * https://tanaikech.github.io/2022/10/11/creating-and-deleting-multiple-events-in-google-calendar-by-batch-requests-using-calendar-api-with-node.js/
      */
     async function insertEvents(resources: C3.Schema$Event[]): Promise<C3.Schema$Event[]> {
-        const items = resources.filter(res => !eventExists(res));
-        if (items.length) {
+        if (resources.length) {
             return await RunBatch({
                 accessToken: auth.credentials.access_token ?? '',
                 api: {

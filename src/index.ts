@@ -14,13 +14,15 @@ const openPianoConfig = new OpenPianoAppointmentService();
             .then(e => e.filter(e => e.summary));
         
         logger.info(`Scraped ${events.length} events from ${openPianoConfig.url}`);
-        logger.debug(inspect(events));
-        
-        logger.info(`Removing ${calendar.events?.length ?? 0} existing events.`);
-        await calendar.deleteEvents(ev => ev.creator?.email === process.env.CLIENT_EMAIL);
+        logger.debug(inspect(events.filter(e => !calendar.eventExists(e))));
 
-        const result = await calendar.insertEvents(events);
-        logger.info(`Added ${result.length} events to calendar.`);
+        if (events.length) {
+            logger.info(`Removing ${calendar.events?.length ?? 0} existing events.`);
+            await calendar.deleteEvents(ev => ev.creator?.email === process.env.CLIENT_EMAIL);
+
+            const result = await calendar.insertEvents(events);
+            logger.info(`Added ${result.length} events to calendar.`);
+        }
     } catch (error) {
         logger.error(error);
     }
