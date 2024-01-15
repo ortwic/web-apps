@@ -2,13 +2,13 @@ import { calendar_v3 as C3 } from 'googleapis';
 import { date } from '../service/logger';
 
 const anyDash = /\s?\p{Dash}\s?/u;
-const anyMonth = [ "Jän", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
+const anyMonth = [ "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
 const leading0 = (n?: number) => (n ? `${n}`.padStart(2, '0') : undefined);
 
 const parseDate = (text: string) => {
     if (text) {
         // consider 'Sep' to be 'Sept'
-        const dateMatch = text.match(`(${anyMonth.join('|')})?[t]?\\s?(\\d{2})`);
+        const dateMatch = text.replace('ä', 'a').match(`(${anyMonth.join('|')})?[t]?\\s?(\\d{2})`);
         if (dateMatch) {
             const month = dateMatch[1] ? anyMonth.indexOf(dateMatch[1]) + 1 : undefined;
             return [ 
