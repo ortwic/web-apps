@@ -7,8 +7,8 @@ const leading0 = (n?: number) => (n ? `${n}`.padStart(2, '0') : undefined);
 
 const parseDate = (text: string) => {
     if (text) {
-        // consider 'Sep' to be 'Sept'
-        const dateMatch = text.replace('ä', 'a').match(`(${anyMonth.join('|')})?[t]?\\s?(\\d{2})`);
+        // consider 4 letters: 'Feb'>>'Febr', 'Mär'>>'März', 'Sep'>>'Sept'
+        const dateMatch = text.replace('ä', 'a').match(`(${anyMonth.join('|')})?[rtz]?\\s?(\\d{2})`);
         if (dateMatch) {
             const month = dateMatch[1] ? anyMonth.indexOf(dateMatch[1]) + 1 : undefined;
             return [ 

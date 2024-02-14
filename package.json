@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc && node ./dist/index.js",
-    "test": "jest --verbose true --watch"
+    "test": "jest --verbose true --watchAll"
   },
   "keywords": [],
   "author": "OCSoft42",
