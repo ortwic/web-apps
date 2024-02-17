@@ -3,13 +3,13 @@
 # Why-App
 A philosophical tool for your existential journey.
 
-## Getting Started
+# Getting Started
 
-### Prerequisites
+## Prerequisites
 
 You should install [nodejs](https://nodejs.org) and [pnpm](https://pnpm.io). I'd recommend [Visual Studio Code](https://code.visualstudio.com) for developing.
 
-### Installation
+## Installation
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
@@ -28,7 +28,7 @@ _Below is an example of how you can instruct your audience on installing and set
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Contributing
+# Contributing
 
 Really? This project is very small yet. Contact me if you really desire...
 
