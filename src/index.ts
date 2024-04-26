@@ -10,6 +10,7 @@ import { createPlaceService } from './service/place.service';
 import { logger } from './service/logger';
 
 const openPianoConfig = new OpenPianoAppointmentService();
+const createdAt = new Date().toUTCString();
 
 async function updateFirestore(events: CalendarEvent[]) {
     const createId = (e: CalendarEvent) => {
@@ -24,7 +25,7 @@ async function updateFirestore(events: CalendarEvent[]) {
         logger.info('Update firestore documents');
         return Promise.all(events.map(async e => {
             const place = await placeService.findPlace(e.location);
-            return storeService.setDocument(createId(e), { ...e, place });
+            return storeService.setDocument(createId(e), { ...e, place, createdAt });
         }));
     } catch (error) {
         logger.error(error);        
