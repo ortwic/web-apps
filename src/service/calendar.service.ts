@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { calendar_v3 as C3, google } from 'googleapis';
 import { RunBatch } from 'gbatchrequests';
 import { logger } from './logger';

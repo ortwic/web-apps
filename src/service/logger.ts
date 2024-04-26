@@ -1,8 +1,9 @@
 import moment from 'moment';
 import { createLogger, transports, format } from 'winston';
 
-const custom = format.combine(
+const customFormat = format.combine(
     format.timestamp(),
+    format.errors({ stack: true }),
     format.printf(({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`)
 );
 
@@ -13,7 +14,7 @@ export const logger = createLogger({
     transports: [
         new transports.File({
             filename: `${date}.log`,
-            format: custom,
+            format: customFormat,
             options: { flags: 'w' }
         })
     ]

@@ -4,7 +4,7 @@ import { load } from 'cheerio';
 interface PageConfig<T> {
     url: string;
     selector: string;
-    toObject: (text: string) => T;
+    toEvent: (text: string) => T;
 }
 
 interface Logger {    
@@ -32,7 +32,7 @@ export async function scrapePages<T>(cfg: PageConfig<T>, logger: Logger = consol
     async function parsePage(data: string): Promise<T[]> {
         const $html = load(data);
         const values = $html(cfg.selector)
-            .map(async (_, element) => cfg.toObject($html(element).text()))
+            .map(async (_, element) => cfg.toEvent($html(element).text()))
             .get();
         return Promise.all(values);
     }

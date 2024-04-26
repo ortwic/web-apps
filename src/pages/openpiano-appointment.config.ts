@@ -1,5 +1,5 @@
-import { calendar_v3 as C3 } from 'googleapis';
 import { date } from '../service/logger';
+import { CalendarEvent } from '../service/event.model';
 
 const anyDash = /\s?\p{Dash}\s?/u;
 const anyMonth = [ "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
@@ -63,7 +63,7 @@ export class OpenPianoAppointmentService {
         ];
     };
 
-    toObject(text: string): C3.Schema$Event {
+    toEvent(text: string): CalendarEvent {
         const [h4, p] = text.split('\n');
         if (h4 && p) {
             const [ startDate, endDate ] = this.parseDateSpan(h4);
@@ -74,6 +74,10 @@ export class OpenPianoAppointmentService {
                 summary: `OpenPiano ${location}`,
                 description: `${text}\n\n${this.url}\nSync: ${date}`,
                 location, 
+                organizer: { 
+                    displayName: 'OpenPiano',
+                    email: 'info@openpianoforrefugees.com'
+                },
                 start: {
                     dateTime: `${startDate}T${startTime}:00`,
                     timeZone: 'Europe/Vienna'
@@ -85,6 +89,6 @@ export class OpenPianoAppointmentService {
             };
         }
 
-        return {};
+        return {} as CalendarEvent;
     }
 }
