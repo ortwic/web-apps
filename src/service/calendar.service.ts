@@ -11,7 +11,7 @@ const normalizeDescription = (text: string | null | undefined) => {
     return text && text.split('\nSync: ')[0]?.replace(/\s/, '');
 };
 
-export async function createCalendar() {
+export async function createCalendarService() {
     const auth = new google.auth.JWT(email, undefined, key, scopes);
     const calendar = google.calendar({ version: 'v3', auth });
     
