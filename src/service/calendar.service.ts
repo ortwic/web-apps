@@ -2,14 +2,10 @@ import { calendar_v3 as C3, google } from 'googleapis';
 import { RunBatch } from 'gbatchrequests';
 import { logger } from './logger';
 
-const email = process.env.CLIENT_EMAIL, 
-    key = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n'),
+export const email = process.env.CLIENT_EMAIL;
+const key = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n'),
     calendarId = process.env.CALENDAR_ID,
     scopes = ['https://www.googleapis.com/auth/calendar'];
-
-const normalizeDescription = (text: string | null | undefined) => {
-    return text && text.split('\nSync: ')[0]?.replace(/\s/, '');
-};
 
 export async function createCalendarService() {
     const auth = new google.auth.JWT(email, undefined, key, scopes);
@@ -23,7 +19,6 @@ export async function createCalendarService() {
     const eventExists = (event: C3.Schema$Event) => {
         return events.some(e => e.summary === event.summary 
             && e.creator?.email === email
-            // && e.description === event.description
             && e.location === event.location);
     };
 

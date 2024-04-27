@@ -3,7 +3,7 @@ export interface CalendarEvent {
     description: string;
     location: string;
     createdAt?: string;
-    creator: Contact;
+    creator?: Contact;
     organizer: Contact;
     start: Date;
     end: Date;

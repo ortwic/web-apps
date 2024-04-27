@@ -5,8 +5,8 @@ import { logger } from "./logger";
 export function createFirestoreService() {
     admin.initializeApp({ 
         credential: admin.credential.cert({
-            clientEmail: process.env.FIRE_CLIENT_EMAIL,
-            privateKey: process.env.FIRE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            clientEmail: process.env.CLIENT_EMAIL,
+            privateKey: process.env.PRIVATE_KEY?.replace(/\\n/g, '\n'),
             projectId: 'song-repo'
         })
     });
