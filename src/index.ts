@@ -10,7 +10,6 @@ import { createPlaceService } from './service/place.service';
 import { logger } from './service/logger';
 
 const openPianoConfig = new OpenPianoAppointmentService();
-const createdAt = new Date().toUTCString();
 
 async function updateFirestore(events: CalendarEvent[]) {
     const createId = (e: CalendarEvent) => {
@@ -25,7 +24,7 @@ async function updateFirestore(events: CalendarEvent[]) {
         logger.info('Update firestore documents');
         return Promise.all(events.map(async e => {
             const place = await placeService.findPlace(e.location);
-            return storeService.setDocument(createId(e), { ...e, place, createdAt });
+            return storeService.setDocument(createId(e), { ...e, place });
         }));
     } catch (error) {
         logger.error(error);        
@@ -54,7 +53,7 @@ async function updateCalendar(events: CalendarEvent[]) {
         logger.info(`Scraped ${events.length} events from ${openPianoConfig.url}`);
         
         if (events.length) {
-            // await updateCalendar(events);
+            await updateCalendar(events);
             await updateFirestore(events);
         }
     } catch (error) {

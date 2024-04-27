@@ -71,6 +71,7 @@ export class OpenPianoAppointmentService {
             const location = parseLocation(p) ?? '';
             
             return { 
+                created: `${Date.now()}`,
                 summary: `OpenPiano ${location}`,
                 description: `${text}\n\n${this.url}\nSync: ${date}`,
                 location, 
