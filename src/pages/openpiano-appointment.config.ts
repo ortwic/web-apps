@@ -75,6 +75,10 @@ export class OpenPianoAppointmentService {
                 summary: `OpenPiano ${location}`,
                 description: `${text}\n\n${this.url}\nSync: ${date}`,
                 location, 
+                creator: { 
+                    displayName: 'song-repo',
+                    email: process.env.CLIENT_EMAIL!
+                }, 
                 organizer: { 
                     displayName: 'OpenPiano',
                     email: 'info@openpianoforrefugees.com'

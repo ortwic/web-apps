@@ -1,18 +1,23 @@
 export interface CalendarEvent {
-    created: string;
     summary: string;
     description: string;
     location: string;
-    organizer: {
-        displayName: string;
-        email: string;
-    }
-    start: {
-        dateTime: string;
-        timeZone: string;
-    };
-    end: {
-        dateTime: string;
-        timeZone: string;
-    };
+    created: string;
+    creator: Contact;
+    organizer: Contact;
+    start: Date;
+    end: Date;
+}
+
+interface Contact {
+    id?: string;
+    displayName?: string;
+    email: string;
+    self?: boolean;
+}
+
+interface Date {
+    date?: string;
+    dateTime: string;
+    timeZone?: string;
 }
