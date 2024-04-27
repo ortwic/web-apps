@@ -71,10 +71,11 @@ export class OpenPianoAppointmentService {
             const location = parseLocation(p) ?? '';
             
             return { 
-                created: `${Date.now()}`,
                 summary: `OpenPiano ${location}`,
                 description: text,
                 location, 
+                 // setting the 'created' property fails in a bad request when sending data to calendar API
+                createdAt: `${Date.now()}`,
                 creator: { 
                     displayName: 'song-repo',
                     email: process.env.CLIENT_EMAIL!
