@@ -12,10 +12,11 @@ import { logger } from './service/logger';
 const openPianoConfig = new OpenPianoAppointmentService();
 
 async function updateFirestore(events: CalendarEvent[]) {
+    const clean = (s: string) => s.replace(/\W+/g, '').toLowerCase();
     const createId = (e: CalendarEvent) => {
         const week = `${moment(e.start.dateTime).isoWeek()}`;
-        const location = e.location.replace(/\W+/g, '');
-        return `${week.padStart(2, '0')}-openpiano-${location}`;
+        const creator = (e.creator.email.split('@')[0]);
+        return `${week.padStart(2, '0')}-${clean(creator)}-${clean(e.location)}`;
     };
     try {
         const storeService = createFirestoreService();
@@ -41,20 +42,23 @@ async function updateCalendar(events: CalendarEvent[]) {
 
         const result = await service.insertEvents(events);
         logger.info(`Added ${result.length} events to calendar.`);
+
+        return service.foreignEvents() as CalendarEvent[];
     } catch (error) {
-        
+        logger.error(error);
     }
+    return [];
 }
 
 (async () => {
     try {        
-        const events = await scrapePages(openPianoConfig)
+        const scrapedEvents = await scrapePages(openPianoConfig)
             .then(e => e.filter(e => e.summary));
-        logger.info(`Scraped ${events.length} events from ${openPianoConfig.url}`);
+        logger.info(`Scraped ${scrapedEvents.length} events from ${openPianoConfig.url}`);
         
-        if (events.length) {
-            await updateCalendar(events);
-            await updateFirestore(events);
+        if (scrapedEvents.length) {
+            const events = await updateCalendar(scrapedEvents);
+            await updateFirestore([...scrapedEvents, ...events]);
         }
     } catch (error) {
         logger.error(error);

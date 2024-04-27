@@ -73,7 +73,7 @@ export class OpenPianoAppointmentService {
             return { 
                 created: `${Date.now()}`,
                 summary: `OpenPiano ${location}`,
-                description: `${text}\n\n${this.url}\nSync: ${date}`,
+                description: text,
                 location, 
                 creator: { 
                     displayName: 'song-repo',
@@ -90,7 +90,8 @@ export class OpenPianoAppointmentService {
                 end: {
                     dateTime: `${endDate}T${endTime}:00`,
                     timeZone: 'Europe/Vienna'
-                }
+                },
+                website: this.url
             };
         }
 

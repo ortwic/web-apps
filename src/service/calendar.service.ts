@@ -27,6 +27,12 @@ export async function createCalendarService() {
             && e.location === event.location);
     };
 
+    const foreignEvents = () => {
+        return events
+            .filter(e => e.creator?.email !== email)
+            .map(e => ({ ...e, website: e.htmlLink }));
+    };
+
     async function insertEvent(resource: C3.Schema$Event): Promise<C3.Schema$Event> {
         if (!eventExists(resource)) {
             const request = { calendarId, auth, resource };        
@@ -78,6 +84,7 @@ export async function createCalendarService() {
     return {
         events,
         eventExists,
+        foreignEvents,
         insertEvent,
         insertEvents,
         deleteEvents

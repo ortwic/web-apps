@@ -7,6 +7,7 @@ export interface CalendarEvent {
     organizer: Contact;
     start: Date;
     end: Date;
+    website?: string;
 }
 
 interface Contact {
