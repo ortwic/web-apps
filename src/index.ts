@@ -26,9 +26,10 @@ async function updateFirestore(events: CalendarEvent[]) {
         logger.info('Update firestore documents');
         return Promise.all(
             events.map(async e => {
+                const id = createId(e);
                 const place = await placeService.findPlace(e.location);
                 const created = (e?.createdUTC ? new Date(e.createdUTC).toISOString() : e.created);
-                return storeService.setDocument(createId(e), { ...e, created, place });
+                return storeService.setDocument(id, { ...e, id, created, place });
             })
         );
     } catch (error) {
