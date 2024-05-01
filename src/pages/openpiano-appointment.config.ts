@@ -75,7 +75,7 @@ export class OpenPianoAppointmentService {
                 description: text,
                 location, 
                  // setting the 'created' property fails in a bad request when sending data to calendar API
-                createdAt: `${Date.now()}`,
+                createdUTC: Date.now(),
                 creator: { 
                     displayName: 'song-repo',
                     email: process.env.CLIENT_EMAIL!

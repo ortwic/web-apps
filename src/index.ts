@@ -24,12 +24,15 @@ async function updateFirestore(events: CalendarEvent[]) {
         const placeService = createPlaceService();
 
         logger.info('Update firestore documents');
-        return Promise.all(events.map(async e => {
-            const place = await placeService.findPlace(e.location);
-            return storeService.setDocument(createId(e), { ...e, place });
-        }));
+        return Promise.all(
+            events.map(async e => {
+                const place = await placeService.findPlace(e.location);
+                const created = (e?.createdUTC ? new Date(e.createdUTC).toISOString() : e.created);
+                return storeService.setDocument(createId(e), { ...e, created, place });
+            })
+        );
     } catch (error) {
-        logger.error(error);        
+        logger.error(`updateFirestore: ${inspect(error)}`);
     }
 }
 
@@ -46,7 +49,7 @@ async function updateCalendar(events: CalendarEvent[]) {
 
         return service.foreignEvents() as CalendarEvent[];
     } catch (error) {
-        logger.error(error);
+        logger.error(`updateCalendar: ${inspect(error)}`);
     }
     return [];
 }
@@ -62,6 +65,6 @@ async function updateCalendar(events: CalendarEvent[]) {
             await updateFirestore([...scrapedEvents, ...events]);
         }
     } catch (error) {
-        logger.error(error);
+        logger.error(`root: ${inspect(error)}`);
     }
 })();
