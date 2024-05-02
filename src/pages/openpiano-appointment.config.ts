@@ -1,4 +1,3 @@
-import { date } from '../service/logger';
 import { CalendarEvent } from '../service/event.model';
 
 const anyDash = /\s?\p{Dash}\s?/u;
@@ -44,7 +43,7 @@ export class OpenPianoAppointmentService {
     readonly currentMonth: number;
     readonly currentYear: number;
 
-    constructor(now = new Date()) {
+    constructor(private email: string, now = new Date()) {
         this.currentMonth = now.getMonth();
         this.currentYear = now.getFullYear();
     }
@@ -78,7 +77,7 @@ export class OpenPianoAppointmentService {
                 createdUTC: Date.now(),
                 creator: { 
                     displayName: 'song-repo',
-                    email: process.env.CLIENT_EMAIL!
+                    email: this.email
                 }, 
                 organizer: { 
                     displayName: 'OpenPiano',

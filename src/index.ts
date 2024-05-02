@@ -9,7 +9,11 @@ import { CalendarEvent } from './service/event.model';
 import { createPlaceService } from './service/place.service';
 import { logger } from './service/logger';
 
-const openPianoConfig = new OpenPianoAppointmentService();
+const openPianoConfig = new OpenPianoAppointmentService(email!);
+
+function exclude<T>(source: T[], target: T[], key: keyof T) {
+    return source.filter(a => !target.some(b => a[key] === b[key]));
+}
 
 async function updateFirestore(events: CalendarEvent[]) {
     const clean = (s: string) => s?.replace(/\W+/g, '').toLowerCase();
@@ -20,16 +24,20 @@ async function updateFirestore(events: CalendarEvent[]) {
         return `${week.padStart(2, '0')}-${creator}-${clean(e.location)}`;
     };
     try {
-        const storeService = createFirestoreService();
+        const storeService = createFirestoreService(email!);
         const placeService = createPlaceService();
+
+        logger.info('Remove obsolete documents');
+        const eventsWithId = events.map(e => ({ ...e, id: createId(e) }));
+        const obsolete = exclude(await storeService.getDocuments(), eventsWithId, 'id');
+        await Promise.all(obsolete.map(e => storeService.removeDocument(e.id)));
 
         logger.info('Update firestore documents');
         return Promise.all(
-            events.map(async e => {
-                const id = createId(e);
+            eventsWithId.map(async e => {
                 const place = await placeService.findPlace(e.location);
                 const created = (e?.createdUTC ? new Date(e.createdUTC).toISOString() : e.created);
-                return storeService.setDocument(id, { ...e, id, created, place });
+                return storeService.setDocument(e.id, { ...e, created, place });
             })
         );
     } catch (error) {
@@ -37,13 +45,13 @@ async function updateFirestore(events: CalendarEvent[]) {
     }
 }
 
-async function updateCalendar(events: CalendarEvent[]) {
+async function updateCalendar(events: CalendarEvent[]): Promise<CalendarEvent[]> {
     try {
         const service = await createCalendarService();
         // logger.debug(inspect(events.filter(e => !service.eventExists(e))));
 
         logger.info(`Removing ${service.events?.length ?? 0} existing events.`);
-        await service.deleteEvents(ev => ev.creator?.email === process.env.CLIENT_EMAIL);
+        await service.deleteEvents(ev => ev.creator?.email === email);
 
         const result = await service.insertEvents(events);
         logger.info(`Added ${result.length} events to calendar.`);
@@ -60,7 +68,7 @@ async function updateCalendar(events: CalendarEvent[]) {
         const scrapedEvents = await scrapePages(openPianoConfig)
             .then(e => e.filter(e => e.summary));
         logger.info(`Scraped ${scrapedEvents.length} events from ${openPianoConfig.url}`);
-        
+
         if (scrapedEvents.length) {
             const events = await updateCalendar(scrapedEvents);
             await updateFirestore([...scrapedEvents, ...events]);

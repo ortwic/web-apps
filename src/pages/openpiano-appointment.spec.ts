@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { OpenPianoAppointmentService } from './openpiano-appointment.config';
 
 const year = new Date().getFullYear();
-const service = new OpenPianoAppointmentService(new Date(year, 8, 1));
+const service = new OpenPianoAppointmentService('john.doe@example.com', new Date(year, 8, 1));
 
 describe('open piano module', () => {
 
