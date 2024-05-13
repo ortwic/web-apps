@@ -53,8 +53,8 @@ async function updateCalendar(events: CalendarEvent[]): Promise<CalendarEvent[]>
         logger.info(`Removing ${service.events?.length ?? 0} existing events.`);
         await service.deleteEvents(ev => ev.creator?.email === email);
 
-        const result = await service.insertEvents(events);
-        logger.info(`Added ${result.length} events to calendar.`);
+        // const result = await service.insertEvents(events);
+        // logger.info(`Added ${result.length} events to calendar.`);
 
         return service.foreignEvents() as CalendarEvent[];
     } catch (error) {
