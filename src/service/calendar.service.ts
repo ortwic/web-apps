@@ -1,6 +1,8 @@
 import { calendar_v3 as C3, google } from 'googleapis';
 import { RunBatch } from 'gbatchrequests';
+import { inspect } from 'util';
 import { logger } from './logger';
+import { CalendarEvent } from './event.model';
 
 export const email = process.env.CLIENT_EMAIL;
 const key = process.env.PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -20,12 +22,6 @@ export async function createCalendarService() {
         return events.some(e => e.summary === event.summary 
             && e.creator?.email === email
             && e.location === event.location);
-    };
-
-    const foreignEvents = () => {
-        return events
-            .filter(e => e.creator?.email !== email)
-            .map(e => ({ ...e, website: e.htmlLink }));
     };
 
     async function insertEvent(resource: C3.Schema$Event): Promise<C3.Schema$Event> {
@@ -76,12 +72,24 @@ export async function createCalendarService() {
         return [];
     }
 
+    async function tryUpdateCalendar(events: CalendarEvent[]): Promise<void> {
+        try {
+            const forceLoading = events.filter(e => !eventExists(e));
+            // logger.debug(inspect(forceLoading));
+    
+            logger.info(`Removing ${events?.length ?? 0} existing events.`);
+            await deleteEvents(ev => ev.creator?.email === email);
+    
+            const result = await insertEvents(events);
+            logger.info(`Added ${result.length} events to calendar.`);
+        } catch (error) {
+            logger.error(`updateCalendar: ${inspect(error)}`);
+        }
+    }
+
     return {
-        events,
-        eventExists,
-        foreignEvents,
-        insertEvent,
-        insertEvents,
-        deleteEvents
+        tryUpdateCalendar,
+        foreignEvents: () => events.filter(e => e.creator?.email !== email)
+            .map(e => ({ ...e, website: e.htmlLink }))
     };
 }
