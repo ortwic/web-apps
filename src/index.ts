@@ -53,10 +53,13 @@ async function updateFirestore(events: CalendarEvent[]) {
 
         if (scrapedEvents.length) {
             const calendar = await createCalendarService();
-            calendar.tryUpdateCalendar(scrapedEvents);
 
+            // try to avoid possible concurrency issues
             const events = calendar.foreignEvents() as CalendarEvent[];
-            await updateFirestore([...scrapedEvents, ...events]);
+            updateFirestore([...scrapedEvents, ...events]);
+
+            // try update calendar with low priority
+            calendar.tryUpdateCalendar(scrapedEvents);
         }
     } catch (error) {
         logger.error(`root: ${inspect(error)}`);
