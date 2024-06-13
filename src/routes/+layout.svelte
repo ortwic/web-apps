@@ -1,18 +1,43 @@
 <script>
-	import Header from './Header.svelte';
+	import AuthCheck from '$lib/components/AuthCheck.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import Snackbar from '$lib/components/Snackbar.svelte';
+	import { page } from '$app/stores';
 	import './styles.css';
 </script>
 
+<svelte:head>
+	<link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
+</svelte:head>
+
 <div class="app">
-	<Header />
+	<AuthCheck>
+		<Header>	
+			<ul>
+				<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
+					<a href="/"><i class="bx bx-home-alt"></i></a>
+				</li>
+				<li aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}>
+					<a href="/settings"><i class="bx bx-cog"></i></a>
+				</li>
+				<li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
+					<a href="/sverdle"><i class="bx bx-dice-5"></i></a>
+				</li>
+				<li aria-current={$page.url.pathname.startsWith('/profile') ? 'page' : undefined}>
+					<a href="/profile"><i class="bx bx-user"></i></a>
+				</li>
+			</ul>
+		</Header>
 
-	<main>
-		<slot />
-	</main>
-
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
+		<main>
+			<slot />
+		</main>
+	
+		<footer>
+			
+		</footer>
+	</AuthCheck>
+	<Snackbar />
 </div>
 
 <style>
@@ -20,6 +45,52 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+	}
+
+
+	ul {
+		padding: 0;
+		margin: 0;
+		height: 3em;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		list-style: none;
+	}
+
+	li {
+		position: relative;
+		height: 100%;
+	}
+
+	li[aria-current='page']::before {
+		--size: 6px;
+		content: '';
+		width: 0;
+		height: 0;
+		position: absolute;
+		top: 0;
+		left: calc(50% - var(--size));
+		border: var(--size) solid transparent;
+		border-top: var(--size) solid var(--color-theme-1);
+	}
+
+	li > * {
+		display: flex;
+		height: 100%;
+		align-items: center;
+		padding: 0 0.5rem;
+		color: var(--color-text);
+		font-weight: 700;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		text-decoration: none;
+		transition: color 0.2s linear;
+	}
+
+	a:hover {
+		color: var(--color-theme-1);
 	}
 
 	main {
@@ -39,10 +110,6 @@
 		justify-content: center;
 		align-items: center;
 		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
 	}
 
 	@media (min-width: 480px) {

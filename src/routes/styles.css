@@ -55,7 +55,7 @@ h1 {
 }
 
 h2 {
-	font-size: 1rem;
+	font-size: 1.2rem;
 }
 
 pre {
@@ -78,14 +78,46 @@ pre {
 	margin: 0 auto;
 }
 
+.danger {
+	color: red !important;
+}
+
 input,
-button {
+button,
+a[role=button] {
 	font-size: inherit;
 	font-family: inherit;
 }
+	
+button.clear {
+	cursor: pointer;
+	padding: .4rem .8rem;
+	background-color: transparent;
+	border: 0;
+	transition: all .2s ease-in-out;
+}
 
-button:focus:not(:focus-visible) {
+button.clear:hover > span {
+	color: var(--color-theme-2);
+	border-bottom: 1px solid var(--color-theme-2);
+}
+
+button.clear:focus:not(:focus-visible) {
 	outline: none;
+}
+
+i.bx {
+	border: 1px solid var(--color-bg-1);
+	border-radius: 50%;
+	padding: 0.2rem;
+	color: var(--color-theme-2);
+	background-color: white;
+	transition: all .2s ease-in-out;	
+}
+
+i.bx:hover, button.clear:hover > i.bx {
+	border-color: var(--color-theme-2);
+	background-color: var(--color-bg-1);
 }
 
 @media (min-width: 720px) {
