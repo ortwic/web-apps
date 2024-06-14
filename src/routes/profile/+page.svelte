@@ -16,7 +16,7 @@
 <div class="text-column">
     {#if $user}
     <h1>
-        <img width="32" src="{$user.photoURL}" alt="{$user.displayName}"/>
+        <img width="32" src="{$user.photoURL}" alt="{$user.email}"/>
         {$user.displayName}
     </h1>
     <button class="clear" on:click={logout}>

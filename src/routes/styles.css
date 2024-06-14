@@ -83,6 +83,7 @@ pre {
 }
 
 input,
+select,
 button,
 a[role=button] {
 	font-size: inherit;

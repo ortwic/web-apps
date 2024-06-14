@@ -41,14 +41,15 @@ function show(message: Message, timeoutSec = 2) {
     }
 }
 
-export function info(message: string, timeoutSec = 2) {
+export function showInfo(message: string, timeoutSec = 5) {
     show({ message, type: 'info' }, timeoutSec);
 }
 
-export function warn(message: string, timeoutSec = 2) {
+export function showWarn(message: string, timeoutSec = 5) {
     show({ message, type: 'warn' }, timeoutSec);
 }
 
-export function error(message: string, timeoutSec = 2) {
+export function showError(message: string, timeoutSec = 5) {
+    console.error(message);
     show({ message, type: 'error' }, timeoutSec);
 }

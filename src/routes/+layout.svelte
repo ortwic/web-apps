@@ -3,6 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Snackbar from '$lib/components/Snackbar.svelte';
 	import { page } from '$app/stores';
+    import SelectProject from './SelectProject.svelte';
 	import './styles.css';
 </script>
 
@@ -19,6 +20,11 @@
 				</li>
 				<li aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}>
 					<a href="/settings"><i class="bx bx-cog"></i></a>
+				</li>
+				<li>
+					<span>
+						<SelectProject />
+					</span>
 				</li>
 				<li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
 					<a href="/sverdle"><i class="bx bx-dice-5"></i></a>
