@@ -1,5 +1,5 @@
 <script lang="ts">
-    import AddFirebaseConfig from './AddFirebaseConfig.svelte';
+    import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
 </script>
 
 <svelte:head>
@@ -9,5 +9,5 @@
 
 <div class="text-column">
     <h1>Settings</h1>
-    <AddFirebaseConfig />
+    <FirebaseConfigEditForm />
 </div>

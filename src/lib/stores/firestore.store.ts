@@ -2,7 +2,7 @@ import type { Readable } from 'svelte/store';
 import type { Firestore, DocumentData } from 'firebase/firestore';
 import { derived } from 'svelte/store';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { currentClientApp } from '$lib/stores/clientApp.store';
+import { currentClientApp } from '$lib/stores/firebase.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {

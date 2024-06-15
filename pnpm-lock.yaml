@@ -54,6 +54,9 @@ importers:
       firebase:
         specifier: ^10.12.2
         version: 10.12.2
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7

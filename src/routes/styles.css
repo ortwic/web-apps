@@ -116,8 +116,12 @@ i.bx {
     transition: all 0.2s ease-in-out;
 }
 
-i.bx:hover,
-button.clear:hover > i.bx {
+button[disabled] > i.bx {
+    color: silver !important;
+}
+
+a:not([disabled]):hover > i.bx,
+button:not([disabled]):hover > i.bx {
     border-color: var(--color-theme-2);
     background-color: var(--color-bg-1);
 }

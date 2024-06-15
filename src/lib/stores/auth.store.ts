@@ -1,6 +1,6 @@
 import { readable } from 'svelte/store';
 import { type User, onAuthStateChanged, getAuth } from 'firebase/auth';
-import { getClientApp } from '$lib/stores/clientApp.store';
+import { getClientApp } from '$lib/stores/firebase.store';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

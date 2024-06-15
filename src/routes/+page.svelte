@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { currentClientApp } from '$lib/stores/clientApp.store';
+    import { currentFirebaseConfig } from '$lib/stores/appSettings.store';
     import Schema from './Schema.svelte';
 </script>
 
@@ -8,6 +8,6 @@
     <meta name="description" content="Custom Firebase Content Management System" />
 </svelte:head>
 
-{#if $currentClientApp}
+{#if $currentFirebaseConfig?.projectId}
     <Schema />
 {/if}
