@@ -1,5 +1,3 @@
-
-
 import { derived, writable, type Readable } from 'svelte/store';
 import type { FirebaseApp, FirebaseOptions } from 'firebase/app';
 import { initializeApp, getApps } from 'firebase/app';
@@ -8,11 +6,17 @@ import { initializeApp, getApps } from 'firebase/app';
 const DEFAULT_NAME = '[DEFAULT]';
 type NamedFirebaseConfig = [FirebaseOptions, string?];
 
-export const currentFirebaseConfig = writable<NamedFirebaseConfig>([{} as FirebaseOptions, DEFAULT_NAME]);
-export const currentClientApp = derived<Readable<NamedFirebaseConfig>, FirebaseApp>(currentFirebaseConfig, ([config, name], set) => set(getClientApp(config, name)));
+export const currentFirebaseConfig = writable<NamedFirebaseConfig>([
+    {} as FirebaseOptions,
+    DEFAULT_NAME
+]);
+export const currentClientApp = derived<Readable<NamedFirebaseConfig>, FirebaseApp>(
+    currentFirebaseConfig,
+    ([config, name], set) => set(getClientApp(config, name))
+);
 
 export function getClientApp(config: FirebaseOptions, name = DEFAULT_NAME): FirebaseApp {
-    let app = getApps().find(app => app.name === name);
+    let app = getApps().find((app) => app.name === name);
     if (!app) {
         app = initializeApp(config, name);
         // const auth = getAuth(app);

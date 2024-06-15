@@ -21,21 +21,21 @@
   <g
      id="layer1">
     <circle
-       style="fill:#ffec00;fill-opacity:1;stroke-width:6.3093"
+       style="fill:#404040;fill-opacity:1;stroke-width:6.3093"
        id="path1471"
        cx="256.32864"
        cy="257.66022"
        r="208.39185" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:382.148px;font-family:'DejaVu Sans';fill:#202020;fill-opacity:1;stroke-width:19.3439"
-       x="184.69328"
-       y="378.15683"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:370px;font-family:'DejaVu Sans';fill:#202020;fill-opacity:1;stroke-width:19.3439"
+       x="50"
+       y="390"
        id="text1533"><tspan
          sodipodi:role="line"
          id="tspan1531"
-         x="184.69328"
-         y="378.15683"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Corbel;fill:#202020;fill-opacity:1;stroke-width:19.3439">?</tspan></text>
+         x="50"
+         y="390"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Corbel;fill:#202020;fill-opacity:1;stroke-width:19.3439">🔥</tspan></text>
   </g>
 </svg>

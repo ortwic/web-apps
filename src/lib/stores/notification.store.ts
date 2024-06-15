@@ -1,10 +1,10 @@
-import { writable } from "svelte/store";
+import { writable } from 'svelte/store';
 
 type NotificationType = 'info' | 'warn' | 'error';
 type Message = {
-    message: string,
-    type: NotificationType
-}
+    message: string;
+    type: NotificationType;
+};
 
 export const messageStack = (() => {
     const { subscribe, update } = writable<Message[]>([]);
@@ -25,10 +25,10 @@ export const messageStack = (() => {
         },
         exists: (value: Message) => {
             let result = false;
-            subscribe((items) => result = items.some((item) => item.message === value.message));
+            subscribe((items) => (result = items.some((item) => item.message === value.message)));
             return result;
         }
-    }
+    };
 })();
 
 function show(message: Message, timeoutSec = 2) {

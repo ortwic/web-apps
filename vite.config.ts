@@ -3,13 +3,13 @@ import { defineConfig } from 'vitest/config';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
-	plugins: [
-		sveltekit(),
-		SvelteKitPWA({
-			strategies: 'generateSW',
-			srcDir: 'src',
-			includeAssets: [],
-			manifest: {
+    plugins: [
+        sveltekit(),
+        SvelteKitPWA({
+            strategies: 'generateSW',
+            srcDir: 'src',
+            includeAssets: [],
+            manifest: {
                 name: 'Why App',
                 short_name: 'Why App',
                 start_url: '/',
@@ -25,34 +25,34 @@ export default defineConfig({
                         src: 'logo-192.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'any',
+                        purpose: 'any'
                     },
                     {
                         src: 'logo-512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'maskable',
+                        purpose: 'maskable'
                     },
                     {
                         src: 'logo-mono.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'monochrome',
-                    },
+                        purpose: 'monochrome'
+                    }
                 ],
                 screenshots: [],
                 display_override: ['window-controls-overlay'],
-                orientation: 'any',
+                orientation: 'any'
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-                globIgnores: ['**/node_modules/**/*'],
+                globIgnores: ['**/node_modules/**/*']
             },
             devOptions: { enabled: true },
             selfDestroying: false
-		})
-	],
-	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}']
-	}
+        })
+    ],
+    test: {
+        include: ['src/**/*.{test,spec}.{js,ts}']
+    }
 });

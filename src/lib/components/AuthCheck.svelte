@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-    import Header from "./Header.svelte";
-	import { auth, user } from "../stores/auth.store";
+    import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+    import Header from './Header.svelte';
+    import { auth, user } from '../stores/auth.store';
 
     async function login() {
         const credentials = await signInWithPopup(auth, new GoogleAuthProvider());
-        console.log("User logged in: ", credentials.user.displayName);
+        console.log('User logged in: ', credentials.user.displayName);
     }
 </script>
 
@@ -23,9 +23,9 @@
 <style>
     button {
         cursor: pointer;
-        margin: .4rem .8rem;
-        padding: .4rem .8rem;
-        border-radius: .5rem;
+        margin: 0.4rem 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
         border-width: 1px;
         background-color: var(--color-bg-2);
     }

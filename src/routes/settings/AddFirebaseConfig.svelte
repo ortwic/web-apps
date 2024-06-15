@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { showError, showInfo } from "$lib/stores/notification.store";
-    import { CONFIG_KEY } from "$lib";
+    import { showError, showInfo } from '$lib/stores/notification.store';
+    import { CONFIG_KEY } from '$lib';
 
-	const placeholder = `const firebaseConfig = {
+    const placeholder = `const firebaseConfig = {
   "apiKey": "AIzaSy...DGo4k",
   "authDomain": "myapp-project-123.firebaseapp.com",
   "databaseURL": "https://myapp-project-123.firebaseio.com",
@@ -11,20 +11,23 @@
   "messagingSenderId": "123456789",
   "appId": "1:123456789:web:ec2e...94d0",
   "measurementId": "G-12345"
-};`
+};`;
 
     let valid = false;
     let textInput = '';
     let projectName = '';
-	let projectConfig: string | undefined;
+    let projectConfig: string | undefined;
 
     function validateJson(text: string) {
         try {
-            projectConfig = text?.match(/\{.+\}/s)?.at(0)?.replace(/\s*(\w+):\s?"/g, '"$1":"');
-			if (projectConfig) {
+            projectConfig = text
+                ?.match(/\{.+\}/s)
+                ?.at(0)
+                ?.replace(/\s*(\w+):\s?"/g, '"$1":"');
+            if (projectConfig) {
                 const config = JSON.parse(projectConfig);
-				return 'apiKey' in config;
-			}
+                return 'apiKey' in config;
+            }
         } catch {
             showError('Invalid Firebase config');
         }
@@ -33,10 +36,13 @@
 
     function add() {
         const config = localStorage.getItem(CONFIG_KEY) ?? '{}';
-        localStorage.setItem(CONFIG_KEY, JSON.stringify({
-            ...JSON.parse(config),
-            [projectName]: projectConfig,
-        }));
+        localStorage.setItem(
+            CONFIG_KEY,
+            JSON.stringify({
+                ...JSON.parse(config),
+                [projectName]: projectConfig
+            })
+        );
         projectName = '';
         showInfo(`Firebase config added for ${projectName}`);
     }
@@ -50,7 +56,7 @@
     <div id="action">
         <label for="firebaseConfig">
             <a href="https://firebase.google.com/" target="_blank">Firebase</a> config
-        </label> 
+        </label>
         <button on:click={add} disabled={!valid}>
             <i class="bx bx-plus"></i>
             Add
@@ -63,7 +69,7 @@
     form {
         display: grid;
         grid-template-columns: 1fr auto;
-        gap: .6rem;
+        gap: 0.6rem;
     }
 
     input {
@@ -71,11 +77,11 @@
         min-width: 24rem;
     }
 
-	textarea {
-		width: calc(100% - 6px);
-		min-width: 24rem;
-		text-wrap: nowrap;
-	}
+    textarea {
+        width: calc(100% - 6px);
+        min-width: 24rem;
+        text-wrap: nowrap;
+    }
 
     #action {
         display: flex;
@@ -84,7 +90,7 @@
         align-items: left;
     }
 
-	button {
-		padding: .4rem .8rem;
-	}
+    button {
+        padding: 0.4rem 0.8rem;
+    }
 </style>

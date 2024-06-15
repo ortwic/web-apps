@@ -3,6 +3,4 @@
 </script>
 
 <h2>{data.id}</h2>
-<pre>
-    
-</pre>
+<pre></pre>

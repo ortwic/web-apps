@@ -1,8 +1,8 @@
-import type { Readable } from "svelte/store";
-import type { Firestore, DocumentData } from "firebase/firestore";
-import { derived } from "svelte/store";
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
-import { currentClientApp } from "$lib/stores/clientApp.store";
+import type { Readable } from 'svelte/store';
+import type { Firestore, DocumentData } from 'firebase/firestore';
+import { derived } from 'svelte/store';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { currentClientApp } from '$lib/stores/clientApp.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -27,20 +27,25 @@ type Store<T extends Data> = {
     documents: Readable<T[]>;
     setDocument: (data: T) => Promise<void>;
     removeDocument: (id: string) => Promise<void>;
-}
+};
 
 export function createStore<T extends Data>(path: string) {
-    return derived<Readable<Firestore>, Store<T>>(currentFirestore, (store, set) => set(buildStore(store, path)));
+    return derived<Readable<Firestore>, Store<T>>(currentFirestore, (store, set) =>
+        set(buildStore(store, path))
+    );
 }
 
 function buildStore<T extends Data>(firestore: Firestore, path: string): Store<T> {
     const documents = derived<Readable<Firestore>, T[]>(currentFirestore, (store, set) => {
         const reference = collection(store, path);
-        onSnapshot(reference, snapshot => {
-            const docs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as T));
+        onSnapshot(reference, (snapshot) => {
+            const docs = snapshot.docs.map(
+                (doc) =>
+                    ({
+                        id: doc.id,
+                        ...doc.data()
+                    }) as T
+            );
             set(docs);
         });
         set([]);
@@ -60,5 +65,5 @@ function buildStore<T extends Data>(firestore: Firestore, path: string): Store<T
         documents,
         setDocument,
         removeDocument
-    }
+    };
 }

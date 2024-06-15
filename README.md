@@ -1,6 +1,7 @@
 <a name="readme-top"></a>
 
 # 🔥 Firelighter CMS 🔥
+
 A lean CMS for [Firebase](https://firebase.google.com/) simular to [FireCMS](https://app.firecms.co).
 
 # Getting Started
@@ -13,16 +14,15 @@ You need some Firebase project to work with and the corresponding Firebase confi
 
 ```js
 const firebaseConfig = {
-  "apiKey": "AIzaSy...DGo4k",
-  "authDomain": "myapp-project-123.firebaseapp.com",
-  "databaseURL": "https://myapp-project-123.firebaseio.com",
-  "projectId": "myapp-project-123",
-  "storageBucket": "myapp-project-123.appspot.com",
-  "messagingSenderId": "123456789",
-  "appId": "1:123456789:web:ec2e...94d0",
-  "measurementId": "G-12345"
+    apiKey: 'AIzaSy...DGo4k',
+    authDomain: 'myapp-project-123.firebaseapp.com',
+    databaseURL: 'https://myapp-project-123.firebaseio.com',
+    projectId: 'myapp-project-123',
+    storageBucket: 'myapp-project-123.appspot.com',
+    messagingSenderId: '123456789',
+    appId: '1:123456789:web:ec2e...94d0',
+    measurementId: 'G-12345'
 };
-
 ```
 
 ## Installation
@@ -30,17 +30,17 @@ const firebaseConfig = {
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
 1. Clone the repo
-   ```sh
-   git clone https://github.com/ortwic/firelighter-cms.git
-   ```
+    ```sh
+    git clone https://github.com/ortwic/firelighter-cms.git
+    ```
 2. Install NPM packages
-   ```sh
-   pnpm install
-   ```
+    ```sh
+    pnpm install
+    ```
 3. Start app in debug mode
-   ```js
-   pnpm dev
-   ```
+    ```js
+    pnpm dev
+    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
