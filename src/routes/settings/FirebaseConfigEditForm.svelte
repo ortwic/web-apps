@@ -51,12 +51,12 @@
     $: valid = validateJson(textInput);
 </script>
 
-<form>
-    <div id="action">
+<form class="y-flex">
+    <div class="x-flex-full">
         <label for="firebaseConfig">
             Save <a href="https://firebase.google.com/docs/web/setup" target="_blank">Firebase</a> config by projectId
         </label>
-        <span>
+        <span class="x-flex-full">
             <button class="clear" on:click={save} disabled={!valid}>
                 <i class="bx bx-save"></i>
             </button>
@@ -69,22 +69,10 @@
 </form>
 
 <style>
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-    }
-
     textarea {
         width: calc(100% - 6px);
         min-width: 24rem;
         text-wrap: nowrap;
-    }
-
-    #action, #action span {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
     }
 
     button {

@@ -69,19 +69,6 @@ pre {
     color: var(--color-text);
 }
 
-.text-column {
-    display: flex;
-    max-width: 48rem;
-    flex: 0.6;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 auto;
-}
-
-.danger {
-    color: red !important;
-}
-
 input,
 select,
 button,
@@ -108,16 +95,21 @@ button.clear:focus:not(:focus-visible) {
 }
 
 i.bx {
-    border: 1px solid var(--color-bg-1);
     border-radius: 50%;
     padding: 0.2rem;
     color: var(--color-theme-2);
-    background-color: white;
     transition: all 0.2s ease-in-out;
 }
 
+i:not(.clear).bx {
+    border: 1px solid var(--color-bg-1);
+    background-color: white;
+}
+
+button[disabled], 
 button[disabled] > i.bx {
     color: silver !important;
+    cursor: default;
 }
 
 a:not([disabled]):hover > i.bx,
@@ -130,16 +122,4 @@ button:not([disabled]):hover > i.bx {
     h1 {
         font-size: 2.4rem;
     }
-}
-
-.visually-hidden {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: auto;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-    white-space: nowrap;
 }

@@ -1,15 +1,15 @@
 <script lang="ts">
-    import type { EntityCollection } from '$lib/models/schema.model';
+    import { derived, writable } from 'svelte/store';
     import { nanoid } from 'nanoid';
-    import Edit from './Edit.svelte';
+    import type { EntityCollection } from '$lib/models/schema.model';
     import Modal from '$lib/components/Modal.svelte';
-    import { derived } from 'svelte/store';
     import { showInfo, showError } from '$lib/stores/notification.store';
     import { createStore } from '$lib/stores/firestore.store';
+    import CollectionEditor from './CollectionEditor.svelte';
 
     const currentStore = createStore<EntityCollection>('__schema');
 
-    let current: EntityCollection | null;
+    let current = writable<EntityCollection | undefined>();
     let nameInput: HTMLInputElement;
     const documents = derived($currentStore.documents, (docs) =>
         docs.toSorted((a, b) => a.path.localeCompare(b.path))
@@ -22,7 +22,7 @@
             const item: EntityCollection = {
                 id,
                 path,
-                props: []
+                props: {}
             };
             nameInput.value = '';
 
@@ -37,7 +37,7 @@
 
     async function edit(ev: Event, item: EntityCollection) {
         ev.preventDefault();
-        current = item;
+        current.set(item);;
     }
 
     async function remove(ev: Event, id: string) {
@@ -52,7 +52,7 @@
     <div class="grid">
         {#each $documents as item}
             <a href="/p/{item.path}">
-                <div class="item">
+                <div class="item emphasis">
                     <div title={item.id} class="actions">
                         <button class="clear" on:click={(ev) => edit(ev, item)}
                             ><i class="bx bx-edit"></i></button
@@ -83,8 +83,10 @@
     </div>
 </section>
 
-<Modal open={!!current} title={current?.path} on:close={() => (current = null)}>
-    <Edit item={current} />
+<Modal open={!!$current} on:close={() => (current.set(undefined))}>
+    {#if $current}
+    <CollectionEditor item={$current} />
+    {/if}
 </Modal>
 
 <style>

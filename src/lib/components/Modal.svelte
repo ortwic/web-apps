@@ -2,11 +2,29 @@
     import { createEventDispatcher } from 'svelte';
 
     export let open = false;
-    export let title = '';
 
     const dispatcher = createEventDispatcher();
 
     let modal: HTMLDialogElement;
+
+    function closeModal() {
+        dispatcher('close');
+    }
+
+    function handleOutsideClick(event: MouseEvent) {
+        const rect = modal.getBoundingClientRect();
+        const isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+        if (!isInDialog) {
+            closeModal();
+        }
+    }
+
+    function handleEscapeKey(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    }
 
     $: if (open) {
         modal?.showModal();
@@ -15,12 +33,12 @@
     }
 </script>
 
-<dialog bind:this={modal}>
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<dialog bind:this={modal} on:click={handleOutsideClick} on:keydown={handleEscapeKey}>
     {#if open}
-        <div class="header">
-            <h2>{title}</h2>
-            <button class="clear" on:click={() => dispatcher('close')}>
-                <i class="bx bx-x"></i>
+        <div class="header x-flex-full">
+            <button class="clear" on:click={closeModal}>
+                <i class="bx bx-x clear"></i>
             </button>
         </div>
         <div class="content">
@@ -40,7 +58,7 @@
         min-width: 50%;
         max-width: 100%;
         min-height: 40%;
-        max-height: 100%;
+        max-height: calc(100% - 2rem);
         border-radius: 0.5rem;
         background-color: var(--color-bg-2);
         border: 1px solid var(--color-theme-2);
@@ -63,15 +81,19 @@
     }
 
     .header {
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid var(--color-theme-2);
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .header > button {
+        padding: 0;
+        font-size: x-large;
     }
 
     .content {
         display: flex;
         flex-direction: column;
-        padding: 1rem;
         overflow: auto;
     }
 </style>

@@ -1,0 +1,33 @@
+.text-column {
+    display: flex;
+    max-width: 48rem;
+    flex: 0.6;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.danger {
+    color: red !important;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.x-flex-full {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.y-flex {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.emphasis {
+    text-transform: uppercase;
+    letter-spacing: .1rem;
+}

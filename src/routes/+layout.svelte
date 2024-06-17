@@ -4,7 +4,8 @@
     import Snackbar from '$lib/components/Snackbar.svelte';
     import { page } from '$app/stores';
     import SelectProject from './SelectProject.svelte';
-    import './styles.css';
+    import '../styles/common.css';
+    import '../styles/utils.css';
 </script>
 
 <svelte:head>
