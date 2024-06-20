@@ -1,15 +1,15 @@
 {
   "projects": {
-    "default": "why-app-8a640"
+    "default": "firelighter-cms"
   },
   "targets": {
-    "why-app-8a640": {
+    "firelighter-cms": {
       "hosting": {
         "beta": [
-          "why-beta"
+          "firelighter-beta"
         ],
         "prod": [
-          "why-app"
+          "firelighter-cms"
         ]
       }
     }

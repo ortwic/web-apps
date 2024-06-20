@@ -1,8 +1,8 @@
 {
-    "name": "why-app",
+    "name": "firelighter-cms",
     "version": "0.0.1",
     "author": "OCSoft42",
-    "description": "A philosophical tool for your existential journey.",
+    "description": "A lean CMS for Firebase simular to FireCMS but using SvelteKit.",
     "keywords": [
         "42",
         "nihilism",
@@ -28,8 +28,8 @@
         "preview": "vite preview",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-        "host:beta": "firebase --project why-app deploy --only hosting:beta",
-        "host:prod": "firebase --project why-app deploy --only hosting:prod",
+        "host:beta": "firebase --project firelighter-cms deploy --only hosting:beta",
+        "host:prod": "firebase --project firelighter-cms deploy --only hosting:prod",
         "test": "vitest",
         "lint": "prettier --check . && eslint .",
         "format": "prettier --write ."
@@ -66,12 +66,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ortwic/why-app.git"
+        "url": "git+https://github.com/ortwic/firelighter-cms.git"
     },
     "bugs": {
-        "url": "https://github.com/ortwic/why-app/issues"
+        "url": "https://github.com/ortwic/firelighter-cms/issues"
     },
-    "homepage": "https://why-app.web.app",
+    "homepage": "https://firelighter-cms.web.app",
     "dependencies": {
         "svelte-simple-modal": "^1.6.2"
     }

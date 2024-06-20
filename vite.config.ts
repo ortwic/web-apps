@@ -52,6 +52,12 @@ export default defineConfig({
             selfDestroying: false
         })
     ],
+    server: {
+        port: 5000
+    },
+    optimizeDeps: {
+        exclude: ['@radix-ui/react-Menubar']
+    },
     test: {
         include: ['src/**/*.{test,spec}.{js,ts}']
     }
