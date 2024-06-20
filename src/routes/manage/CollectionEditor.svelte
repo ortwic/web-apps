@@ -4,19 +4,33 @@
     import type { DataType } from '@firecms/core';
     import { buildEntityPropertiesFromData } from '@firecms/schema_inference'
     import type { EntityCollection } from '$lib/models/schema.model';
-    import { createStore } from '$lib/stores/firestore.store';
+    import { createSchemaStore, createStore } from '$lib/stores/firestore.store';
+    import { showError, showInfo } from '$lib/stores/notification.store';
 
     export let item: EntityCollection;
 
     const dataTypeValues = ["string", "number", "boolean", "date", "array", "map", "geopoint", "reference"] as const;
     const collapsibleCodeBlocks: Record<string, boolean> = {};
 
-    const currentStore = createStore<EntityCollection>(item.path);
+    const schemaStore = createSchemaStore();
+    const currentStore = createStore(item.path);
     const documents = $currentStore.documents;
+
+    async function saveCollection() {
+        try {
+            await $schemaStore.setDocument(item);
+            showInfo(`${item.path} saved`);
+        } catch (error) {
+            showError(`${error}`);
+        }
+    }
         
-    async function doCollectionInference() {
-        item.props = await buildEntityPropertiesFromData($documents, getType);
-        console.log(item);
+    async function appendInferredPropsFromData() {
+        const inferredProps = await buildEntityPropertiesFromData($documents, getType);
+        item.props = { 
+            ...item.props, 
+            ...inferredProps 
+        };
     }
 
     function getType(value: any): DataType {
@@ -44,10 +58,10 @@
 
 <section class="toolbar x-flex-full">
     <span class="corner">
-        <button title="Add" disabled class="clear" on:click={doCollectionInference}>
+        <button title="Save properties" class="clear" on:click={saveCollection}>
             <i class="bx bx-save"></i>
         </button>
-        <button title="Infer from data" class="clear" on:click={doCollectionInference}>
+        <button title="Infer from data" class="clear" on:click={appendInferredPropsFromData}>
             <i class="bx bxs-magic-wand"></i>
         </button>
     </span>
@@ -91,7 +105,7 @@
         <button title="Show JSON" class="clear" on:click={() => toggleCodeRow(key)}>
             <i class="bx bx-code"></i>
         </button>
-        <button title="Delete" disabled class="clear" on:click={doCollectionInference}>
+        <button title="Delete" disabled class="clear" on:click={appendInferredPropsFromData}>
             <i class="bx bx-trash"></i>
         </button>
     </div>

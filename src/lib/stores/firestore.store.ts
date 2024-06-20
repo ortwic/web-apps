@@ -3,6 +3,7 @@ import type { Firestore, DocumentData } from 'firebase/firestore';
 import { derived } from 'svelte/store';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { currentClientApp } from '$lib/stores/firebase.store';
+import type { EntityCollection } from '$lib/models/schema.model';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -29,6 +30,7 @@ type Store<T extends Data> = {
     removeDocument: (id: string) => Promise<void>;
 };
 
+export const createSchemaStore = () => createStore<EntityCollection>('__schema');
 export function createStore<T extends Data>(path: string) {
     return derived<Readable<Firestore>, Store<T>>(currentFirestore, (store, set) =>
         set(buildStore(store, path))

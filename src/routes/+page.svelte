@@ -1,7 +1,10 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { goto } from "$app/navigation";
 
-    goto('/manage');
+    onMount(() => {
+        goto('/manage');
+    });
 </script>
 
 <svelte:head>
