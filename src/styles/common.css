@@ -7,6 +7,7 @@
     --color-bg-0: rgb(202, 216, 228);
     --color-bg-1: hsl(209, 36%, 86%);
     --color-bg-2: hsl(224, 44%, 95%);
+    --color-bg-3: rgba(255, 255, 255, 0.45);
     --color-theme-1: #ff3e00;
     --color-theme-2: #4075a6;
     --color-text: rgba(0, 0, 0, 0.7);
@@ -61,7 +62,7 @@ h2 {
 pre {
     font-size: 16px;
     font-family: var(--font-mono);
-    background-color: rgba(255, 255, 255, 0.45);
+    background-color: var(--color-bg-3);
     border-radius: 3px;
     box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
     padding: 0.5em;
@@ -77,12 +78,20 @@ a[role='button'] {
     font-family: inherit;
 }
 
-button.clear {
+button {
     cursor: pointer;
     padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    background-color: var(--color-bg-2);
+    box-shadow: 1px 1px 3px #00000080;
+    transition: all 0.2s ease-in-out;
+}
+
+button.clear {
     background-color: transparent;
     border: 0;
-    transition: all 0.2s ease-in-out;
+    box-shadow: unset;
 }
 
 button.clear:hover > span {

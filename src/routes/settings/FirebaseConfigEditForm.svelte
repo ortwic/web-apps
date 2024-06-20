@@ -66,6 +66,9 @@
         </span>
     </div>
     <textarea id="firebaseConfig" bind:value={textInput} {placeholder} rows="10"></textarea>
+    <p class="info">
+        Config is stored locally in your browser. It is not sent to Firebase.
+    </p>
 </form>
 
 <style>

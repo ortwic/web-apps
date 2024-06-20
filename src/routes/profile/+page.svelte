@@ -1,6 +1,7 @@
 <script lang="ts">
     import { getAuth, signOut } from 'firebase/auth';
-    import { user } from '$lib/stores/auth.store';
+    import Login from '$lib/components/Login.svelte';
+    import AuthCheck from '$lib/components/AuthCheck.svelte';
 
     export function logout() {
         const auth = getAuth();
@@ -14,14 +15,17 @@
 </svelte:head>
 
 <div class="text-column">
-    {#if $user}
+    <AuthCheck let:user>
+        <div slot="login">
+            <Login />
+        </div>
         <h1>
-            <img width="32" src={$user.photoURL} alt={$user.email} />
-            {$user.displayName}
+            <img width="32" src={user?.photoURL} alt={user?.email} />
+            {user?.displayName}
         </h1>
-        <button class="clear" on:click={logout}>
+        <button on:click={logout}>
             <i class="bx bx-log-out"></i>
             <span>Logout</span>
         </button>
-    {/if}
+    </AuthCheck>
 </div>

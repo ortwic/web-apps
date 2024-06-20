@@ -1,7 +1,11 @@
 <script lang="ts">
     import { loadSettings, saveSelectedProjectId, settingsStore } from '$lib/stores/appSettings.store';
+    import { onMount } from 'svelte';
 
-    settingsStore.set(loadSettings());
+    // ensure settings are loaded on client side only
+    onMount(() => {
+        settingsStore.set(loadSettings());
+    });
 
     function selectProject(ev: Event) {
         const target = ev.target as HTMLSelectElement;

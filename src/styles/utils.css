@@ -7,6 +7,14 @@
     margin: 0 auto;
 }
 
+.info {
+    font-style: italic;
+    background-color: var(--color-bg-3);
+    padding: 1rem;
+    border-radius: .5rem;
+    border: 1px solid var(--color-bg-1);
+}
+
 .danger {
     color: red !important;
 }

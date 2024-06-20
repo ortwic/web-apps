@@ -1,11 +1,13 @@
-<script>
-    import AuthCheck from '$lib/components/AuthCheck.svelte';
+<script lang="ts">
+    import { derived } from 'svelte/store';
     import Header from '$lib/components/Header.svelte';
     import Snackbar from '$lib/components/Snackbar.svelte';
     import { page } from '$app/stores';
     import SelectProject from './SelectProject.svelte';
     import '../styles/common.css';
     import '../styles/utils.css';
+
+    const pathStartsWith = derived(page, p => p.url.pathname.split('/').filter(Boolean).at(0));
 </script>
 
 <svelte:head>
@@ -13,35 +15,33 @@
 </svelte:head>
 
 <div class="app">
-    <AuthCheck>
-        <Header>
-            <ul>
-                <li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-                    <a href="/"><i class="bx bx-home-alt"></i></a>
-                </li>
-                <li aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}>
-                    <a href="/settings"><i class="bx bx-cog"></i></a>
-                </li>
-                <li>
-                    <span>
-                        <SelectProject />
-                    </span>
-                </li>
-                <li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
-                    <a href="/sverdle"><i class="bx bx-dice-5"></i></a>
-                </li>
-                <li aria-current={$page.url.pathname.startsWith('/profile') ? 'page' : undefined}>
-                    <a href="/profile"><i class="bx bx-user"></i></a>
-                </li>
-            </ul>
-        </Header>
+    <Header>
+        <ul>
+            <li class:current={$pathStartsWith === 'manage'}>
+                <a href="/"><i class="bx bx-home-alt"></i></a>
+            </li>
+            <li class:current={$pathStartsWith === 'settings'}>
+                <a href="/settings"><i class="bx bx-cog"></i></a>
+            </li>
+            <li>
+                <span>
+                    <SelectProject />
+                </span>
+            </li>
+            <li class:current={$pathStartsWith === 'sverdle'}>
+                <a href="/sverdle"><i class="bx bx-dice-5"></i></a>
+            </li>
+            <li class:current={$pathStartsWith === 'profile'}>
+                <a href="/profile"><i class="bx bx-user"></i></a>
+            </li>
+        </ul>
+    </Header>
 
-        <main>
-            <slot />
-        </main>
+    <main>
+        <slot />
+    </main>
 
-        <footer></footer>
-    </AuthCheck>
+    <footer></footer>
     <Snackbar />
 </div>
 
@@ -67,7 +67,7 @@
         height: 100%;
     }
 
-    li[aria-current='page']::before {
+    li.current::before {
         --size: 6px;
         content: '';
         width: 0;
