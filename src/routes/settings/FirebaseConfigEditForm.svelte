@@ -1,7 +1,7 @@
 <script lang="ts">
     import json from 'json5';
     import type { FirebaseOptions } from 'firebase/app';
-    import { currentFirebaseConfig, removeFirebaseConfig, saveFirebaseConfig } from '$lib/stores/appSettings.store';
+    import { currentFirebaseConfig, removeFirebaseConfig, saveFirebaseConfig } from '$lib/stores/settings.store';
     import { showError, showInfo } from '$lib/stores/notification.store';
 
     const placeholder = `const firebaseConfig = {
@@ -52,6 +52,9 @@
 </script>
 
 <form class="y-flex">
+    <p class="info">
+        Firebase project configurations are stored locally in your browser only.
+    </p>
     <div class="x-flex-full">
         <label for="firebaseConfig">
             Save <a href="https://firebase.google.com/docs/web/setup" target="_blank">Firebase</a> config by projectId
@@ -66,9 +69,6 @@
         </span>
     </div>
     <textarea id="firebaseConfig" bind:value={textInput} {placeholder} rows="10"></textarea>
-    <p class="info">
-        Config is stored locally in your browser. It is not sent to Firebase.
-    </p>
 </form>
 
 <style>

@@ -1,11 +1,8 @@
 <script lang="ts">
-    import { loadSettings, saveSelectedProjectId, settingsStore } from '$lib/stores/appSettings.store';
-    import { onMount } from 'svelte';
+    import { saveSelectedProjectId, settingsStore } from '$lib/stores/settings.store';
 
-    // ensure settings are loaded on client side only
-    onMount(() => {
-        settingsStore.set(loadSettings());
-    });
+    export let disabled = false;
+    export let width = '6rem';
 
     function selectProject(ev: Event) {
         const target = ev.target as HTMLSelectElement;
@@ -15,7 +12,8 @@
     }
 </script>
 
-<select name="config" value={$settingsStore.selectedProjectId} on:change={selectProject}>
+<select style:width={width} {disabled} name="config" 
+    value={$settingsStore.selectedProjectId} on:change={selectProject}>
     {#each Object.keys($settingsStore.firebaseConfigs) as projectId}
         <option value={projectId}>{projectId}</option>
     {/each}
@@ -25,6 +23,5 @@
     select,
     option {
         padding: 0.2rem;
-        min-width: 6rem;
     }
 </style>

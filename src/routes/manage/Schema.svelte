@@ -2,14 +2,14 @@
     import { derived, writable } from 'svelte/store';
     import { nanoid } from 'nanoid';
     import type { EntityCollection } from '$lib/models/schema.model';
-    import Modal from '$lib/components/Modal.svelte';
     import { showInfo, showError } from '$lib/stores/notification.store';
+    import { currentClientUser } from '$lib/stores/firebase.store';
     import { createSchemaStore } from '$lib/stores/firestore.store';
+    import Modal from '$lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
-    import AuthCheck from '$lib/components/AuthCheck.svelte';
-    import Login from '$lib/components/Login.svelte';
 
     const schemaStore = createSchemaStore();
+    const disabled = !$currentClientUser;
 
     let current = writable<EntityCollection | undefined>();
     let nameInput: HTMLInputElement;
@@ -57,15 +57,12 @@
             <a href="/p/{item.path}">
                 <div class="item emphasis">
                     <div title={item.id} class="actions">
-                        <AuthCheck>
-                            <button class="clear" on:click={(ev) => edit(ev, item)}
-                                ><i class="bx bx-edit"></i></button
-                            >
-                            <button class="clear" on:click={(ev) => remove(ev, item.id)}
-                                ><i class="bx bx-trash danger"></i></button
-                            >
-                            <div slot="login">&nbsp;</div>
-                        </AuthCheck>
+                        <button {disabled} class="clear" on:click={(ev) => edit(ev, item)}>
+                            <i class="bx bx-edit"></i>
+                        </button>
+                        <button {disabled} class="clear" on:click={(ev) => remove(ev, item.id)}>
+                            <i class="bx bx-trash danger"></i>
+                        </button>
                     </div>
                     <h2>{item.path}</h2>
                     <div>
@@ -74,26 +71,18 @@
                 </div>
             </a>
         {/each}
-        <AuthCheck>
-            <div class="item">
-                <div class="actions"></div>
-                <input
-                    type="text"
-                    on:keydown={(e) => e.key === 'Enter' && add()}
-                    bind:this={nameInput}
-                    placeholder="Path"
-                />
-                <button class="clear" on:click={add}>
-                    <i class="bx bx-plus"></i>
-                </button>
-            </div>
-            <div class="info" slot="login">
-                <p>
-                    You need to login to define collections.
-                </p>
-                <Login />
-            </div>
-        </AuthCheck>
+        <div class="item">
+            <div class="actions"></div>
+            <input {disabled}
+                type="text"
+                on:keydown={(e) => e.key === 'Enter' && add()}
+                bind:this={nameInput}
+                placeholder="Path"
+            />
+            <button {disabled} class="clear" on:click={add}>
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
     </div>
 </section>
 

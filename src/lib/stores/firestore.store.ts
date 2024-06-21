@@ -15,7 +15,7 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
     return data;
 };
 
-const currentFirestore = derived(currentClientApp, (app) => getFirestore(app));
+const currentFirestore = derived(currentClientApp, (app) => app ? getFirestore(app) : null);
 const setDocOptions = {
     merge: true
 };
@@ -32,35 +32,41 @@ type Store<T extends Data> = {
 
 export const createSchemaStore = () => createStore<EntityCollection>('__schema');
 export function createStore<T extends Data>(path: string) {
-    return derived<Readable<Firestore>, Store<T>>(currentFirestore, (store, set) =>
+    return derived<Readable<Firestore | null>, Store<T>>(currentFirestore, (store, set) =>
         set(buildStore(store, path))
     );
 }
 
-function buildStore<T extends Data>(firestore: Firestore, path: string): Store<T> {
-    const documents = derived<Readable<Firestore>, T[]>(currentFirestore, (store, set) => {
-        const reference = collection(store, path);
-        onSnapshot(reference, (snapshot) => {
-            const docs = snapshot.docs.map(
-                (doc) =>
-                    ({
-                        id: doc.id,
-                        ...doc.data()
-                    }) as T
-            );
-            set(docs);
-        });
+function buildStore<T extends Data>(firestore: Firestore | null, path: string): Store<T> {
+    const documents = derived<Readable<Firestore | null>, T[]>(currentFirestore, (store, set) => {
+        if (store) {
+            const reference = collection(store, path);
+            onSnapshot(reference, (snapshot) => {
+                const docs = snapshot.docs.map(
+                    (doc) =>
+                        ({
+                            id: doc.id,
+                            ...doc.data()
+                        }) as T
+                );
+                set(docs);
+            });
+        }
         set([]);
     });
 
     async function setDocument(data: T) {
-        const docRef = doc(firestore, path, data.id);
-        await setDoc(docRef, omitUndefinedFields(data), setDocOptions);
+        if (firestore) {
+            const docRef = doc(firestore, path, data.id);
+            await setDoc(docRef, omitUndefinedFields(data), setDocOptions);
+        }
     }
 
     async function removeDocument(id: string) {
-        const docRef = doc(firestore, path, id);
-        await deleteDoc(docRef);
+        if (firestore) {
+            const docRef = doc(firestore, path, id);
+            await deleteDoc(docRef);
+        }
     }
 
     return {

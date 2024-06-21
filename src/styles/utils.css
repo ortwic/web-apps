@@ -39,3 +39,7 @@
     text-transform: uppercase;
     letter-spacing: .1rem;
 }
+
+.no-wrap {
+    white-space: nowrap;
+}

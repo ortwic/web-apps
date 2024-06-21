@@ -123,8 +123,8 @@ button[disabled] > i.bx {
 
 a:not([disabled]):hover > i.bx,
 button:not([disabled]):hover > i.bx {
-    border-color: var(--color-theme-2);
-    background-color: var(--color-bg-1);
+    color: var(--color-theme-1);
+    border-color: var(--color-theme-1);
 }
 
 @media (min-width: 720px) {
