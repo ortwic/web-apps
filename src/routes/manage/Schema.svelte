@@ -1,40 +1,43 @@
 <script lang="ts">
     import { derived, writable } from 'svelte/store';
-    import { nanoid } from 'nanoid';
     import type { EntityCollection } from '$lib/models/schema.model';
-    import { showInfo, showError } from '$lib/stores/notification.store';
+    import { showError, showWarn } from '$lib/stores/notification.store';
     import { currentClientUser } from '$lib/stores/firebase.store';
     import { createSchemaStore } from '$lib/stores/firestore.store';
     import Modal from '$lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
 
     const schemaStore = createSchemaStore();
-    $: disabled = !$currentClientUser;
+    $: canAdd = !$currentClientUser;
+    $: canEdit = !$currentClientUser;
 
     let current = writable<EntityCollection | undefined>();
-    let nameInput: HTMLInputElement;
+    let pathInput: HTMLInputElement;
     const documents = derived($schemaStore.documents, (docs) =>
         docs.toSorted((a, b) => a.path.localeCompare(b.path))
     );
 
     async function add() {
-        const path = nameInput.value;
-        if (path) {
-            const id = `${path}-${nanoid(6)}`;
-            const item: EntityCollection = {
-                id,
-                path,
-                props: {}
-            };
-            nameInput.value = '';
+        const path = pathInput.validity.valid && pathInput.value;
+        if (!path) {
+            return showWarn('Invalid path');
+        }
+        const exists = $documents.some((item) => item.path === path);
+        if (exists) {
+            return showWarn('Path already exists');
+        }
 
-            try {
-                return $schemaStore?.setDocument(item);
-            } catch (ex: any) {
-                showError(ex.message);
-            }
-        } else {
-            showInfo('Path is required');
+        const item: EntityCollection = {
+            id: path,
+            path,
+            properties: {}
+        };
+        pathInput.value = '';
+
+        try {
+            return $schemaStore?.setDocument(item);
+        } catch (ex: any) {
+            showError(ex.message);
         }
     }
 
@@ -54,13 +57,13 @@
 <section>
     <div class="grid">
         {#each $documents as item}
-            <a href="/p/{item.path}">
+            <a href="/list/{item.path}">
                 <div class="item emphasis">
                     <div title={item.id} class="actions">
-                        <button {disabled} class="clear" on:click={(ev) => edit(ev, item)}>
+                        <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
                             <i class="bx bx-edit"></i>
                         </button>
-                        <button {disabled} class="clear" on:click={(ev) => remove(ev, item.id)}>
+                        <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.id)}>
                             <i class="bx bx-trash danger"></i>
                         </button>
                     </div>
@@ -73,20 +76,20 @@
         {/each}
         <div class="item">
             <div class="actions"></div>
-            <input {disabled}
-                type="text"
+            <input disabled={canAdd}
+                type="text" pattern="\w+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
-                bind:this={nameInput}
+                bind:this={pathInput}
                 placeholder="Path"
             />
-            <button {disabled} class="clear" on:click={add}>
+            <button disabled={canAdd} class="clear" on:click={add}>
                 <i class="bx bx-plus"></i>
             </button>
         </div>
     </div>
 </section>
 
-<Modal open={!!$current} on:close={() => (current.set(undefined))}>
+<Modal open={!!$current} width="100%" on:close={() => (current.set(undefined))}>
     {#if $current}
     <CollectionEditor item={$current} />
     {/if}

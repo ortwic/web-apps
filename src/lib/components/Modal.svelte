@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
 
     export let open = false;
+    export let width = "auto";
 
     const dispatcher = createEventDispatcher();
 
@@ -9,15 +10,6 @@
 
     function closeModal() {
         dispatcher('close');
-    }
-
-    function handleOutsideClick(event: MouseEvent) {
-        const rect = modal.getBoundingClientRect();
-        const isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
-            rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
-        if (!isInDialog) {
-            closeModal();
-        }
     }
 
     function handleEscapeKey(event: KeyboardEvent) {
@@ -34,16 +26,18 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={modal} on:click={handleOutsideClick} on:keydown={handleEscapeKey}>
+<dialog bind:this={modal} style:width={width} on:click={closeModal} on:keydown={handleEscapeKey}>
     {#if open}
-        <div class="header x-flex-full">
-            <button class="clear" on:click={closeModal}>
-                <i class="bx bx-x clear"></i>
-            </button>
-        </div>
-        <div class="content">
-            <slot />
-        </div>
+    <div class="header x-flex-full">
+        <button class="clear" on:click={closeModal}>
+            <i class="bx bx-x clear"></i>
+        </button>
+    </div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="content" on:click={(ev) => ev.stopImmediatePropagation()}>
+        <slot />
+    </div>
     {/if}
 </dialog>
 
@@ -55,8 +49,8 @@
         position: fixed;
         display: flex;
         flex-direction: column;
+        padding: 0;
         min-width: 50%;
-        max-width: 100%;
         min-height: 40%;
         max-height: calc(100% - 2rem);
         border-radius: 0.5rem;
@@ -94,6 +88,8 @@
     .content {
         display: flex;
         flex-direction: column;
+        padding: 1rem;
         overflow: auto;
+        transition: all 0.3s allow-discrete;
     }
 </style>

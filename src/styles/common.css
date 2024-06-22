@@ -84,7 +84,6 @@ button {
     border-radius: 0.5rem;
     border-width: 1px;
     background-color: var(--color-bg-2);
-    box-shadow: 1px 1px 3px #00000080;
     transition: all 0.2s ease-in-out;
 }
 

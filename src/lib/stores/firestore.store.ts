@@ -1,7 +1,7 @@
 import type { Readable } from 'svelte/store';
 import type { Firestore, DocumentData } from 'firebase/firestore';
 import { derived } from 'svelte/store';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { currentClientApp } from '$lib/stores/firebase.store';
 import type { EntityCollection } from '$lib/models/schema.model';
 
@@ -26,6 +26,7 @@ type Data = {
 
 type Store<T extends Data> = {
     documents: Readable<T[]>;
+    getDocument: (id: string) => Promise<T | null>;
     setDocument: (data: T) => Promise<void>;
     removeDocument: (id: string) => Promise<void>;
 };
@@ -55,6 +56,17 @@ function buildStore<T extends Data>(firestore: Firestore | null, path: string): 
         set([]);
     });
 
+    async function getDocument(id: string): Promise<T | null> {
+        if (firestore) {
+            const docRef = doc(firestore, path, id);
+            const snapshot = await getDoc(docRef);
+            if (snapshot.exists()) {
+                return snapshot.data({ serverTimestamps: 'none' }) as T;
+            }
+        }
+        return null;
+    }
+
     async function setDocument(data: T) {
         if (firestore) {
             const docRef = doc(firestore, path, data.id);
@@ -71,6 +83,7 @@ function buildStore<T extends Data>(firestore: Firestore | null, path: string): 
 
     return {
         documents,
+        getDocument,
         setDocument,
         removeDocument
     };
