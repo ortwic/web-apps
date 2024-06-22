@@ -3,6 +3,16 @@ import { defineConfig } from 'vitest/config';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'firebase': ['firebase/app', 'firebase/auth', 'firebase/analytics'],
+                    'firestore': ['firebase/firestore'],
+                }
+            }
+        }
+    },
     plugins: [
         sveltekit(),
         SvelteKitPWA({
@@ -54,9 +64,6 @@ export default defineConfig({
     ],
     server: {
         port: 5000
-    },
-    optimizeDeps: {
-        exclude: ['@radix-ui/react-Menubar']
     },
     test: {
         include: ['src/**/*.{test,spec}.{js,ts}']

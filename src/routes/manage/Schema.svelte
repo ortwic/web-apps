@@ -9,7 +9,7 @@
     import CollectionEditor from './CollectionEditor.svelte';
 
     const schemaStore = createSchemaStore();
-    const disabled = !$currentClientUser;
+    $: disabled = !$currentClientUser;
 
     let current = writable<EntityCollection | undefined>();
     let nameInput: HTMLInputElement;

@@ -1,4 +1,4 @@
-import type { Properties } from "@firecms/core";
+import type { Properties } from "../../firecms_core/types";
 
 export interface EntityCollection {
     id: string;

@@ -1,8 +1,6 @@
 <script lang="ts">
     import { slide } from 'svelte/transition';
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
-    import type { DataType } from '@firecms/core';
-    import { buildEntityPropertiesFromData } from '@firecms/schema_inference'
     import type { EntityCollection } from '$lib/models/schema.model';
     import { createSchemaStore, createStore } from '$lib/stores/firestore.store';
     import { showError, showInfo } from '$lib/stores/notification.store';
@@ -26,6 +24,8 @@
     }
         
     async function appendInferredPropsFromData() {
+        const { buildEntityPropertiesFromData } = await import('$lib/packages/schema_inference');
+
         const inferredProps = await buildEntityPropertiesFromData($documents, getType);
         item.props = { 
             ...item.props, 
@@ -33,7 +33,7 @@
         };
     }
 
-    function getType(value: any): DataType {
+    function getType(value: any) {
         if (typeof value === "number")
             return "number";
         else if (typeof value === "string")
@@ -129,6 +129,7 @@
 
     .cell {
         padding: .4rem .8rem;
+        white-space: nowrap;
     }
 
     .cell.header {

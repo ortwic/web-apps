@@ -1,6 +1,6 @@
 ## Roadmap of features
 
-### 
+### MVP
 - [x] Init sveltekit project
 - [x] Manage custom firebase configs (localstorage)
 - [x] Firestore access
