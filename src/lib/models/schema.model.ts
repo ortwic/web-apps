@@ -1,25 +1,6 @@
-import type { Properties } from "../../firecms_core/types";
+import type { EntityCollection as FireCMS_Collection } from "$lib/packages/firecms_core/types/collections";
+import type { Properties } from "$lib/packages/firecms_core/types/properties";
 
-export interface EntityCollection {
-    id: string;
-    path: string;
-    props: Properties;
-}
-
-// type Enum = { id: string; label: string; };
-// type Validation = {    
-//     required: boolean;
-//     unique: boolean;
-// };
-
-// type Property = {
-//     dataType: Omit<DataType, 'map'>;
-//     name: string;
-//     validation: Validation;
-//     editable: boolean;
-//     default: string;
-//     enumValues: Enum[];
-// } & {
-//     dataType: 'map';
-//     properties: Record<string, Property>;
-// };
+export type EntityCollection = Omit<FireCMS_Collection, 'name'> & {
+    properties: Properties;
+};
