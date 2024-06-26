@@ -54,7 +54,7 @@
     }
 </script>
 
-<section>
+<section class="content-64">
     <div class="grid">
         {#each $documents as item}
             <a href="/list/{item.path}">
@@ -102,6 +102,13 @@
         justify-content: top;
         align-items: center;
         flex: 0.6;
+    }
+
+    .content-64 {
+        padding: 1rem;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 64rem;
     }
 
     div.grid {

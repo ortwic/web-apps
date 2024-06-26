@@ -9,6 +9,7 @@ export default defineConfig({
                 manualChunks: {
                     'firebase': ['firebase/app', 'firebase/auth', 'firebase/analytics'],
                     'firestore': ['firebase/firestore'],
+                    'tabulator-tables': ['tabulator-tables'],
                 }
             }
         }

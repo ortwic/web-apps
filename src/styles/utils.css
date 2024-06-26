@@ -43,3 +43,11 @@
 .no-wrap {
     white-space: nowrap;
 }
+
+.fa-square::before {
+  content: '☐ ';
+}
+
+.fa-check-square::before {
+  content: '☑ ';
+}

@@ -14,6 +14,10 @@ const config = {
         adapter: adapter(),
         serviceWorker: {
             register: false
+        },
+        alias: {
+            $lib: './src/lib',
+            $styles: './src/styles'
         }
     }
 };
