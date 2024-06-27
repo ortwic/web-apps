@@ -1,7 +1,7 @@
 import type { Readable } from 'svelte/store';
 import type { Firestore, DocumentData } from 'firebase/firestore';
 import { derived } from 'svelte/store';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import { currentClientApp } from '$lib/stores/firebase.store';
 import type { EntityCollection } from '$lib/models/schema.model';
 
@@ -20,25 +20,19 @@ const setDocOptions = {
     merge: true
 };
 
-type Data = {
+export type Document = {
     id: string;
 } & DocumentData;
 
-type Store<T extends Data> = {
-    documents: Readable<T[]>;
-    getDocument: (id: string) => Promise<T | null>;
-    setDocument: (data: T) => Promise<void>;
-    removeDocument: (id: string) => Promise<void>;
-};
-
 export const createSchemaStore = () => createStore<EntityCollection>('__schema');
-export function createStore<T extends Data>(path: string) {
-    return derived<Readable<Firestore | null>, Store<T>>(currentFirestore, (store, set) =>
+export function createStore<T extends Document>(path: string) {
+    type Store = ReturnType<typeof buildStore<T>>;
+    return derived<Readable<Firestore | null>, Store>(currentFirestore, (store, set) =>
         set(buildStore(store, path))
     );
 }
 
-function buildStore<T extends Data>(firestore: Firestore | null, path: string): Store<T> {
+function buildStore<T extends Document>(firestore: Firestore | null, path: string) {
     const documents = derived<Readable<Firestore | null>, T[]>(currentFirestore, (store, set) => {
         if (store) {
             const reference = collection(store, path);
@@ -67,24 +61,44 @@ function buildStore<T extends Data>(firestore: Firestore | null, path: string): 
         return null;
     }
 
-    async function setDocument(data: T) {
-        if (firestore) {
-            const docRef = doc(firestore, path, data.id);
-            await setDoc(docRef, omitUndefinedFields(data), setDocOptions);
+    async function setDocuments(...documents: T[]) {
+        if (firestore && documents.length) {
+            const batch = writeBatch(firestore);
+
+            documents.forEach((data) => {
+                const docRef = doc(firestore, path, data.id);
+                batch.set(docRef, omitUndefinedFields(data), setDocOptions);
+            });
+
+            await batch.commit();
         }
     }
 
-    async function removeDocument(id: string) {
+    async function removeDocuments(...ids: string[]) {
         if (firestore) {
-            const docRef = doc(firestore, path, id);
-            await deleteDoc(docRef);
+            const batch = writeBatch(firestore);
+
+            ids.forEach((id) => {
+                const docRef = doc(firestore, path, id);
+                batch.delete(docRef);                
+            });
+
+            await batch.commit();
         }
     }
 
     return {
         documents,
         getDocument,
-        setDocument,
-        removeDocument
+        setDocuments,
+        removeDocuments
     };
+}
+
+export function timestampReplacer(key: string, value: unknown) {
+    if (value && typeof value === 'object' && 'seconds' in value && 'nanoseconds' in value) {
+        const ts = new Timestamp(Number(value.seconds), Number(value.nanoseconds));
+        return ts.toDate().toISOString();
+    }
+    return value;
 }

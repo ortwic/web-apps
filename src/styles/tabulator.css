@@ -12,6 +12,7 @@
 
 .tabulator-cell {
     overflow: scroll;
+    align-content: center;
 }
 
 .content-preview {

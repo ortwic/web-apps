@@ -46,7 +46,10 @@ function getCustomDefinitionByType(prop: AnyProperty, maxHeight: string): Partia
         
         case 'array':
             if ((<AnyProperty>prop.of)?.dataType === 'string') {
-                return label();
+                return {
+                    ...label(),
+                    editor: 'input',
+                };
             }
 
             return {
@@ -78,7 +81,7 @@ function getCustomDefinitionByType(prop: AnyProperty, maxHeight: string): Partia
         default:
             return { 
                 formatter: 'plaintext',
-                editor: 'input'
+                editor: !prop.readOnly ? 'input' : undefined
             };
     }
 }

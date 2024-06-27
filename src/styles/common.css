@@ -93,6 +93,10 @@ button.clear {
     box-shadow: unset;
 }
 
+button.icon {
+    padding: .2rem;
+}
+
 button.clear:hover > span {
     color: var(--color-theme-2);
     border-bottom: 1px solid var(--color-theme-2);

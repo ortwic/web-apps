@@ -10,6 +10,7 @@
 
 <style>
     .toolbar > .corner {
+        padding: 0 .8rem;
         min-width: 10%;
     }
 </style>

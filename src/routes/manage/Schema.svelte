@@ -35,7 +35,7 @@
         pathInput.value = '';
 
         try {
-            return $schemaStore?.setDocument(item);
+            return $schemaStore?.setDocuments(item);
         } catch (ex: any) {
             showError(ex.message);
         }
@@ -49,7 +49,7 @@
     async function remove(ev: Event, id: string) {
         ev.preventDefault();
         if (confirm('Are you sure?')) {
-            return $schemaStore?.removeDocument(id);
+            return $schemaStore?.removeDocuments(id);
         }
     }
 </script>

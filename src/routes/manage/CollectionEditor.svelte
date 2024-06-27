@@ -23,7 +23,7 @@
     async function saveCollection() {
         console.log(item.properties)
         try {
-            await $schemaStore.setDocument(item);
+            await $schemaStore.setDocuments(item);
             showInfo(`${item.path} saved`);
         } catch (error) {
             showError(`${error}`);
@@ -77,13 +77,13 @@
 </script>
 
 <Toolbar>
-    <button title="Save properties" class="clear" on:click={saveCollection}>
+    <button title="Save properties" class="icon clear" on:click={saveCollection}>
         <i class="bx bx-save"></i>
     </button>
-    <button title="Infer from data" class="clear" on:click={appendInferredPropsFromData}>
+    <button title="Infer from data" class="icon clear" on:click={appendInferredPropsFromData}>
         <i class="bx bxs-magic-wand"></i>
     </button>
-    <button title="Toggle code view" class="clear" on:click={toggleEditView}>
+    <button title="Toggle code view" class="icon clear" on:click={toggleEditView}>
         <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
     </button>
     <span slot="title">{item.path}</span>
@@ -159,9 +159,5 @@
 
     .cell.full {
         grid-column: 1 / -1;
-    }
-
-    button {
-        padding: .2rem;
     }
 </style>
