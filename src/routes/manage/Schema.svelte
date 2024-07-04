@@ -20,11 +20,11 @@
     async function add() {
         const path = pathInput.validity.valid && pathInput.value;
         if (!path) {
-            return showWarn('Invalid path');
+            return showWarn('Invalid collection name');
         }
         const exists = $documents.some((item) => item.path === path);
         if (exists) {
-            return showWarn('Path already exists');
+            return showWarn('Collection already exists');
         }
 
         const item: EntityCollection = {
@@ -75,13 +75,14 @@
             </a>
         {/each}
         <div class="item">
-            <div class="actions"></div>
+            <div class="actions"><br/></div>
             <input disabled={canAdd}
                 type="text" pattern="\w+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
-                placeholder="Path"
+                placeholder="Collection"
             />
+            <br/>
             <button disabled={canAdd} class="clear" on:click={add}>
                 <i class="bx bx-plus"></i>
             </button>
@@ -128,6 +129,11 @@
         color: var(--color-text);
         border-radius: 0.5rem;
         border: 1px solid gray;
+    }
+
+    div.item > input {
+        padding: .5rem;
+        text-align: center;
     }
 
     div.actions {
