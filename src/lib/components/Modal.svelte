@@ -50,8 +50,7 @@
         display: flex;
         flex-direction: column;
         padding: 0;
-        min-width: 50%;
-        min-height: 40%;
+        min-width: 18rem;
         max-height: calc(100% - 2rem);
         border-radius: 0.5rem;
         background-color: var(--color-bg-2);

@@ -39,7 +39,7 @@
     <Header>
         <ul>
             {#if $settingsStore.selectedProjectId}
-            <li class:current={$pathStartsWith === 'manage' || $pathStartsWith === 'list'}
+            <li class:current={$pathStartsWith === 'manage' || $pathStartsWith === 'content'}
                 in:slide={{ duration: 400, axis: 'x' }} out:slide={{ duration: 400, axis: 'x' }}>
                 <a href="/manage">
                     <span class="emphasis no-wrap">{$settingsStore.selectedProjectId}</span>

@@ -20,19 +20,19 @@ const setDocOptions = {
     merge: true
 };
 
-export type Document = {
+export type Entity = {
     id: string;
 } & DocumentData;
 
 export const createSchemaStore = () => createStore<EntityCollection>('__schema');
-export function createStore<T extends Document>(path: string) {
+export function createStore<T extends Entity>(path: string) {
     type Store = ReturnType<typeof buildStore<T>>;
     return derived<Readable<Firestore | null>, Store>(currentFirestore, (store, set) =>
         set(buildStore(store, path))
     );
 }
 
-function buildStore<T extends Document>(firestore: Firestore | null, path: string) {
+function buildStore<T extends Entity>(firestore: Firestore | null, path: string) {
     const documents = derived<Readable<Firestore | null>, T[]>(currentFirestore, (store, set) => {
         if (store) {
             const reference = collection(store, path);
