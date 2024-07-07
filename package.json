@@ -1,0 +1,20 @@
+{
+  "name": "web-apps",
+  "version": "1.0.0",
+  "description": "Web apps developed with svelte and firebase.",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "OCSoft42",
+  "license": "ISC",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "lerna": "^8.1.6"
+  }
+}
