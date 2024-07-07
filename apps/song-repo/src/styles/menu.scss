@@ -1,0 +1,157 @@
+.menu, .dialog {
+
+    @mixin row {
+        display: block;
+        padding: .4rem;
+        text-align: left;
+    }
+
+    div.row {
+        display: flex;
+        flex-flow: nowrap;
+        justify-items: center;
+        align-content: center;
+        align-items: center;
+        border-top: 1px solid silver;
+        width: 100%;
+        white-space: nowrap;
+        
+        button, 
+        a[role="button"] {
+            flex: 1 1 0;
+            width: 100%;
+            min-width: 0; /* https://stackoverflow.com/a/44782536/2598771 */
+            min-height: 3em;
+            border: 0;
+            border-radius: 0;
+            box-shadow: unset;
+            text-align: center;
+            background-color: inherit;
+            transition: all .2s ease-in-out;
+
+            span {
+                display: inline-block;
+                padding: 6px;
+            }
+
+            i:not(.bx-sm) {
+                border: 1px solid silver;
+                border-radius: 1em;
+                background-color: white;
+                padding: 4px;
+            }
+
+            &:hover {
+                background-color: #FFFFFFC0;
+            }
+
+            &:disabled {
+                background-color: transparent;
+            }
+            
+            &:not(:last-child) {
+                border-right: 1px solid silver;
+            }
+    
+            &.warn {
+                color: black;
+                background-color: var(--secondary-opaque);
+
+                &:hover {
+                    background-color: white;
+                }
+
+                span {
+                    color: inherit;
+                }
+            }
+        }
+
+        a[role="button"] {
+            display: block;
+
+            span {
+                color: var(--primary);
+                padding-top: .6em;
+                vertical-align: middle;
+            }
+        }
+        
+        p {
+            margin: .6rem 1rem;
+            width: 100%;
+        }
+    }
+
+    div.row:last-child {
+        border-bottom: 1px solid silver;
+    }
+    
+    div.section {
+        &.indent {
+            margin: 0 1rem;
+        }
+
+        label {
+            @include row;
+        }
+    
+        p {
+            margin: .6rem 1rem;
+            text-align: left;
+        }
+        
+        input[type=text], 
+        input[type=email],
+        input[type=number],
+        input[type=url],
+        input[type=search],
+        input[type=password] {
+            @include row;
+            border: 1px solid gray;
+            transition: all .2s ease-in-out;
+    
+            &:focus {
+                outline: 1px solid var(--primary);
+            }
+        }
+    }
+    
+    button.sm {
+        padding: .2rem;
+        outline: 0;
+        border: 1px solid silver;
+        border-radius: 1em;
+        text-shadow: unset;
+        font-size: small;
+        width: 2em;
+        height: 2em;
+        transition: all .2s ease-in-out;
+
+        color: var(--primary);
+        background-color: white;
+
+        &.selected {
+            border-color: var(--primary);            
+        }
+
+        &.disabled {
+            color: var(--primselect);
+            border-color: var(--primselect);
+            background-color: transparent;
+        }
+
+        &:hover {
+            color: var(--text);
+            background-color: white;
+        }
+    }
+
+    .success-text {
+        color: Green;
+    }
+
+    .danger-text {
+        color: Red;
+    }
+}

@@ -1,0 +1,189 @@
+{
+  "menu": {
+    "songs": "Your songs",
+    "howto": "Making music",
+    "howto-blog": "How to make music blog",
+    "events": "Public events",
+    "event-calendar": "Public event calendar",
+    "donate": "Donate",
+    "masterdata": "Master data",
+    "login": {
+      "login": "Login",
+      "email": "Email",
+      "password": "Password",
+      "repeat": "Repeat password",
+      "signup": "Sign up",
+      "with-google": "Login with Google",
+      "with-microsoft": "Login with Microsoft",
+      "read-privacy-policy": "Read privacy policy",
+      "read-terms-of-use": "Read terms of use",
+      "read-carefully": "Please read the document carefully",
+      "wrong-password": "Wrong password. Did you forgot your password?",
+      "reset-password": "Send reset code"
+    },
+    "or": "or",
+    "table": {
+      "exportTitle": "My Song List",
+      "set-view": "Edit column view",
+      "show-hide": "Show/Hide",
+      "group-by": "Group by",
+      "sort-by": "Sort by",
+      "filter-by": "Filter by"
+    }
+  },
+  "start": {
+    "loading": "Loading...",
+    "hello": "Hello musician!",
+    "intro": "This app was specifically designed for musicians like you to keep track of your repertoire and your progress. Some features of this app:",
+    "features": {
+      "signup": "Sign up to store your own song list",
+      "list": "Create own list of songs you've mastered or want to learn",
+      "track": "Keep an overview of your progress",
+      "share": "Share or export list of your repertoire",
+      "search": "Search with autocomplete for genres, artists, and titles",
+      "events": "Public events like",
+      "blog": "How-tos and further articles about making",
+      "github": "Planned feature overview and known bugs",
+      "feedback": "We hope you find our app useful and look forward to your"
+    },
+    "imprint": "Imprint",
+    "privacypolicy": "Privacy policy",
+    "termsofuse": "Terms of use",
+    "samples": "Or test list with sample data first"
+  },
+  "feedback": {
+    "submit": "Submit feedback",
+    "note": "Dote the following questions on a scale from 1 to 10 ascending, where 10 is the most important to you.",
+    "qBackup": "How important is it to you to be able to backup your data?",
+    "qSearch": "How important is it to you that data is suggested to you when creating new pieces?",
+    "genre": "Genre / Style",
+    "title": "Artist / Title",
+    "refLyrics": "Reference lyrics",
+    "refChords": "Reference chords",
+    "searchNotes": "Search for sheet music",
+    "other": "Other",
+    "qShare": "How important is it for you to be able to share your content with other users?",
+    "pubLink": "Public link",
+    "otherUsers": "Other users of the platform",
+    "emailSend": "E-Mail delivery",
+    "qBlog": "How useful is it for you to browse a blog about how-tos and recommendations?",
+    "blogHowto": "How-to",
+    "blogRefs": "Recommendations",
+    "blogTheory": "Music theory",
+    "qOther": "Do you have any other ideas and suggestions for the app or have you noticed serious bugs?",
+    "ty": "Thank you for participating in this feedback survey."
+  },
+  "songs": {
+    "columns": {
+      "fav": "Favorite",
+      "progressLogs": "Count",
+      "progress": "Progress",
+      "status": "Status",
+      "artistImg": "Image",
+      "artist": "Artist",
+      "title": "Title",
+      "genre": "Genre",
+      "style": "Style",
+      "source": "Source",
+      "uri": "Resource-Pfad",
+      "key": "Key",
+      "time": "Time",
+      "bpm": "BPM",
+      "difficulty": "Level",
+      "features": "Features",
+      "tags": "Labels",
+      "learnedOn": "Learned",
+      "changedAt": "Last changed",
+      "country": "Country",
+      "year": "Year"
+    },
+    "menu": {
+      "open": "Open resource",
+      "search": "Search for resources",
+      "search-sheet-music": "Search sheet music",
+      "search-tutorial": "Search tutorial",
+      "search-lyrics": "Search lyrics",
+      "search-midi-file": "Search midi file",
+      "change-resource": "Change resource",
+      "toggle-favorite": "Toggle favorite",
+      "change-status": "Change status",
+      "delete": "Delete?",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "resource": {
+      "title": "Enter resource path",
+      "caption": "Enter a uri path to any resource:",
+      "invalid-uri": "Not a valid URI:",
+      "info": "Use a cloud storage like google drive to upload your files. Then copy the url here."
+    },
+    "nosongs": "No songs added.",
+    "exportTitle": "My Song List",
+    "import": "Start importing...",
+    "importDone": "Found {found} songs. Total songs: {total}",
+    "addTitle": "Search - powered by",
+    "noPersist": "You are not signed in, so data won't be persisted after leaving the app!",
+    "hint-markdown": "markdown supported e.g.",
+    "hint-label": "comma separated e.g. Foo, Bar",
+    "status": {
+      "todo": "Todo",
+      "wip": "Wip",
+      "done": "Done",
+      "repeat": "Repeat",
+      "archived": "Archived"
+    }
+  },
+  "table": {
+    "groupBy": "Group by {title}",
+    "search": "Search for anything e. g. genre, artist, todo",
+    "filter": {
+      "empty": "all"
+    }
+  },
+  "blog": {
+    "title": "Everthing about making music",
+    "more": "more...",
+    "less": "...lesser",
+    "back": "Back"
+  },
+  "notfound": {
+    "title": "Not found",
+    "messages": [
+      "Oops, something went wrong.",
+      "We're sorry, but we can't find the page you're looking for.",
+      "Looks like this page is missing. Maybe it's been moved or deleted.",
+      "This page isn't available right now. Please check back later.",
+      "We're experiencing some technical difficulties. Please try again later.",
+      "We're sorry, but something seems to be wrong on our end.",
+      "We're working hard to fix this issue. Please bear with us.",
+      "This page is currently under maintenance. We apologize for any inconvenience.",
+      "We're sorry, but we're having trouble loading this page.",
+      "An unexpected error has occurred. We're on it."
+    ]
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "decline": "Decline"
+  },
+  "calendar": {
+    "title": "Event calendar"
+  },
+  "profile": {
+    "sign-out": "Sign out",
+    "share-link": "Copy link to share",
+    "share-link-copied": "Copied link for sharing into clipboard."
+  },
+  "settings": {
+    "title": "Settings",
+    "view": "View",
+    "reset-views": "Reset views",
+    "reset-text": "Reset stored column settings, filters and grouping.",
+    "reset-done": "All saved view reseted!",
+    "reset-cookies": "Reset cookies",
+    "data-lost": "All data will be lost",
+    "delete-profile": "Delete profile",
+    "delete-advice": "You should export your data before deletion.",
+    "delete-done": "Your account was deleted successfully!",
+    "profile": "Profile"
+  }
+}

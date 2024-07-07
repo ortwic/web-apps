@@ -1,0 +1,186 @@
+{
+  "menu": {
+    "songs": "Deine Songs",
+    "howto": "Musizieren",
+    "howto-blog": "Wie geht Musik Blog",
+    "events": "Veranstaltungen",
+    "event-calendar": "Veranstaltungeskalender",
+    "donate": "Spenden",
+    "masterdata": "Stammdaten",
+    "login": {
+      "login": "Login",
+      "email": "E-Mail",
+      "password": "Kennwort",
+      "repeat": "Kennwort wiederholen",
+      "signup": "Registrieren",
+      "with-google": "Login mit Google",
+      "with-microsoft": "Login mit Microsoft",
+      "read-privacy-policy": "Datenschutz gelesen",
+      "read-terms-of-use": "Nutzungsbedingungen",
+      "read-carefully": "Bitte lesen Sie das Dokument sorgfältig durch",
+      "wrong-password": "Falsches Passwort. Haben Sie Ihr Passwort vergessen?",
+      "reset-password": "Reset-Code senden"
+    },
+    "or": "oder",
+    "table": {
+      "exportTitle": "Meine Songliste",
+      "set-view": "Ansicht bearbeiten",
+      "show-hide": "Zeige/Verstecke ",
+      "group-by": "Gruppiere nach",
+      "sort-by": "Sortiere nach",
+      "filter-by": "Filtern nach"
+    }
+  },
+  "start": {
+    "loading": "Wird geladen...",
+    "hello": "Hallo Musiker!",
+    "intro": "Diese App wurde speziell für Musiker wie Sie entwickelt, um einen Überblick über Ihr Repertoire und Ihre Fortschritte zu behalten. Einige Funktionen dieser App:",
+    "features": {
+      "signup": "Melden Sie sich an, um Ihre eigene Songliste zu speichern",
+      "list": "Eigene Liste mit Musikstücken erstellen, die Sie beherrschen oder noch lernen möchten",
+      "track": "Übersicht über Ihre Fortschritte behalten",
+      "share": "Liste des Repertoires öffentlich teilen oder exportieren",
+      "search": "Suche mit Vervollständigung der Genres, Künstler und Titel",
+      "events": "Öffentliche events wie",
+      "blog": "HowTo's und weitere Artikel über das musizieren",
+      "github": "Überblick geplanter Features und bekannte Bugs",
+      "feedback": "Wir hoffen, dass Sie unsere App nützlich finden."
+    },
+    "imprint": "Impressum",
+    "privacypolicy": "Datenschutz",
+    "termsofuse": "Nutzungsbedingungen",
+    "samples": "Oder Liste mit Beispieldaten ansehen"
+  },
+  "feedback": {
+    "submit": "Feedback senden",
+    "note": "Bitte bewerte die Folgenden Fragen auf einer Skala von 1 bis 10 aufsteigend, wobei 10 dir am aller wichtigsten ist.",
+    "qBackup": "Wie wichtig ist es dir, Daten zu sichern?",
+    "qSearch": "Wie wichtig ist es dir, dass dir bei der Erstellung neuer Stücke Daten vorgeschlagen werden?",
+    "genre": "Genre / Style",
+    "title": "Künstler / Titel",
+    "refLyrics": "Verweis Lyrics",
+    "refChords": "Verweis Akkorde",
+    "searchNotes": "Suche nach Noten",
+    "other": "Sonstiges",
+    "qShare": "Wie wichtig ist es für dich, deine Inhalte mit anderen Benutzern teilen zu können?",
+    "pubLink": "Öffentlicher Link",
+    "otherUsers": "Andere Benutzer der Plattform",
+    "emailSend": "E-Mail Versand",
+    "qBlog": "Wie sinnvoll ist es für dich, in einem Blog nach Anleitungen und Empfehlungen zu stöbern?",
+    "blogHowto": "Wie man",
+    "blogRefs": "Empfehlungen",
+    "blogTheory": "Musiktheorie",
+    "qOther": "Hast du noch sonstige Ideen und Vorschläge für die App oder sind dir schwerwiegende Bugs aufgefallen?",
+    "ty": "Danke, dass du an dieser Feedback Befragung teil genommen hast."
+  },
+  "songs": {
+    "columns": {
+      "fav": "Favorit",
+      "progressLogs": "Anzahl",
+      "progress": "Fortschritt",
+      "status": "Status",
+      "artistImg": "Bild",
+      "artist": "Künstler",
+      "title": "Titel",
+      "genre": "Genre",
+      "style": "Style",
+      "source": "Quelle",
+      "uri": "Resource path",
+      "key": "Tonart",
+      "time": "Taktart",
+      "bpm": "Tempo",
+      "difficulty": "Level",
+      "features": "Merkmale",
+      "tags": "Labels",
+      "learnedOn": "Gelernt",
+      "changedAt": "Geändert",
+      "country": "Land",
+      "year": "Jahr"
+    },
+    "menu": {
+      "open": "Öffne Ressource",
+      "search": "Nach Ressourcen suchen",
+      "search-sheet-music": "Noten suchen",
+      "search-tutorial": "Tutorial suchen",
+      "search-lyrics": "Songtexte suchen",
+      "search-midi-file": "Midi-Dateien suchen",
+      "change-resource": "Ressource ändern",
+      "toggle-favorite": "Favorit umschalten",
+      "change-status": "Status ändern",
+      "delete": "Löschen?",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "resource": {
+      "title": "Geben Sie den Ressourcenpfad ein",
+      "caption": "Geben Sie einen URI-Pfad zu einer beliebigen Ressource ein:",
+      "invalid-uri": "Kein gültiger URI:",
+      "info": "Verwenden Sie einen Cloud-Speicher wie Google Drive, um Ihre Dateien hochzuladen. \nDann kopieren Sie die URL hier."
+    },
+    "nosongs": "Nichts hinzugefügt.",
+    "exportTitle": "Meine Songliste",
+    "import": "Import starten...",
+    "importDone": "{found} Songs gefunden. Gesamtzahl der Songs: {total}",
+    "addTitle": "Suche – unterstützt von",
+    "noPersist": "Sie sind nicht angemeldet, daher bleiben die Daten nach dem Verlassen der App nicht erhalten!",
+    "hint-label": "Komma getrennt, z.B. \nFoo, Bar",
+    "hint-markdown": "Markdown unterstützt z.B.",
+    "status": {
+      "todo": "Offen",
+      "wip": "In Arbeit",
+      "done": "Erledigt",
+      "repeat": "Wiederholen",
+      "archived": "Archiviert"
+    }
+  },
+  "table": {
+    "groupBy": "Gruppieren nach {title}",
+    "search": "Suchen nach etwas wie Genre, Künstler, todo...",
+    "filter": {
+      "empty": "Alle"
+    }
+  },
+  "blog": {
+    "title": "Alles über das Musizieren",
+    "less": "...weniger",
+    "more": "mehr...",
+    "back": "Zurück"
+  },
+  "notfound": {
+    "title": "Nicht gefunden",
+    "messages": [
+      "Hoppla, etwas ist schief gelaufen.",
+      "Es tut uns leid, aber wir können die Seite, die Sie suchen, nicht finden.",
+      "Es sieht so aus, als ob diese Seite fehlt. Vielleicht wurde sie verschoben oder gelöscht.",
+      "Diese Seite ist gerade nicht verfügbar. Bitte schauen Sie später noch einmal vorbei.",
+      "Wir haben einige technische Schwierigkeiten. Bitte versuchen Sie es später noch einmal.",
+      "Es tut uns leid, aber etwas scheint bei uns schief zu laufen.",
+      "Wir arbeiten hart daran, dieses Problem zu beheben. Bitte haben Sie Geduld mit uns.",
+      "Diese Seite wird gerade gewartet. Wir entschuldigen uns für etwaige Unannehmlichkeiten.",
+      "Es tut uns leid, aber wir haben Probleme beim Laden dieser Seite.",
+      "Ein unerwarteter Fehler ist aufgetreten. Wir sind dran."
+    ]
+  },
+  "dialog": {
+    "confirm": "Bestätigen",
+    "decline": "Ablehnen"
+  },
+  "profile": {
+    "sign-out": "Abmelden",
+    "share-link": "Share-Link kopieren",
+    "share-link-copied": "Share-Link in die Zwischenablage kopiert."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "view": "Ansicht",
+    "reset-views": "Ansichten zurücksetzen",
+    "reset-text": "Gespeicherter Spalteneinstellungen, Filter und Gruppierung zurücksetzen.",
+    "reset-done": "Alle gespeicherten Ansichten wurden zurückgesetzt!",
+    "reset-cookies": "Cookies zurücksetzen",
+    "data-lost": "Alle Daten gehen verloren",
+    "delete-profile": "Profil löschen",
+    "delete-advice": "Sie sollten Ihre Daten vor dem Löschen exportieren.",
+    "delete-done": "Ihr Konto wurde erfolgreich gelöscht!",
+    "profile": "Profil"
+  }
+}
