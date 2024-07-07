@@ -1,0 +1,147 @@
+@import '@fontsource/fira-mono';
+
+:root {
+    --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+        Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'Fira Mono', monospace;
+    --color-bg-0: rgb(202, 216, 228);
+    --color-bg-1: hsl(209, 36%, 86%);
+    --color-bg-2: hsl(224, 44%, 95%);
+    --color-bg-3: rgba(255, 255, 255, 0.45);
+    --color-theme-1: #ff3e00;
+    --color-theme-2: #4075a6;
+    --color-text: rgba(0, 0, 0, 0.7);
+    --column-width: 42rem;
+    --column-margin-top: 4rem;
+    font-family: var(--font-body);
+    color: var(--color-text);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background-attachment: fixed;
+    background-color: var(--color-bg-1);
+    background-size: 100vw 100vh;
+    background-image: radial-gradient(
+            50% 50% at 50% 50%,
+            rgba(255, 255, 255, 0.75) 0%,
+            rgba(255, 255, 255, 0) 100%
+        ),
+        linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
+}
+
+h1,
+h2,
+p {
+    font-weight: 400;
+}
+
+p {
+    line-height: 1.5;
+}
+
+a {
+    color: var(--color-theme-1);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.2rem;
+}
+
+pre {
+    font-size: 16px;
+    font-family: var(--font-mono);
+    background-color: var(--color-bg-3);
+    border-radius: 3px;
+    box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
+    padding: 0.5em;
+    overflow-x: auto;
+    color: var(--color-text);
+}
+
+input,
+select,
+button,
+a[role='button'] {
+    font-size: inherit;
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    background-color: var(--color-bg-2);
+    transition: all 0.2s ease-in-out;
+}
+
+button.clear {
+    background-color: transparent;
+    border: 0;
+    box-shadow: unset;
+}
+
+button.icon {
+    padding: .2rem;
+}
+
+button.clear:hover > span {
+    color: var(--color-theme-2);
+    border-bottom: 1px solid var(--color-theme-2);
+}
+
+button.clear:focus:not(:focus-visible) {
+    outline: none;
+}
+
+i.bx {
+    border-radius: 50%;
+    padding: 0.2rem;
+    color: var(--color-theme-2);
+    transition: all 0.2s ease-in-out;
+}
+
+i:not(.clear).bx {
+    border: 1px solid var(--color-bg-1);
+    background-color: white;
+}
+
+button[disabled], 
+button[disabled] > i.bx {
+    color: silver !important;
+    cursor: default;
+}
+
+a:not([disabled]):hover > i.bx,
+button:not([disabled]):hover > i.bx {
+    color: var(--color-theme-1);
+    border-color: var(--color-theme-1);
+}
+
+.label {
+    border: 1px solid silver;
+    background-color: #F0F0F0C0;
+    box-shadow: 2px 2px 4px #80808060;
+    margin: .4rem .2rem;
+    padding: .2rem .6rem;
+    border-radius: 1rem;
+    font-size: smaller;
+}
+
+@media (min-width: 720px) {
+    h1 {
+        font-size: 2.4rem;
+    }
+}
