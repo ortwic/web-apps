@@ -49,9 +49,6 @@
             <li class:current={$pathStartsWith === 'settings'}>
                 <a href="/settings"><i class="bx bx-cog"></i></a>
             </li>
-            <li class:current={$pathStartsWith === 'sverdle'}>
-                <a href="/sverdle"><i class="bx bx-dice-5"></i></a>
-            </li>
         </ul>
     </Header>
 
