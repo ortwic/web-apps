@@ -1,6 +1,5 @@
-import { Timestamp } from 'firebase/firestore';
-import type { CellComponent, ColumnDefinition } from 'tabulator-tables';
 import { DateTime } from 'luxon';
+import type { CellComponent, ColumnDefinition } from 'tabulator-tables';
 
 export function image(): Partial<ColumnDefinition> { 
     return {
@@ -68,15 +67,14 @@ export function timestamp(): Partial<ColumnDefinition> {
     return {
         formatter(cell: CellComponent): string {
             const value = cell.getValue();
-            if (value instanceof Timestamp) {
+            const isFirebaseTimestamp = 'toDate' in value && value.toDate instanceof Function;
+            if (isFirebaseTimestamp) {
                 return DateTime.fromJSDate(value.toDate()).toFormat('yyyy-MM-dd HH:mm:ss');
             }
-            if (value?.seconds) {
+            if ('seconds' in value && value.seconds) {
                 return DateTime.fromSeconds(value.seconds).toFormat('yyyy-MM-dd HH:mm:ss');
             }
             return `${value}`;
         },
     }; 
 };
-
-

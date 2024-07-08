@@ -4,15 +4,17 @@
     import type { CellComponent } from 'tabulator-tables';
     import type { EntityCollection } from '$lib/models/schema.model';
     import type { Entity } from '$lib/stores/firestore.store';
-    import type { ColumnOptions } from '$lib/components/table/column.type';
+    import type { ColumnOptions } from '$lib/models/column.model';
     import { createSchemaStore, createStore, timestampReplacer } from '$lib/stores/firestore.store';
-    import { prepareColumnDefinitions } from '$lib/components/table/column.helper';
-    import Table from '$lib/components/table/Table.svelte';
+    import { prepareColumnDefinitions } from '$lib/table/column.helper';
+    import { Table } from '@web-apps/svelte-tabulator';
+    import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator/templates';
     import Toolbar from '$lib/components/Toolbar.svelte';
     import { showError, showInfo } from '$lib/stores/notification.store';
     import Modal from '$lib/components/Modal.svelte';
     import CollectionEditor from '../../manage/CollectionEditor.svelte';
     import { goto } from '$app/navigation';
+    import '$styles/tabulator.css';
     
     export let data;
     let showAddEntry = false;
@@ -155,7 +157,8 @@
         columns={prepareColumnDefinitions(schema, {
             ...options,
             actions: getActions(schema)
-        })} />
+        })} 
+        on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
 </section>
 
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>

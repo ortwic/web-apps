@@ -1,6 +1,5 @@
-import type { CellComponent, CellEditEventCallback, ColumnComponent, Editor, ListEditorParams, RowComponent, SortDirection } from 'tabulator-tables';
-import type { ColumnDefinition } from '../tabulator/types';
-import { autoFilter } from './filter.helper';
+import type { CellEditEventCallback, ColumnComponent, Editor, ListEditorParams, RowComponent, SortDirection } from 'tabulator-tables';
+import type { ColumnDefinition } from '@web-apps/svelte-tabulator';
 import Format from './Formatter.class';
 import type { MessageFormatter } from '../../../service/i18n';
 
@@ -48,34 +47,6 @@ export const column = (
         Format.get(format),
         ...more
     );
-};
-
-export const autoColumns = <T>(data: T[]): ColumnDefinition[] => {
-    if (data.length) {
-        const total = Object.keys(data[0]).length;
-        const column = (key: string) => {
-            const def = {
-                title: key,
-                field: key,
-                width: total < 6 ? `${100 / total}%` : '18%',
-                editor: 'input',
-                resizable: true,
-                ...autoFilter(),
-            };
-            if (Array.isArray(data[0][key])) {
-                def.formatter = Format.get('label').formatter;
-            } else if (typeof data[0][key] === 'object') {
-                def.formatter = (cell: CellComponent) => {
-                    const value = cell.getValue();
-                    return JSON.stringify(value, null, 2);
-                };
-            }
-            return def as ColumnDefinition;
-        };
-        if (total) {
-            return Object.keys(data[0]).map(column);
-        }
-    }
 };
 
 export function createEditor(cellEdited: CellEditEventCallback, readonly = false) {  

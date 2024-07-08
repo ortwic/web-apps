@@ -2,9 +2,9 @@
     import { t } from "svelte-i18n";
     import { derived } from "svelte/store";
     import type { ColumnDefinition, SortDirection, Sorter } from "tabulator-tables";
+    import { tableView as view } from "@web-apps/svelte-tabulator";
     import Switch from "../ui/elements/Switch.svelte";
     import PopupMenu from "../ui/PopupMenu.svelte";
-    import { tableView as view } from "../../store/app.store";
 
     const sortEntry = <T>(acc: { [x: string]: T; }, { field, dir }) => {
         acc[field] = dir;

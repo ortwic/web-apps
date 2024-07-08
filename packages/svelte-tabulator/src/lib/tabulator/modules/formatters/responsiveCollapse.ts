@@ -1,4 +1,4 @@
-export default function(cell){
+export default function(cell: any){
     const config = cell.getRow()._row.modules.responsiveLayout;
     if (!config) {
         return;
@@ -18,7 +18,7 @@ export default function(cell){
 
     cell.getElement().classList.add('tabulator-row-handle');
 
-    function toggleList(el, isOpen){
+    function toggleList(el: HTMLElement, isOpen: boolean){
         const collapseEl = config.element;
 
         config.open = isOpen;
@@ -36,7 +36,7 @@ export default function(cell){
 
     div.addEventListener('click', (e) => {
         e.stopImmediatePropagation();
-        toggleList(e.target, !config.open);
+        toggleList(e.target as HTMLElement, !config.open);
         cell.getTable().rowManager.adjustTableSize();
     });
 

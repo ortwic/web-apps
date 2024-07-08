@@ -23,9 +23,7 @@
             onAuthStateChanged($currentClientAuth, currentClientUser.set)
         }
         
-        if (settings.selectedProjectId) { 
-            goto('/manage');
-        } else {
+        if (!settings.selectedProjectId) { 
             goto('/settings');
         }
     });

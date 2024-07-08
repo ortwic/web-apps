@@ -63,6 +63,12 @@ export default defineConfig({
             selfDestroying: false
         })
     ],
+    resolve: {
+        // preserveSymlinks: true  
+    },
+    optimizeDeps: {
+        include: ['@web-apps/svelte-tabulator']
+    },
     server: {
         port: 5000
     },

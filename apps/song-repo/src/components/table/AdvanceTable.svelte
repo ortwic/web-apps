@@ -1,28 +1,28 @@
 <script lang='ts'>
-    import { map, of, type Observable } from 'rxjs';
+    import { derived, readable, type Readable } from 'svelte/store';
     import type { ColumnDefinition } from 'tabulator-tables';
+    import { Table, autoColumns } from '@web-apps/svelte-tabulator';
     import FileDrop from './FileDrop.svelte';
-    import Table from './Table.svelte';
-    import { autoColumns } from './templates/column.helper';
     import ConfirmDialog from '../dialogs/ConfirmDialog.svelte';
     import TabbedTitle from '../ui/TabbedTitle.svelte';
     import stores, { type WithId } from '../../service/master-data.service';
     import { uniqueKey } from '../../service/firestore.service';
     import { showInfo, showError } from '../../store/notification.store';
+    import { observableToStore } from '../../store/app.store';
 
     
     type Pages = keyof typeof stores;
     let active: Pages;
-    let columns: Observable<ColumnDefinition[]>;
-    let data: Observable<WithId[]>;
+    let columns: Readable<ColumnDefinition[]>;
+    let data: Readable<WithId[]>;
     let sub: { unsubscribe: () => void; };
 
     async function changePage(path: Pages) {
         const page = stores[path];
         active = path;
         sub?.unsubscribe();
-        data = page.docs();
-        columns = data.pipe(map(autoColumns));
+        data = observableToStore(page.docs());
+        columns = derived(data, (values) => autoColumns(values));
     }
 
     async function importJSON(event: CustomEvent): Promise<void> {
@@ -31,9 +31,9 @@
             if (json?.length && active === 'Genres') {
                 const field = Object.keys(json[0])[0];
                 if (field) {
-                    columns = of(autoColumns(json));
+                    columns = readable(autoColumns(json));
                     const dataWithId = json.map(obj => ({ id: uniqueKey(obj[field]), ...obj }));
-                    data = of(dataWithId);
+                    data = readable(dataWithId);
                     await stores[active].update(dataWithId);
 
                     showInfo(`Found ${json.length} entries.`);

@@ -4,8 +4,8 @@
     import { push } from 'svelte-spa-router';
     import { slideFade } from '../components/ui/transition.helper';
     import AuthService, { currentUser } from '../service/auth.service';
-    import { createUserStore, viewStoreId } from '../service/song.service';
-    import { currentMenu, tableView } from "../store/app.store";
+    import { createUserStore } from '../service/song.service';
+    import { currentMenu } from "../store/app.store";
     import { showError, showInfo } from '../store/notification.store';
 
 	const authService = new AuthService();

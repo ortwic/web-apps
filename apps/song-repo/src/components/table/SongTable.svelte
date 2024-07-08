@@ -3,13 +3,13 @@
   import '../../styles/table.scss';
   import { t } from 'svelte-i18n';
   import { location } from 'svelte-spa-router';
-  import type { CellComponent, CellEditEventCallback } from 'tabulator-tables';
+  import type { CellComponent, CellEditEventCallback, ColumnComponent } from 'tabulator-tables';
+  import { Table, autoFilter, rangeFilter } from '@web-apps/svelte-tabulator';  
+  import type { TableView } from '@web-apps/svelte-tabulator';
   import type { ColumnDefinition } from './tabulator/types';
   import { column, createEditor } from './templates/column.helper';
-  import { autoFilter, rangeFilter } from './templates/filter.helper';
   import { groupByFormatter } from './templates/Formatter.class';
   import Prompt from '../dialogs/PromptDialog.svelte';
-  import Table from './Table.svelte'
   import AddEntry from './AddEntry.svelte';
   import FileDrop from './FileDrop.svelte';
   import SongResource, { type Dialog } from './SongResource.class';
@@ -17,8 +17,8 @@
   import SongService, { viewStoreId } from '../../service/song.service';
   import type { MessageFormatter } from '../../service/i18n';
   import type { UserSong } from '../../model/song.model';
-  import type { TableView } from '../../model/table-view.model';
   import { showError, showInfo } from '../../store/notification.store';
+  import { observableToStore } from '../../store/app.store';
   import genres from '../../data/genres.json';
 
   export let params: { id?: string } = {};
@@ -26,7 +26,7 @@
   const readonly = !!params.id;
   const service = new SongService(params.id?.slice(1), $location === '/samples');
   const resource = !readonly ? new SongResource(service) : undefined;
-  const songs = service.usersongs;
+  const songs = observableToStore(service.usersongs);
   let prompt: Dialog<string>;
 
   const genreList = genres.map(v => v.name);
@@ -83,6 +83,8 @@
   }
 
   function init(view: TableView): void {
+    initHeaderMenu(view);
+
     const responsiveColumn = view.table.getColumn('__responsive');
     const summaryColumn = view.table.getColumn('__summary');
     if (view.useResponsiveLayout) {
@@ -97,6 +99,20 @@
       responsiveColumn.hide();
       summaryColumn.hide();
     }
+  }
+
+  function initHeaderMenu(view: TableView) {
+    view.columns?.forEach(c => {
+      if (c.headerMenu && Array.isArray(c.headerMenu)) {
+        const label = `${$t('menu.table.group-by')} ${c.title}`;
+        if (!c.headerMenu.some(m => 'label' in m && m.label === label)) {
+          c.headerMenu.push({
+            label,
+            action: (ev: Event, column: ColumnComponent) => view.toggleGroup(c.field, column.getElement())
+          });
+        }
+      }
+    });
   }
 </script>
 

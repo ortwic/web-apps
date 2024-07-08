@@ -1,6 +1,6 @@
 <script lang="ts">
     import Toolbar from '$lib/components/Toolbar.svelte';
-    import type { TypedValue } from '$lib/components/table/column.type.js';
+    import type { TypedValue } from '$lib/models/content.type.js';
     import { createStore, type Entity } from '$lib/stores/firestore.store';
     import { marked } from 'marked';
 

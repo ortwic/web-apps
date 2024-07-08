@@ -1,10 +1,10 @@
+import { marked } from "marked";
 import type { ColumnDefinition, CellComponent, Editor } from "tabulator-tables";
+import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator/templates";
 import type { EntityCollection } from "$lib/models/schema.model";
 import type { AnyProperty } from "$lib/packages/firecms_core/types/properties";
-import type { ColumnOptions, TypedValue } from "./column.type";
-import { autoFilter } from "./table.helper";
-import { label, timestamp } from "./formatter.helper";
-import { marked } from "marked";
+import type { TypedValue } from "$lib/models/content.type";
+import type { ColumnOptions } from "$lib/models/column.model";
 
 function actionColumn<T>(options: ColumnOptions<T>): ColumnDefinition {
     return {

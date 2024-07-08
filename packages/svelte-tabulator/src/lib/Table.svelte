@@ -1,7 +1,6 @@
 <script lang="ts">
   import 'tabulator-tables/dist/css/tabulator_bulma.min.css';
   import { 
-    type ColumnComponent, 
     type Filter, 
     type GroupArg,
     type GroupComponent, 
@@ -28,15 +27,14 @@
     ValidateModule
   } from 'tabulator-tables';
   import * as luxon from 'luxon';
-  import type { ColumnDefinition } from './tabulator/types';
-  import { default as ResponsiveLayoutModule, type CollapsedCellData } from './tabulator/modules/ResponsiveLayout';
-  import { t } from 'svelte-i18n';
-  import { onMount, createEventDispatcher, onDestroy } from 'svelte';
+  import type { ColumnDefinition } from './tabulator/types.js';
+  import { default as ResponsiveLayoutModule, type CollapsedCellData } from './tabulator/modules/ResponsiveLayout.js';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import type { Readable } from 'svelte/store';
   import { Observable, fromEvent, map, take } from 'rxjs';
-  import type { TableView } from '../../model/table-view.model';
-  import { tableView } from '../../store/app.store';
-  import { orientation, type Orientation } from '../../store/media.store';
-  import responsiveCollapse from './tabulator/modules/formatters/responsiveCollapse';
+  import { orientation, type Orientation } from './stores/media.store.js';
+  import { tableView } from './stores/table-view.store.js';
+  import responsiveCollapse from './tabulator/modules/formatters/responsiveCollapse.js';
 
   window['luxon'] = luxon;
 
@@ -67,18 +65,19 @@
     responsiveCollapse
   });
 
-  type T = $$Generic;
+  type T = $$Generic<object>;
   type GroupFormatter = (value: unknown, count: number, data: T[], group?: GroupComponent) => string;
+  type DetailFormatter = (data: CollapsedCellData[]) => HTMLElement;
 
   const rowGroups: Record<string, GroupArg> = {};
   export let idField: keyof T;
-  export let columns: ColumnDefinition[] = undefined;
-  export let data: Observable<T[]>;
-  export let groupBy: string[] = undefined;
+  export let columns: ColumnDefinition[] = [];
+  export let data: Readable<T[]>;
+  export let groupBy: string[] | undefined = undefined;
   export let placeholder = '';
   export let placeholderSearch = '';
-  export let groupHeader: GroupFormatter = undefined;
-  export let detailFormatter: (data: CollapsedCellData[]) => HTMLElement = undefined;
+  export let groupHeader: GroupFormatter | undefined = undefined;
+  export let detailFormatter: DetailFormatter | undefined = undefined;
   export const isGroupedBy = (field: string) => field in rowGroups;
   export let persistenceID = '';
   let useResponsiveLayout = false;
@@ -165,16 +164,15 @@
     table = fromEvent(tableInstance, 'tableBuilt').pipe(take(1), map(() => handleTableBuilt(tableInstance, useResponsiveLayout)));
   }
 
-
   function handleTableBuilt(table: Tabulator, useResponsiveLayout: boolean) {
-    initHeaderMenu(table);
     initGroupBy(table);
     if (useResponsiveLayout) {
       initSearch(table);
     }
 
-    const view: TableView = { 
+    const view = { 
       table,
+      columns,
       useResponsiveLayout,
       groups: Object.keys(rowGroups),
       toggleGroup
@@ -184,23 +182,11 @@
     return table;
   }
 
-  function initHeaderMenu(table: Tabulator) {
-    columns?.filter(c => c.headerMenu).forEach(c => {
-      if (c.headerMenu.length) {
-        c.headerMenu.length = 0;
-      }
-      c.headerMenu.push({
-        label: `${$t('menu.table.group-by')} ${c.title}`,
-        action: (ev: Event, column: ColumnComponent) => toggleGroup(c.field, column.getElement())
-      });
-    });
-  }
-
   function initGroupBy(table: Tabulator) {
     if (Array.isArray(table.options.groupBy)) {
       table.options.groupBy.forEach(field => {
-        if (field) {
-          rowGroups[field] = columns.find(c => c.field === field)?.groupByFunc;
+        if (typeof field === 'string') {
+          rowGroups[field] = <GroupArg>columns.find(c => c.field === field)?.groupByFunc;
           table.getColumn(field)?.getElement()?.classList.add('primary');
         }
       });
@@ -215,7 +201,7 @@
 
   function toggleGroup(field: string, element?: HTMLElement) {
     if (!isGroupedBy(field)) {
-      rowGroups[field] = columns.find(c => c.field === field)?.groupByFunc;
+      rowGroups[field] = <GroupArg>columns.find(c => c.field === field)?.groupByFunc;
       element?.classList.add('primary');
     } else {
       delete rowGroups[field];
@@ -226,7 +212,7 @@
 
   function setGroupBy(table: Tabulator) {
     const groups = Object.keys(rowGroups).map(k => rowGroups[k] ?? k);
-    table.setGroupBy(groups.length ? groups as string[] : undefined);
+    table.setGroupBy(<GroupArg>(groups.length ? groups as string[] : undefined));
   }
 
   function search() {

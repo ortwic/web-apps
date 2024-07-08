@@ -1,0 +1,57 @@
+{
+	"name": "@web-apps/svelte-tabulator",
+	"version": "6.2.1",
+	"scripts": {
+		"dev": "vite build -w",
+		"dev:local": "vite dev",
+		"build": "vite build && npm run package",
+		"preview": "vite preview",
+		"package": "svelte-kit sync && svelte-package && publint",
+		"prepublishOnly": "npm run package",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:unit": "vitest"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		},
+		"./templates": "./dist/index.d.ts",
+		"./templates/*": "./dist/templates/*.ts",
+		"./stores": "./dist/index.d.ts",
+		"./stores/*": "./dist/stores/*.ts"
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"peerDependencies": {
+		"svelte": "^4.0.0"
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/package": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^3.0.0",
+		"@testing-library/jest-dom": "^6.4.6",
+		"@testing-library/svelte": "^5.2.0",
+		"@testing-library/user-event": "^14.4.3",
+		"@types/luxon": "^3.4.2",
+		"@types/tabulator-tables": "^6.2.2",
+		"jsdom": "^22.1.0",
+		"luxon": "^3.4.4",
+		"publint": "^0.1.9",
+		"rxjs": "^7.8.1",
+		"svelte": "^4.2.7",
+		"svelte-check": "^3.6.0",
+		"tabulator-tables": "^6.2.1",
+		"tslib": "^2.4.1",
+		"typescript": "^5.0.0",
+		"vite": "^5.0.11",
+		"vitest": "^2.0.0"
+	},
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module"
+}

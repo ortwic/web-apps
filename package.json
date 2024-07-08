@@ -4,7 +4,10 @@
   "description": "Web apps developed with svelte and firebase.",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:cms": "pnpm --filter firelighter-cms run dev",
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "dev": "lerna run dev --parallel"
   },
   "keywords": [],
   "author": "OCSoft42",

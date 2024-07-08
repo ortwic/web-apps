@@ -3,11 +3,11 @@
     import { t } from "svelte-i18n";
     import { derived } from "svelte/store";
     import { of } from "rxjs";
+    import { orientation } from "@web-apps/svelte-tabulator";
     import Image from "../components/ui/elements/Image.svelte";
     import PostDetails from "../components/ui/PostDetails.svelte";
     import { getBlogPosts } from "../service/blog.service";
     import { logPageView } from "../store/notification.store";
-    import { orientation } from "../store/media.store";
 
     const width = derived(orientation, (o) => o === 'landscape' ? 120 : 80);
     let posts = of([]);

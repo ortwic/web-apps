@@ -1,4 +1,4 @@
-import type { ColumnDefinition, FilterType } from 'tabulator-tables';
+import type { CellComponent, ColumnDefinition, EmptyCallback, FilterType, NumberParams, ValueBooleanCallback, ValueVoidCallback } from 'tabulator-tables';
 
 export const autoFilter = (operator: FilterType = 'like'): Partial<ColumnDefinition> => {
     return {
@@ -26,7 +26,13 @@ export const rangeFilter = (min = 0, max = 100, step = 5): Partial<ColumnDefinit
 const getMinMax = (value: string) => (value?.split('-') ?? []);
 
 // copied from example // https://tabulator.info/examples/5.5#filter-header
-const minMaxFilterEditorElement = (cell, _onRendered, success, cancel, editorParams) => {
+const minMaxFilterEditorElement = (
+    cell: CellComponent, 
+    _onRendered: EmptyCallback, 
+    success: ValueBooleanCallback, 
+    cancel: ValueVoidCallback, 
+    editorParams: NumberParams
+) => {
     const container = document.createElement('span');
     const [min, max] = getMinMax(cell.getValue());
 
@@ -34,9 +40,9 @@ const minMaxFilterEditorElement = (cell, _onRendered, success, cancel, editorPar
     const start = document.createElement('input');
     start.setAttribute('type', 'number');
     start.setAttribute('placeholder', 'Min');
-    start.setAttribute('min', editorParams.min);
-    start.setAttribute('max', editorParams.max);
-    start.setAttribute('step', editorParams.step);
+    start.setAttribute('min', `${editorParams.min}`);
+    start.setAttribute('max', `${editorParams.max}`);
+    start.setAttribute('step', `${editorParams.step}`);
     start.setAttribute('value', min);
     start.style.padding = '4px';
     start.style.width = '50%';
@@ -64,7 +70,7 @@ const minMaxFilterEditorElement = (cell, _onRendered, success, cancel, editorPar
         }
 
         if (ev.key == 'Esc') {
-            cancel();
+            cancel(undefined);
         }
     }
 
