@@ -17,7 +17,8 @@ const config = {
         },
         alias: {
             $lib: './src/lib',
-            $styles: './src/styles'
+            $styles: './src/styles',
+            '@web-apps/svelte-tabulator': '../../packages/svelte-tabulator/dist'
         }
     }
 };

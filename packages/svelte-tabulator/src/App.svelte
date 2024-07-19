@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-  import Table from "$lib/Table.svelte";
-  import { column } from "$lib/templates/column.helper.js";
-
+  import { writable } from 'svelte/store';
+  import Table from './lib/Table.svelte'
+  import { column } from './lib/templates/column.helper';
+  
   const columns = [
     column('Name', 1, 'name', '20%', 'string'),
     column('Age', 2, 'age', '5%', 'number'),
@@ -28,13 +28,6 @@
     { name: 'William', age: 85, city: 'Paris', country: 'France', favoriteColor: 'pink' },
     { name: 'Sophia', age: 90, city: 'London', country: 'UK', favoriteColor: 'brown' },
   ]);
-
 </script>
 
 <Table {columns} {data} idField="name" />
-
-<style>
-    :root {
-        font-family: Arial, Helvetica, sans-serif;
-    }
-</style>
