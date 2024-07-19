@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import * as path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,6 +15,11 @@ export default defineConfig({
                 },
             },
         },
+    },
+    resolve: {
+        alias: {
+            '@web-apps/svelte-tabulator': path.resolve(__dirname, '../../packages/svelte-tabulator/dist')
+        }
     },
     plugins: [
         svelte(),

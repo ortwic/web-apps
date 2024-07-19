@@ -4,10 +4,11 @@
   "description": "Web apps developed with svelte and firebase.",
   "private": true,
   "scripts": {
-    "dev:cms": "pnpm --filter firelighter-cms run dev",
-    "build": "lerna run build",
-    "clean": "lerna run clean",
-    "dev": "lerna run dev --parallel"
+    "dev": "turbo run dev --parallel",
+    "dev:cms": "turbo run dev --parallel -F ./packages/svelte-tabulator -F ./apps/firelighter-cms",
+    "dev:song": "turbo run dev --parallel -F ./packages/svelte-tabulator -F ./apps/song-repo",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
   },
   "keywords": [],
   "author": "OCSoft42",
@@ -16,8 +17,11 @@
     "apps/*",
     "packages/*"
   ],
-  "dependencies": {},
   "devDependencies": {
-    "lerna": "^8.1.6"
-  }
+    "prettier": "^3.3.2",
+    "prettier-plugin-svelte": "^3.2.6",
+    "turbo": "^2.0.7"
+  },
+  "packageManager": "pnpm@9.1.4",
+  "type": "module"
 }
