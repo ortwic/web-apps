@@ -1,0 +1,20 @@
+{
+  "start": {
+    "level": "Select a level"
+  },
+  "notfound": {
+    "title": "Not found",
+    "messages": [
+      "Oops, something went wrong.",
+      "We're sorry, but we can't find the page you're looking for.",
+      "Looks like this page is missing. Maybe it's been moved or deleted.",
+      "This page isn't available right now. Please check back later.",
+      "We're experiencing some technical difficulties. Please try again later.",
+      "We're sorry, but something seems to be wrong on our end.",
+      "We're working hard to fix this issue. Please bear with us.",
+      "This page is currently under maintenance. We apologize for any inconvenience.",
+      "We're sorry, but we're having trouble loading this page.",
+      "An unexpected error has occurred. We're on it."
+    ]
+  }
+}
