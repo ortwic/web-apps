@@ -1,6 +1,11 @@
 {
   "start": {
-    "level": "Select a level"
+    "all": "All",
+    "loading": "Loading...",
+    "level": "Select a level",
+    "start": "Start",
+    "privacy": "Privacy Policy",
+    "termsofuse": "Terms of Use"
   },
   "notfound": {
     "title": "Not found",
