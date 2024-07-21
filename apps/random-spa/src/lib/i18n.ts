@@ -12,8 +12,8 @@ interface MessageObject {
 export type MessageFormatter = (id: string | MessageObject, options?: Omit<MessageObject, 'id'>) => string;
 export const lang = getLocaleFromNavigator();
 export function setupI18n(): Promise<void> {
-    register('de', () => import('../lang/de.json'));
-    register('en', () => import('../lang/en.json'));
+    register('de', () => import('./lang/de.json'));
+    register('en', () => import('./lang/en.json'));
 
     init({
         fallbackLocale: 'en',

@@ -1,31 +1,31 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
-    import { getGroups } from "../lib/services/data.service";
-    import Group from './Group.svelte';
+    import { gameStore } from "../lib/firebase/game.store";
+    import Game from './Game.svelte';
 
-    let activeGroup = null;
+    let selected = null;
 
     onMount(() => {
-        activeGroup = $groups[0];
+        selected = $games[0];
     });
 
-	const groups = getGroups();
+    const games = gameStore.documents;
 
-    function toggleGroup(group: string) {
-        activeGroup = activeGroup === group ? null : group;
+    function toggle(value: string) {
+        selected = selected === value ? null : value;
     }
 </script>
 
-{#each $groups as group}
+{#each $games as game}
 <p>
-    <button on:click={() => toggleGroup(group)}>
-        <h2>{group}</h2>
+    <button on:click={() => toggle(game.path)}>
+        <h2>{game.title}</h2>
     </button>
-    {#if activeGroup === group}
+    {#if selected === game.path}
         <div in:slide={{ duration: 200 }} 
             out:slide={{ duration: 200 }}>
-            <Group {group} />
+            <Game {game} />
         </div>
     {/if}
 </p>

@@ -3,13 +3,16 @@
   import Router from "svelte-spa-router";
   import logo from "/logo.svg";
   import Start from './routes/Start.svelte';
-  import Entry from './routes/Entry.svelte';
+  import Random from './routes/Random.svelte';
+  import Page from "./routes/Page.svelte";
   import NotFound from './routes/NotFound.svelte';
-  import { setupI18n } from './lib/services/i18n';
+  import { setupI18n } from './lib/i18n';
 
   const routes = {
     '/': Start,
-    '/r/:group/:level': Entry,
+    '/r/:path': Random,
+    '/r/:path/:level': Random,
+    '/p/:path': Page,
     '*': NotFound
   };
 </script>
@@ -26,30 +29,34 @@
   </h1>
 </header>
 
-<main>
-  {#await setupI18n()}
+{#await setupI18n()}
   loading...
-  {:then} 
+{:then} 
+<main>
 
   <Router {routes}/>
 
   <!-- <Snackbar /> -->
-  {:catch error}
-  <p>
-    Error while loading translations: <br />
-    { error }
-  </p>
-  {/await}
 </main>
 
 <footer>
-    &copy; {new Date().getFullYear()} OCSoft42
+    <span>&copy; {new Date().getFullYear()} OCSoft42</span>
+    | <a href="#/p/privacy">{ $t('start.privacy') }</a>
+    | <a href="#/p/termsofuse">{ $t('start.termsofuse') }</a>
 </footer>
+
+{:catch error}
+<p>
+  Error while loading translations: <br />
+  { error }
+</p>
+{/await}
 
 <style>
   header {
       padding: 1em;
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       align-items: center;
   }
@@ -60,5 +67,9 @@
     padding: 1em;
     display: block;
     width: auto;
+  }
+
+  footer > * {
+    white-space: nowrap;
   }
 </style>
