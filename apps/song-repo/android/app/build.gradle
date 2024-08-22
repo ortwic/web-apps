@@ -51,13 +51,14 @@ def twaManifest = [
 ]
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 35
+    namespace "app.web.song_repo.twa"
     defaultConfig {
         applicationId "app.web.song_repo.twa"
         minSdkVersion 19
-        targetSdkVersion 33
-        versionCode 3
-        versionName "3"
+        targetSdkVersion 35
+        versionCode 4
+        versionName "4"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

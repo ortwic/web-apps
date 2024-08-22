@@ -21,8 +21,8 @@
     "path": "/home/ortwin/Dev/Deployment/android.keystore",
     "alias": "android"
   },
-  "appVersionName": "3",
-  "appVersionCode": 3,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://song-repo.web.app/manifest.webmanifest",
@@ -40,5 +40,5 @@
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
-  "appVersion": "3"
+  "appVersion": "4"
 }
