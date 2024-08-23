@@ -1,7 +1,7 @@
-import type { DocumentData } from 'firebase/firestore';
 import { writable } from 'svelte/store';
 import { getFirestore, collection, onSnapshot, doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import { app } from './firebase.setup';
+import type { Entity } from '../models';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -16,10 +16,6 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
 const setDocOptions = {
     merge: true
 };
-
-export type Entity = {
-    id: string;
-} & DocumentData;
 
 export function buildStore<T extends Entity>(path: string) {
     const firestore = getFirestore(app);
@@ -75,6 +71,7 @@ export function buildStore<T extends Entity>(path: string) {
     }
 
     return {
+        path,
         documents,
         getDocument,
         setDocuments,

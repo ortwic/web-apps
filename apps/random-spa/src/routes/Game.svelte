@@ -20,20 +20,20 @@
 
 <section>
   <p>{description()}</p>
-  {#if levels().length > 1}
+  {#if levels()?.length > 1}
     <h3>{ $t('start.level') }</h3>
     <ul>
         <li>
-            <a href="#/r/{game.path}">{ $t('start.all') }</a>
+            <a href="#/r/{game.id}">{ $t('start.all') }</a>
         </li>
           {#each levels() as item, i}
           <li>
-              <a href="#/r/{game.path}/{i}">{item}</a>
+              <a href="#/r/{game.id}/{i}">{item}</a>
           </li>
           {/each}
     </ul>
   {:else}
-    <a href="#/r/{game.path}">{ $t('start.start') }</a>
+    <a href="#/r/{game.id}">{ $t('start.start') }</a>
   {/if}
 </section>
 

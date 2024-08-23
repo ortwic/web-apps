@@ -1,11 +1,11 @@
 import { writable } from "svelte/store";
 
-export const randomNumberStore = (norepeat = true) => {
+export const randomNumberStore = (repeat: () => boolean) => {
     const { subscribe, set } = writable(0);
     let record = [];
     function next(max: number) {
         const n = Math.floor(Math.random() * max);
-        if (max && norepeat) {
+        if (max && !repeat()) {
             if (record.length >= max) {
                 record.length = 0;
             }

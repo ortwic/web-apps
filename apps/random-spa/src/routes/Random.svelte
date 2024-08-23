@@ -13,21 +13,23 @@
         level?: number 
     } = {};
 
-    const contentStore = buildStore<GameContent>(params.path);
-    const byLevel = (level: number) => (!isNaN(level)
-        ? (content: GameContent) => content.level === level 
-        : () => true);
-    const documents = derived(contentStore.documents, (docs) => docs.filter(byLevel(+params.level)));
-    const levels = derived(gameStore.documents, getLevels);
+    const config = derived(gameStore.documents, (games) => games.find((g) => g.id === params.path));
+    const levels = derived(config, getLevels);
     
-    const randomIndex = randomNumberStore();
+    const randomIndex = randomNumberStore(() => $config.repeat);
     $: randomIndex.set($documents.length);
 
+    const data = buildStore<GameContent>(`${gameStore.path}/${params.path}/data`);
+    const documents = derived(data.documents, (docs) => docs.filter(byLevel));
     const entry = derived([documents, randomIndex], ([docs, index]) => docs[index]);
     const content = derived(entry, (e) => (e && e.content_de && lang === 'de' ? e.content_de : e?.content));
 
-    function getLevels(games: GameDescription[]) {
-        const game = games.find((g) => g.path === params.path);
+    function byLevel(content: GameContent) {
+        const level = +params.level;
+        return !isNaN(level) ? content.level === level : true;
+    }
+
+    function getLevels(game: GameDescription) {
         return game && game.levels_de && lang === 'de' ? game.levels_de : game?.levels ?? [];
     }
 </script>
@@ -42,7 +44,7 @@
     </h2>
     {/if}
     <p>
-        {@html marked($content, { mangle: false, headerIds: false })}
+        {@html marked($content ?? '&lt;No translation found&gt;', { mangle: false, headerIds: false })}
     </p>
 {/if}
 <button on:click={() => pop()}>Back</button>
