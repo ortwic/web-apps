@@ -2,6 +2,7 @@
   import { t } from "svelte-i18n";
   import Router from "svelte-spa-router";
   import logo from "/logo.svg";
+  import Adsense from "./lib/ad/Adsense.svelte";
   import Start from './routes/Start.svelte';
   import Random from './routes/Random.svelte';
   import Page from "./routes/Page.svelte";
@@ -23,7 +24,7 @@
 </svelte:head>
 
 <header title="Shaking it all up!">
-  <a href="#/"><img src={logo} width="100" alt="Shaking it all up!" /></a>
+  <a href="/"><img src={logo} width="100" alt="Shaking it all up!" /></a>
   <h1>
     Randomizer
   </h1>
@@ -40,9 +41,12 @@
 </main>
 
 <footer>
+  <Adsense adSlot="0000000" adClient="ca-pub-2477798570332878" />
+  <div>
     <span>&copy; <a href="#/p/imprint">{new Date().getFullYear()} OCSoft42</a></span>
     | <a href="#/p/privacy">{ $t('start.privacy') }</a>
     | <a href="#/p/termsofuse">{ $t('start.termsofuse') }</a>
+  </div>
 </footer>
 
 {:catch error}
@@ -60,18 +64,22 @@
       justify-content: center;
       align-items: center;
   }
-  
+
   footer {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: .6em .2em;
+    max-height: 20vh;
     text-align: center;
     background-color: var(--bg-color);
   }
 
-  footer > * {
+  footer > div {
+    padding: .4rem;
+  }
+
+  footer > div > * {
     white-space: nowrap;
   }
 </style>
