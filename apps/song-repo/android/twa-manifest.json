@@ -18,7 +18,7 @@
   "monochromeIconUrl": "https://song-repo.web.app/logo-mono.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/home/ortwin/Dev/Deployment/android.keystore",
+    "path": "/home/ortwin/Dev/android/song-repo/android.keystore",
     "alias": "android"
   },
   "appVersionName": "3",
