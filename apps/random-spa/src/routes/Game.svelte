@@ -39,7 +39,7 @@
 
 <style>
   ul {
-    list-style: none;
+    list-style: inside;
     padding: 0;
   }
 
