@@ -23,9 +23,9 @@
 </svelte:head>
 
 <header title="Shaking it all up!">
-  <img src={logo} width="100" alt="Shaking it all up!" />
+  <a href="#/"><img src={logo} width="100" alt="Shaking it all up!" /></a>
   <h1>
-      Randomizer
+    Randomizer
   </h1>
 </header>
 
@@ -40,7 +40,7 @@
 </main>
 
 <footer>
-    <span>&copy; {new Date().getFullYear()} OCSoft42</span>
+    <span>&copy; <a href="#/p/imprint">{new Date().getFullYear()} OCSoft42</a></span>
     | <a href="#/p/privacy">{ $t('start.privacy') }</a>
     | <a href="#/p/termsofuse">{ $t('start.termsofuse') }</a>
 </footer>

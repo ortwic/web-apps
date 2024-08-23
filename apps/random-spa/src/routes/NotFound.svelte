@@ -4,7 +4,7 @@
     const no = Math.floor(Math.random() * $t('notfound.messages').length );
 </script>
 
-<div>
+<section>
     <h2>{ $t('notfound.title') }</h2>
     <p>
         { $t(`notfound.messages.${no}`) }
@@ -12,14 +12,14 @@
     <p style="color: red">
         <slot></slot>
     </p>
-</div>
+</section>
 
 <style>
     h2 {
         color: var(--primary);
     }
 
-    div {
+    section {
         margin: 1em;
     }
 </style>

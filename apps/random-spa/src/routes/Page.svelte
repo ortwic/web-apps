@@ -11,7 +11,7 @@
     } = {};
 
     const store = buildStore<GameContent>('pages');
-    const doc = store.getDocument(params.path);
+    $: document = store.getDocument(params.path);
 
     function content(e: GameContent) {
         const result = e && e.content_de && lang === 'de' ? e.content_de : e?.content;
@@ -19,10 +19,10 @@
     }
 </script>
 
-<p>
-    {#await doc}
+<section>
+    {#await document}
         { $t('start.loading') }
     {:then page} 
         {@html content(page)}
     {/await}
-</p>
+</section>
