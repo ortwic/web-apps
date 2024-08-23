@@ -22,7 +22,7 @@
   <title>Randomizer App - Shaking it all up!</title>
 </svelte:head>
 
-<header>
+<header title="Shaking it all up!">
   <img src={logo} width="100" alt="Shaking it all up!" />
   <h1>
       Randomizer
@@ -62,11 +62,13 @@
   }
   
   footer {
-    position: absolute;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    padding: 1em;
-    display: block;
-    width: auto;
+    padding: .6em .2em;
+    text-align: center;
+    background-color: var(--bg-color);
   }
 
   footer > * {

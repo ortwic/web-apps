@@ -1,32 +1,41 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { slide } from "svelte/transition";
+    import { Accordion, AccordionItem } from 'svelte-collapsible'
     import { gameStore } from "../lib/firebase/game.store";
     import Game from './Game.svelte';
 
-    let selected = null;
-
-    onMount(() => {
-        selected = $games[0];
-    });
-
+    // see https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function
+    const easing = 'ease-in-out';
     const games = gameStore.documents;
 
-    function toggle(value: string) {
-        selected = selected === value ? null : value;
-    }
+    let selected: string | null;
 </script>
 
-{#each $games as game}
-<p>
-    <button on:click={() => toggle(game.path)}>
-        <h2>{game.title}</h2>
-    </button>
-    {#if selected === game.path}
-        <div in:slide={{ duration: 200 }} 
-            out:slide={{ duration: 200 }}>
+<Accordion duration={.2} {easing} bind:key={selected}>
+    {#each $games as game}
+    <AccordionItem bind:key={game.path}>
+        <h2 class="triangle-right" slot="header">
+            <svg class="transition" class:red={game.path === selected} width="16" height="16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="0,0 80,50 0,100" fill="currentColor"/>
+            </svg>
+            {game.title}
+        </h2>
+        <p class="body" slot="body">
             <Game {game} />
-        </div>
-    {/if}
-</p>
-{/each}
+        </p>
+    </AccordionItem>
+    {/each}
+</Accordion>
+
+<style>
+    p.body {
+        padding: 0 2em;
+    }
+
+    .transition {
+        transition: all .2s ease-in-out;
+    }
+
+    .red {
+        rotate: 90deg;
+    }
+</style>
