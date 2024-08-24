@@ -13,6 +13,7 @@
     "test:unit": "vitest"
   },
   "devDependencies": {
+    "@stdlib/random-shuffle": "^0.2.1",
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/svelte": "^5.2.0",
@@ -31,6 +32,6 @@
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
     "vite-plugin-pwa": "^0.16.4",
-    "vitest": "^1.2.0"
+    "vitest": "^1.6.0"
   }
 }

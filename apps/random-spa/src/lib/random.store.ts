@@ -1,23 +1,68 @@
 import { writable } from "svelte/store";
+import shuffle from "@stdlib/random-shuffle";
 
-export const randomNumberStore = (repeat: () => boolean) => {
-    const { subscribe, set } = writable(0);
-    let record = [];
-    function next(max: number) {
-        const n = Math.floor(Math.random() * max);
-        if (max && !repeat()) {
-            if (record.length >= max) {
-                record.length = 0;
-            }
-            if (record.indexOf(n) > -1) {
-                return next(max);
-            }
-            record.push(n);
+type RandomIntegerGenerator = ReturnType<typeof randomIntegers>;
+
+export const randomIntegers = (length: number, repeat = false) => {
+    const random = (max: number) => Math.floor(Math.random() * max);
+    let set: number[], index: number;
+
+    function reset() {
+        index = -1;
+        set = repeat 
+            ? Array.from({ length }, () => random(length))
+            : shuffle(Array.from({ length }, (_, i) => i));
+        if (import.meta.env.DEV) {        
+            console.log('generated random set', set);
         }
-        return n;            
     }
+
+    reset();
+    
+    return {
+        length,
+        repeat,
+        reset,
+        prev: (): number | null => index > 0 ? set[--index] : null,
+        next: (): number | null => index < length - 1 ? set[++index] : null
+    };
+};
+
+export const randomIntegerStore = () => {
+    const { subscribe, set } = writable<number | null>(null);
+    const generators: RandomIntegerGenerator[] = [];
+    const last = () => generators.at(-1);
+
+    function create(length: number, repeat = false) {
+        const gen = randomIntegers(length, repeat);
+        generators.push(gen);
+        set(gen.next());
+    }
+
+    function prev() {
+        const n = last().prev();
+        if (n === null && generators.length > 1) {
+            generators.pop();
+            prev();
+        } else {
+            set(n);
+        }
+    }
+
+    function next() {
+        const { length, repeat, next } = last();
+        const n = next();
+        if (n === null) {
+            create(length, repeat);
+        } else {
+            set(n);
+        }
+    }
+    
     return {
         subscribe,
-        set: (max: number) => set(next(max))
+        create,
+        prev,
+        next
     };
 };
