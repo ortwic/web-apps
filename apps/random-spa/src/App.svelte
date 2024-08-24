@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from "svelte-i18n";
-  import Router from "svelte-spa-router";
+  import Router, { link } from "svelte-spa-router";
   import logo from "/logo.svg";
   import Adsense from "./lib/ad/Adsense.svelte";
   import Start from './routes/Start.svelte';
@@ -11,8 +11,7 @@
 
   const routes = {
     '/': Start,
-    '/r/:path': Random,
-    '/r/:path/:level': Random,
+    '/r/:path/:level/:dummy?': Random,
     '/p/:path': Page,
     '*': NotFound
   };
@@ -24,7 +23,7 @@
 </svelte:head>
 
 <header title="Shaking it all up!">
-  <a href="/"><img src={logo} width="100" alt="Shaking it all up!" /></a>
+  <a use:link href="/"><img src={logo} width="100" alt="Shaking it all up!" /></a>
   <h1>
     Randomizer
   </h1>
@@ -43,9 +42,9 @@
 <footer>
   <Adsense adSlot="0000000" adClient="ca-pub-2477798570332878" />
   <div>
-    <span>&copy; <a href="#/p/imprint">{new Date().getFullYear()} OCSoft42</a></span>
-    | <a href="#/p/privacy">{ $t('start.privacy') }</a>
-    | <a href="#/p/termsofuse">{ $t('start.termsofuse') }</a>
+    <span>&copy; <a use:link href="/p/imprint">{new Date().getFullYear()} OCSoft42</a></span>
+    | <a use:link href="/p/privacy">{ $t('start.privacy') }</a>
+    | <a use:link href="/p/termsofuse">{ $t('start.termsofuse') }</a>
   </div>
 </footer>
 
@@ -76,10 +75,11 @@
   }
 
   footer > div {
-    padding: .4rem;
+    padding: .4rem 0;
   }
 
-  footer > div > * {
+  footer > div * {
+    font-weight: normal;
     white-space: nowrap;
   }
 </style>

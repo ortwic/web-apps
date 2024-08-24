@@ -21,5 +21,9 @@
       "We're sorry, but we're having trouble loading this page.",
       "An unexpected error has occurred. We're on it."
     ]
+  },
+  "random": {
+    "next": "Next",
+    "prev": "Back"
   }
 }

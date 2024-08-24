@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from 'svelte-i18n';
+    import { link } from 'svelte-spa-router';
     import type { GameDescription } from '../lib/models';
     import { lang } from '../lib/i18n';
 
@@ -24,16 +25,16 @@
     <h3>{ $t('start.level') }</h3>
     <ul>
         <li>
-            <a href="#/r/{game.id}">{ $t('start.all') }</a>
+            <a use:link href="/r/{game.id}/0">{ $t('start.all') }</a>
         </li>
           {#each levels() as item, i}
           <li>
-              <a href="#/r/{game.id}/{i}">{item}</a>
+              <a use:link href="/r/{game.id}/{i + 1}">{item}</a>
           </li>
           {/each}
     </ul>
   {:else}
-    <a href="#/r/{game.id}">{ $t('start.start') }</a>
+    <a use:link href="/r/{game.id}">{ $t('start.start') }</a>
   {/if}
 </section>
 

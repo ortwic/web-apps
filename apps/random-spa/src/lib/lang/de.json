@@ -21,5 +21,9 @@
       "Es tut uns leid, aber wir haben Probleme beim Laden dieser Seite.",
       "Ein unerwarteter Fehler ist aufgetreten. Wir sind dran."
     ]
+  },
+  "random": {
+    "next": "Nächstes",
+    "prev": "Zurück"
   }
 }
