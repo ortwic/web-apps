@@ -1,16 +1,20 @@
 <script lang="ts">
+    import { t } from "svelte-i18n";
     import { derived } from "svelte/store";
-    import { pop } from "svelte-spa-router";
+    import { fly } from "svelte/transition";
+    import { swipe } from 'svelte-gestures';
+    import { pop, push } from "svelte-spa-router";
     import { gameStore } from "../lib/firebase/game.store";
     import { marked } from "marked";
     import { lang } from "../lib/i18n";
     import { buildStore } from "../lib/firebase/firestore.builder";
     import type { GameContent, GameDescription } from "../lib/models";
+    import { swipeTransitionStore } from "../lib/transition.store";
     import { randomIntegerStore } from "../lib/random.store";
 
     export let params: { 
         path?: string,
-        level?: number 
+        level?: number
     } = {};
 
     const config = derived(gameStore.documents, (games) => games.find((g) => g.id === params.path));
@@ -18,6 +22,7 @@
     const data = buildStore<GameContent>(`${gameStore.path}/${params.path}/data`);
     const documents = derived(data.documents, (docs) => docs.filter(byLevel));
     
+    const move = swipeTransitionStore({ x: 500, duration: 500, opacity: 1 });
     const randomIndex = randomIntegerStore();
     $: if ($documents.length) {
         randomIndex.create($documents.length, $config.repeat);
@@ -27,7 +32,7 @@
 
     function byLevel(content: GameContent) {
         const level = +params.level;
-        return !isNaN(level) ? content.level === level : true;
+        return level ? content.level === level - 1 : true;
     }
 
     function getLevels(game: GameDescription) {
@@ -35,30 +40,35 @@
     }
 
     function prev() {
+        move.left();
         randomIndex.prev();
-        if ($randomIndex === null) {
-            pop();
-        }
+        pop();
     }
 
     function next() {
+        move.right();
         randomIndex.next();
+        push(`/r/${$config.id}/${$entry.level + 1}/${$randomIndex}.${$documents.length}`);
     }
 
+    function swiped({ direction }) {
+        if (direction === 'left') {
+            next();
+        } else if (direction === 'right') {
+            prev();
+        }
+    }
 </script>
 
-<section>
-    <button on:click={prev}>Back</button>
-    <button on:click={next}>Next</button>
+{#key $move}
+<section class="absolute grid" in:fly={move.in} out:fly={move.out}
+    use:swipe={{ timeframe: 500, minSwipeDistance: 50 }} on:swipe={(e) => swiped(e.detail)}>
+    <button on:click={prev}>&lt;&lt; { $t('random.prev') }</button>
+    <button on:click={next}>{ $t('random.next') } &gt;&gt;</button>
     <span class="col-2">
-        {#if $entry}
+    {#if $entry}
         {#if $levels.length > 1}
-        <h2>
-            {$levels[$entry.level]} 
-            {#if import.meta.env.DEV}
-                {$randomIndex + 1} / {$documents.length}
-            {/if}
-        </h2>
+        <h2>{$levels[$entry.level]} </h2>
         {/if}
         <p>
             {@html marked($content ?? '&lt;No translation found&gt;', { mangle: false, headerIds: false })}
@@ -66,9 +76,10 @@
     {/if}
     </span>
 </section>
+{/key}
 
 <style>
-    section {
+    section.grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-gap: 1em;

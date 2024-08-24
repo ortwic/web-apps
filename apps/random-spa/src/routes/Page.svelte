@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from 'svelte-i18n';
+    import { fly } from 'svelte/transition';
     import { marked } from "marked";
     import { lang } from "../lib/i18n";
     import type { GameContent } from "../lib/models";
@@ -19,10 +20,12 @@
     }
 </script>
 
-<section>
-    {#await document}
+{#await document}
+    <section class="absolute" transition:fly={{ x: -500, duration: 500 }}>
         { $t('start.loading') }
-    {:then page} 
+    </section>
+{:then page} 
+    <section class="absolute" transition:fly={{ x: -500, duration: 500 }}>
         {@html content(page)}
-    {/await}
-</section>
+    </section>
+{/await}

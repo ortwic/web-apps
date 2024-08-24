@@ -167,6 +167,9 @@ importers:
       svelte-collapsible:
         specifier: ^0.3.0
         version: 0.3.0
+      svelte-gestures:
+        specifier: ^5.0.4
+        version: 5.0.4
       svelte-i18n:
         specifier: ^3.7.0
         version: 3.7.4(svelte@4.2.18)
@@ -6159,6 +6162,9 @@ packages:
 
   svelte-floating-ui@1.5.8:
     resolution: {integrity: sha512-dVvJhZ2bT+kQDHlE4Lep8t+sgEc0XD96fXLzAi2DDI2bsaegBbClxXVNMma0C2WsG+n9GJSYx292dTvA8CYRtw==}
+
+  svelte-gestures@5.0.4:
+    resolution: {integrity: sha512-a6cnR46AfFZ8zZyvA38A1wBLBFI7rYuAWQnmv3yYgSdbaJK/U7JG34rSkjMCePRvf4BETJSDfMNngLs5zEAfbw==}
 
   svelte-hmr@0.15.3:
     resolution: {integrity: sha512-41snaPswvSf8TJUhlkoJBekRrABDXDMdpNpT2tfHIv4JuhgvHqLMhEPGtaQn0BmbNSTkuz2Ed20DF2eHw0SmBQ==}
@@ -14002,6 +14008,8 @@ snapshots:
     dependencies:
       '@floating-ui/core': 1.6.4
       '@floating-ui/dom': 1.6.7
+
+  svelte-gestures@5.0.4: {}
 
   svelte-hmr@0.15.3(svelte@4.2.18):
     dependencies:
