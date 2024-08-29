@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { t } from "svelte-i18n";
   import Router, { link } from "svelte-spa-router";
   import logoSrc from "/logo.svg";
@@ -8,7 +9,6 @@
   import Page from "./routes/Page.svelte";
   import NotFound from './routes/NotFound.svelte';
   import { setupI18n } from './lib/i18n';
-    import { onMount } from "svelte";
 
   const routes = {
     '/': Start,
@@ -24,7 +24,7 @@
   function animateLogo() {
     if (logoImg?.classList) {
       logoImg.classList.toggle('shake-ani');
-      setTimeout(() => logoImg.classList.remove('shake-ani'), 1600);
+      setTimeout(() => logoImg?.classList.remove('shake-ani'), 1600);
       setTimeout(animateLogo, Math.random() * 4000 + 8000);
     }
   }
