@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "song-repo-jobs",
+            "type": "node-terminal",
             "request": "launch",
-            "name": "Debug Node",
             "skipFiles": ["<node_internals>/**"],
-            "program": "${workspaceFolder}\\dist\\index.js",
-            "preLaunchTask": "tsc: build - tsconfig.json",
+            "cwd": "${workspaceFolder}/apps/song-repo-jobs",
+            "command": "pnpm dev",
             "outFiles": ["${workspaceFolder}/**/*.js"]
         }
     ]

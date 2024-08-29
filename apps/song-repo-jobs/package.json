@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc && node ./dist/index.js",
+    "debug": "tsc && node --inspect ./dist/index.js",
     "test": "jest --verbose true --watchAll"
   },
   "keywords": [],

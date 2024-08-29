@@ -3,7 +3,4 @@
         "src/data/lang"
     ],
     "i18n-ally.keystyle": "nested",
-    "terminal.integrated.env.linux": {
-        "LD_PRELOAD": null,
-    }, 
 }
