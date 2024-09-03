@@ -14,9 +14,9 @@
 <section transition:fly={{ x: -500, duration: 500 }}>
     <Accordion duration={.2} {easing} bind:key={selected}>
         {#each $games as game}
-        <AccordionItem bind:key={game.path}>
+        <AccordionItem bind:key={game.id}>
             <h2 class="triangle-right" slot="header">
-                <svg class="transition" class:red={game.path === selected} width="16" height="16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <svg class="transition" class:red={game.id === selected} width="16" height="16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <polygon points="0,0 80,50 0,100" fill="currentColor"/>
                 </svg>
                 {game.title}
