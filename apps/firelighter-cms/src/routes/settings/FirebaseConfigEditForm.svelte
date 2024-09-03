@@ -3,6 +3,7 @@
     import type { FirebaseOptions } from 'firebase/app';
     import { currentFirebaseConfig, removeFirebaseConfig, saveFirebaseConfig } from '$lib/stores/settings.store';
     import { showError, showInfo } from '$lib/stores/notification.store';
+    import { onMount } from 'svelte';
 
     const placeholder = `const firebaseConfig = {
   "apiKey": "AIzaSy...DGo4k",
@@ -15,6 +16,21 @@
 
     let textInput = '';
     let config: FirebaseOptions | undefined;
+
+    onMount(() => setConfigFromUrl());
+
+    function setConfigFromUrl() {
+        if(location.search) {
+            const params = new URLSearchParams(location.search);
+            const projectId = params.get('projectId');
+            const apiKey = params.get('apiKey');
+            if (projectId && apiKey) {
+                const authDomain = `${projectId}.firebaseapp.com`;
+                config = { projectId, apiKey, authDomain };
+                setCurrentConfig(config);
+            }
+        }
+    }
 
     function setCurrentConfig(config: FirebaseOptions) {
         textInput = config?.projectId ? json.stringify(config, null, 2) : '';
@@ -31,6 +47,14 @@
             showError('Invalid Firebase config');
         } 
         return false;
+    }
+
+    function share() {
+        if (config?.projectId) {
+            const url = `${location.href}?projectId=${config.projectId}&apiKey=${config.apiKey}`;
+            navigator.clipboard.writeText(url);
+            showInfo(`Copied ${url} to clipboard`);
+        }
     }
 
     function save() {
@@ -60,11 +84,14 @@
             Save <a href="https://firebase.google.com/docs/web/setup" target="_blank">Firebase</a> config by projectId
         </label>
         <span class="x-flex-full">
+            <button class="clear" on:click={share} disabled={!valid}>
+                <i class="bx bx-share-alt"></i>
+            </button>
             <button class="clear" on:click={save} disabled={!valid}>
                 <i class="bx bx-save"></i>
             </button>
             <button class="clear" on:click={remove} disabled={!valid}>
-                <i class="bx bx-trash"></i>
+                <i class="bx bx-trash danger"></i>
             </button>
         </span>
     </div>
@@ -80,9 +107,5 @@
 
     button {
         padding: .4rem;
-    }
-
-    i.bx-trash {
-        color: red;
     }
 </style>
