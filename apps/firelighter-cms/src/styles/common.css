@@ -4,19 +4,28 @@
     --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
         Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     --font-mono: 'Fira Mono', monospace;
-    --color-bg-0: rgb(202, 216, 228);
-    --color-bg-1: hsl(209, 36%, 86%);
-    --color-bg-2: hsl(224, 44%, 95%);
-    --color-bg-3: rgba(255, 255, 255, 0.45);
-    --color-theme-1: #ff3e00;
-    --color-theme-2: #4075a6;
-    --color-text: rgba(0, 0, 0, 0.7);
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+  
+    --color-bg-0: #303030;
+    --color-bg-1: #242424;
+    --color-bg-2: #1a1a1a;
+    --color-bg-3: #00000060;
+    --color-theme-1: #646cff;
+    --color-theme-2: #535bf2;
+    --color-text: #dedede;
     --column-width: 42rem;
     --column-margin-top: 4rem;
+  
+    color-scheme: light dark;
+    color: var(--color-text);
+    background-color: var(--bg-color);
+  
     font-family: var(--font-body);
     color: var(--color-text);
 }
-
+  
 body {
     min-height: 100vh;
     margin: 0;
@@ -24,11 +33,11 @@ body {
     background-color: var(--color-bg-1);
     background-size: 100vw 100vh;
     background-image: radial-gradient(
-            50% 50% at 50% 50%,
-            rgba(255, 255, 255, 0.75) 0%,
-            rgba(255, 255, 255, 0) 100%
-        ),
-        linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
+        50% 50% at 50% 50%,
+        var(--color-bg-3) 0%,
+        var(--color-bg-2) 100%
+    ),
+    linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
 }
 
 h1,
@@ -37,22 +46,20 @@ p {
     font-weight: 400;
 }
 
-p {
-    line-height: 1.5;
-}
-
 a {
     color: var(--color-theme-1);
-    text-decoration: none;
+    text-decoration: inherit;
+    transition: all .25s ease-in-out;
 }
 
 a:hover {
+    color: var(--color-theme-2);
     text-decoration: underline;
 }
 
 h1 {
     font-size: 2rem;
-    text-align: center;
+    line-height: 1.1;
 }
 
 h2 {
@@ -64,10 +71,17 @@ pre {
     font-family: var(--font-mono);
     background-color: var(--color-bg-3);
     border-radius: 3px;
-    box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
     padding: 0.5em;
     overflow-x: auto;
     color: var(--color-text);
+}
+
+input,
+select,
+textarea,
+button {
+    color: var(--color-text);
+    background-color: var(--color-bg-2);
 }
 
 input,
@@ -80,11 +94,23 @@ a[role='button'] {
 
 button {
     cursor: pointer;
-    padding: 0.4rem 0.8rem;
-    border-radius: 0.5rem;
-    border-width: 1px;
-    background-color: var(--color-bg-2);
-    transition: all 0.2s ease-in-out;
+    padding: 0.6em 1.2em;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all .25s ease-in-out;
+}
+button:hover {
+    border-color: var(--color-theme-1);
+}
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+button:focus-visible {
+    outline: 4px auto var(--color-theme-1);
 }
 
 button.clear {
@@ -115,12 +141,12 @@ i.bx {
 
 i:not(.clear).bx {
     border: 1px solid var(--color-bg-1);
-    background-color: white;
+    background-color: var(--color-bg-3);;
 }
 
 button[disabled], 
 button[disabled] > i.bx {
-    color: silver !important;
+    color: var(--color-bg-0) !important;
     cursor: default;
 }
 
@@ -131,8 +157,8 @@ button:not([disabled]):hover > i.bx {
 }
 
 .label {
-    border: 1px solid silver;
-    background-color: #F0F0F0C0;
+    border: 1px solid var(--color-bg-0);
+    background-color: var(--color-bg-2);
     box-shadow: 2px 2px 4px #80808060;
     margin: .4rem .2rem;
     padding: .2rem .6rem;
@@ -140,8 +166,14 @@ button:not([disabled]):hover > i.bx {
     font-size: smaller;
 }
 
-@media (min-width: 720px) {
-    h1 {
-        font-size: 2.4rem;
+@media (prefers-color-scheme: light) {
+    :root {
+      --color-theme-1: #ff3e00;
+      --color-theme-2: #4075a6;
+      --color-text: #213547;
+      --color-bg-0: #cad8e4;
+      --color-bg-1: #cedce8;
+      --color-bg-2: #f9f9f9;
+      --color-bg-3: #ffffff;
     }
 }

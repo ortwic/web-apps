@@ -1,9 +1,15 @@
+.tabulator {
+    background-color: var(--color-bg-3) !important;
+}
+
 .tabulator-headers {
+    color: var(--color-text);
     background-color: var(--color-bg-2) !important;
 }
 
 .tabulator-row {
     overflow: hidden;
+    color: var(--color-text);
 }
 
 .tabulator-row.tabulator-row-even {

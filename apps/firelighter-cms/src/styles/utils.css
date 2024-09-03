@@ -23,7 +23,7 @@
 }
 
 .danger {
-    color: red !important;
+    color: brown !important;
 }
 
 .w-100 {
@@ -57,4 +57,10 @@
 
 .fa-check-square::before {
   content: '☑ ';
+}
+
+@media (prefers-color-scheme: light) {
+    .danger {
+        color: red !important;
+    }
 }
