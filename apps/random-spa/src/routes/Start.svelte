@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { t } from 'svelte-i18n';
     import { fly } from 'svelte/transition';
     import { Accordion, AccordionItem } from 'svelte-collapsible'
     import { gameStore } from "../lib/firebase/game.store";
@@ -20,6 +21,11 @@
                     <polygon points="0,0 80,50 0,100" fill="currentColor"/>
                 </svg>
                 {game.title}
+                <ul class="chips">
+                    {#each game.tags as tag}
+                    <li>{ $t(tag) }</li>
+                    {/each}
+                </ul>
             </h2>
             <p class="body" slot="body">
                 <Game {game} />
@@ -40,5 +46,28 @@
 
     .red {
         rotate: 90deg;
+    }
+
+    h2 {
+        margin-bottom: 0;
+    }
+
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 1.5rem;
+    }
+
+    .chips li {
+        border: 1px solid var(--primary-color);
+        background-color: var(--bg-button);
+        margin-top: .5rem;
+        margin-bottom: 0;
+        padding: .2rem .6rem;
+        border-radius: 1rem;
+        font-size: small;
+        font-weight: normal;
     }
 </style>

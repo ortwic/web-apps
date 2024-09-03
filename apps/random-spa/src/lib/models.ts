@@ -12,6 +12,7 @@ export interface GameDescription extends Entity {
     title: string;
     description: string;
     description_de: string;
+    tags: string[];
     levels: string[];
     levels_de: string[];
 }
