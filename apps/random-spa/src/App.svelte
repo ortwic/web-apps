@@ -55,7 +55,7 @@
 </main>
 
 <footer>
-  <Adsense adSlot="0000000" adClient="ca-pub-2477798570332878" />
+  <Adsense adSlot="7554111525" adClient="ca-pub-2477798570332878" />
   <div>
     <span>&copy; <a use:link href="/p/imprint">{new Date().getFullYear()} OCSoft42</a></span>
     | <a use:link href="/p/privacy">{ $t('start.privacy') }</a>
