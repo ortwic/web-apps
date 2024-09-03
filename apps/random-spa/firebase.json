@@ -14,8 +14,8 @@
       ],
       "rewrites": [
         {
-          "source": "/app-ads.txt",
-          "destination": "/app-ads.txt"
+          "source": "/ads.txt",
+          "destination": "/ads.txt"
         },
         {
           "source": "**",
@@ -33,8 +33,8 @@
       ],
       "rewrites": [
         {
-          "source": "/app-ads.txt",
-          "destination": "/app-ads.txt"
+          "source": "/ads.txt",
+          "destination": "/ads.txt"
         },
         {
           "source": "**",
