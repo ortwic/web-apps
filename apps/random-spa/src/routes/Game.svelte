@@ -34,7 +34,7 @@
           {/each}
     </ul>
   {:else}
-    <a use:link href="/r/{game.id}">{ $t('start.start') }</a>
+    <a use:link href="/r/{game.id}/0">{ $t('start.start') }</a>
   {/if}
 </section>
 
