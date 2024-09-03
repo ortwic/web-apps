@@ -3,13 +3,15 @@
     import { link } from 'svelte-spa-router';
     import type { GameDescription } from '../lib/models';
     import { lang } from '../lib/i18n';
+    import { marked } from 'marked';
 
     export let game: GameDescription;
 
     function description() {
-        return game.description_de && lang === 'de' 
+      const desc = game.description_de && lang === 'de' 
             ? game.description_de 
             : game.description;
+        return marked(desc);
     }
 
     function levels() {
@@ -20,7 +22,7 @@
 </script>
 
 <section>
-  <p>{description()}</p>
+  <p>{@html description()}</p>
   {#if levels()?.length > 1}
     <h3>{ $t('start.level') }</h3>
     <ul>
