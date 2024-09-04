@@ -1,6 +1,6 @@
 <script lang="ts">
     import { slide } from 'svelte/transition';
-    import type { Properties } from '$lib/packages/firecms_core/types/properties';
+    import type { Properties } from '../../lib/packages/firecms_core/types/properties';
 
     export let properties: Properties;
     const dataTypeValues = [
@@ -32,13 +32,11 @@
         {/if}
     </div>
     <div class="cell" title="Data Type">
-        {#if properties[key] && properties[key].dataType}
         <select disabled class="w-100" bind:value={properties[key].dataType}>
             {#each dataTypeValues as type}
                 <option value={type}>{type}</option>
             {/each}
         </select>
-        {/if}
     </div>
     <div class="cell" title="Default Value">
         <input disabled type="text" bind:value={properties[key].defaultValue} placeholder="Default value">

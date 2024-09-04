@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "firelighter-cms"
+  },
+  "targets": {
+    "firelighter-cms": {
+      "hosting": {
+        "beta": [
+          "firelighter-beta"
+        ],
+        "prod": [
+          "firelighter-cms"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
