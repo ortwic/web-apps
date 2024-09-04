@@ -3,8 +3,9 @@
   import { onMount } from 'svelte';
   import { derived } from 'svelte/store';
   import { slide } from 'svelte/transition';
-  import { onAuthStateChanged } from 'firebase/auth';
   import Router, { link, location, push } from "svelte-spa-router";
+  import { onAuthStateChanged } from 'firebase/auth';
+  import { colorScheme } from "@web-apps/svelte-tabulator";
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
   import { currentClientAuth, currentClientUser } from "./lib/stores/firebase.store";
   import Header from "./lib/components/Header.svelte";
@@ -24,6 +25,7 @@
   };
 
   const pathStartsWith = derived(location, l => l.split('/').filter(Boolean).at(0));
+  const themeIcon = derived(colorScheme, s => s === 'light' ? 'bx-moon' : 'bx-sun');
 
   // ensure settings are loaded on client side only
   onMount(() => {
@@ -38,14 +40,19 @@
           push('/settings');
       }
   });
+
+  function toggleTheme() {
+    document.documentElement.classList.remove($colorScheme);
+    colorScheme.set($colorScheme === 'light' ? 'dark' : 'light');
+    document.documentElement.classList.add($colorScheme);
+  }
 </script>
 
 <svelte:head>
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
 </svelte:head>
 
-<main>
-  <Header>
+<Header>
     <ul>
         {#if $settingsStore.selectedProjectId}
         <li class:current={$pathStartsWith === 'manage' || $pathStartsWith === 'content'}
@@ -58,8 +65,13 @@
         <li class:current={$pathStartsWith === 'settings'}>
             <a use:link href="/settings"><i class="bx bx-cog"></i></a>
         </li>
+        <li>
+            <button class="clear" on:click={() => toggleTheme()}>
+                <i class="bx {$themeIcon}"></i>
+            </button>
+        </li>
     </ul>
-  </Header>
+</Header>
 
 <main>
   <Router {routes}/>
@@ -67,7 +79,6 @@
 
 <footer></footer>
 <Snackbar />
-</main>
 
 <style>
    .app {

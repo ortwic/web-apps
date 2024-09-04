@@ -23,6 +23,16 @@
     font-family: var(--font-body);
     color: var(--color-text);
 }
+
+.light {
+    --color-theme-1: #ff3e00;
+    --color-theme-2: #4075a6;
+    --color-text: #213547;
+    --color-bg-0: #cad8e4;
+    --color-bg-1: #cedce8;
+    --color-bg-2: #f9f9f9;
+    --color-bg-3: #ffffff;
+}
   
 body {
     min-height: 100vh;
@@ -162,16 +172,4 @@ button:not([disabled]):hover > i.bx {
     padding: .2rem .6rem;
     border-radius: 1rem;
     font-size: smaller;
-}
-
-@media (prefers-color-scheme: light) {
-    :root {
-      --color-theme-1: #ff3e00;
-      --color-theme-2: #4075a6;
-      --color-text: #213547;
-      --color-bg-0: #cad8e4;
-      --color-bg-1: #cedce8;
-      --color-bg-2: #f9f9f9;
-      --color-bg-3: #ffffff;
-    }
 }
