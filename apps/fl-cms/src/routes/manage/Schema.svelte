@@ -63,27 +63,27 @@
 <section class="content-64">
     <div class="grid">
         {#each $documents as item}
-            <a use:link href="/content/{item.path}">
-                <div class="item emphasis">
-                    <div title={item.id} class="actions">
-                        <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
-                            <i class="bx bx-edit"></i>
-                        </button>
-                        <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.id)}>
-                            <i class="bx bx-trash danger"></i>
-                        </button>
-                    </div>
-                    <h2>{item.path}</h2>
-                    <div>
-                        <i class="bx bx-lg bx-right-arrow-alt"></i>
-                    </div>
+            <div class="flex-center item emphasis">
+                <div title={item.id} class="actions">
+                    <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
+                        <i class="bx bx-edit"></i>
+                    </button>
+                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.id)}>
+                        <i class="bx bx-trash danger"></i>
+                    </button>
                 </div>
-            </a>
+                <a use:link href="/content/{item.path}" class="flex-center">
+                    <h2>{item.path}</h2>
+                    <span>
+                        <i class="bx bx-lg bx-right-arrow-alt"></i>
+                    </span>
+                </a>
+            </div>
         {/each}
-        <div class="item">
+        <div class="flex-center item">
             <div class="actions"><br/></div>
             <input disabled={canAdd}
-                type="text" pattern="\w+"
+                type="text" pattern="\w+|/"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
                 placeholder="Collection"
@@ -120,14 +120,11 @@
     }
 
     div.item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 1rem;
         background-color: var(--color-bg-2);
         color: var(--color-text);
         border-radius: 0.5rem;
         border: 1px solid gray;
+        padding: 1rem;
     }
 
     div.item > input {

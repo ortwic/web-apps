@@ -1,10 +1,16 @@
 <script lang="ts">
     import { push } from 'svelte-spa-router';
+    import type { User } from 'firebase/auth';
     import Login from '../../lib/components/Login.svelte';
     import Logout from '../../lib/components/Logout.svelte';
     import { currentClientAuth, currentClientUser } from '../../lib/stores/firebase.store';
     import SelectProject from './SelectProject.svelte';
     import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
+
+    function login(user: User | null) {
+        currentClientUser.set(user);
+        push('/manage');
+    }
 </script>
 
 <svelte:head>
@@ -23,7 +29,7 @@
         {#if $currentClientUser}
         <Logout auth={$currentClientAuth} user={$currentClientUser} />
         {:else}
-        <Login auth={$currentClientAuth} on:login={() => push('/manage')} />
+        <Login auth={$currentClientAuth} on:login={({ detail: user }) => login(user)} />
         {/if}
     </div>
 

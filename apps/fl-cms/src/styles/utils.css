@@ -42,6 +42,12 @@
     gap: .6rem;
 }
 
+.flex-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .emphasis {
     text-transform: uppercase;
     letter-spacing: .1rem;
