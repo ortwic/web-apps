@@ -2,7 +2,7 @@
     import { slide } from 'svelte/transition';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
 
-    export let properties: Properties;
+    export let properties: Properties = {};
     const dataTypeValues = [
         "string", "number", "boolean", "date", "array", "map", "geopoint", "reference"
     ] as const;

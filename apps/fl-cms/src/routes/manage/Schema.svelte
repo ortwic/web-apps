@@ -1,7 +1,7 @@
 <script lang="ts">
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
-    import type { EntityCollection } from '../../lib/models/schema.model';
+    import type { Collection } from '../../lib/models/schema.model';
     import { showError, showWarn } from '../../lib/stores/notification.store';
     import { currentClientUser } from '../../lib/stores/firebase.store';
     import { createSchemaStore } from '../../lib/stores/firestore.store';
@@ -12,9 +12,9 @@
     $: canAdd = !$currentClientUser;
     $: canEdit = !$currentClientUser;
 
-    let current = writable<EntityCollection | undefined>();
+    let current = writable<Collection | undefined>();
     let pathInput: HTMLInputElement;
-    const documents = derived($schemaStore.documents, (docs) =>
+    const documents = derived($schemaStore, (docs) =>
         docs.toSorted((a, b) => a.path.localeCompare(b.path))
     );
 
@@ -28,29 +28,24 @@
             return showWarn('Collection already exists');
         }
 
-        const item: EntityCollection = {
-            id: path,
-            path,
-            properties: {}
-        };
         pathInput.value = '';
 
         try {
-            return $schemaStore?.setDocuments(item);
+            return $schemaStore?.createSchema(path.split('/'));
         } catch (ex: any) {
             showError(ex.message);
         }
     }
 
-    async function edit(ev: Event, item: EntityCollection) {
+    async function edit(ev: Event, item: Collection) {
         ev.preventDefault();
         current.set(item);;
     }
 
-    async function remove(ev: Event, id: string) {
+    async function remove(ev: Event, path: string) {
         ev.preventDefault();
         if (confirm('Are you sure?')) {
-            return $schemaStore?.removeDocuments(id);
+            return $schemaStore?.removeSchema(path.split('/'));
         }
     }
 </script>
@@ -64,26 +59,36 @@
     <div class="grid">
         {#each $documents as item}
             <div class="flex-center item emphasis">
-                <div title={item.id} class="actions">
+                <div title={item.path} class="actions">
                     <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
                         <i class="bx bx-edit"></i>
                     </button>
-                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.id)}>
+                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.path)}>
                         <i class="bx bx-trash danger"></i>
                     </button>
                 </div>
+                {#if item.parent}
+                <a use:link href="/content/{item.path}" class="flex-center">
+                    <h2>{item.path}</h2>
+                    <span>
+                        <i class="bx bx-lg bx-list-ul"></i>
+                        <i class="bx bx-lg bx-right-arrow-alt"></i>
+                    </span>
+                </a>
+                {:else}
                 <a use:link href="/content/{item.path}" class="flex-center">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>
                     </span>
                 </a>
+                {/if}
             </div>
         {/each}
         <div class="flex-center item">
             <div class="actions"><br/></div>
             <input disabled={canAdd}
-                type="text" pattern="\w+|/"
+                type="text" pattern="\w+\/?\w+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
                 placeholder="Collection"

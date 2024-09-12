@@ -1,7 +1,7 @@
 import { marked } from "marked";
 import type { ColumnDefinition, CellComponent, Editor } from "tabulator-tables";
 import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
-import type { EntityCollection } from "../models/schema.model";
+import type { Collection } from "../models/schema.model";
 import type { AnyProperty } from "../packages/firecms_core/types/properties";
 import type { TypedValue } from "../models/content.type";
 import type { ColumnOptions } from "../models/column.model";
@@ -21,7 +21,7 @@ function actionColumn<T>(options: ColumnOptions<T>): ColumnDefinition {
     };
 }
 
-export function prepareColumnDefinitions<T>(collection: EntityCollection | null, options: ColumnOptions<T>): ColumnDefinition[] {
+export function prepareColumnDefinitions<T>(collection: Collection | null, options: ColumnOptions<T>): ColumnDefinition[] {
     const columns = options.actions ? [actionColumn(options)] : [];
     if (collection?.properties) {
         Object.entries(collection.properties as Record<string, AnyProperty>).forEach(([field, prop]) => {

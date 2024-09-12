@@ -1,6 +1,15 @@
-import type { EntityCollection as FireCMS_Collection } from "../packages/firecms_core/types/collections";
-import type { Properties } from "../packages/firecms_core/types/properties";
+import type { DocumentData } from "firebase/firestore";
+import type { EntityCollection } from "../packages/firecms_core/types/collections";
 
-export type EntityCollection = Omit<FireCMS_Collection, 'name'> & {
-    properties: Properties;
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+type PureCollection = Omit<EntityCollection<{}>, 'subcollections'>;
+
+export type Collection = PartialBy<PureCollection, 'properties'> & {
+    pathSegments?: string[];
+    parent?: Collection;
+    subcollections?: Collection[];
 };
+
+export type Entity = {
+    id: string;
+} & DocumentData;

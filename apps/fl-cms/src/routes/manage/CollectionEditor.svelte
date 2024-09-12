@@ -1,25 +1,24 @@
 <script lang="ts">
     import json from 'json5';
+    import { get } from 'svelte/store';
     import { type Content, JSONEditor, Mode } from 'svelte-jsoneditor'
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
-    import type { EntityCollection } from '../../lib/models/schema.model';
+    import type { Collection } from '../../lib/models/schema.model';
     import { createSchemaStore, createStore } from '../../lib/stores/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
 
-    export let item: EntityCollection;
+    export let item: Collection;
     let showJsonView = false;
-    let properties = item.properties;
+    let properties = item.properties || {};
 
     const schemaStore = createSchemaStore();
-    const currentStore = createStore(item.path);
-    const documents = $currentStore.documents;
 
     async function saveCollection() {
         try {
-            await $schemaStore.setDocuments(item);
+            await $schemaStore.updateSchema(item);
             showInfo(`${item.path} saved`);
         } catch (error) {
             showError(`${error}`);
@@ -46,7 +45,8 @@
             return "map";
         };
         
-        const inferredProps = await buildEntityPropertiesFromData($documents, getType);
+        const store = get(createStore(item.path));
+        const inferredProps = await buildEntityPropertiesFromData(get(store), getType);
         properties = { 
             ...item.properties, 
             ...inferredProps 
@@ -55,13 +55,18 @@
     }
 
     function setProperties(content: Content) {
+        item.properties = parseProperties(content);
+    }
+
+    function parseProperties(content: Content): Properties {
         if ('text' in content) {
             try {            
-                item.properties = json.parse<Properties>(content.text);
+                return json.parse<Properties>(content.text);
             } catch (error) {
                 showError(`Invalid JSON: ${error}`);
             }
         }
+        return {};
     }
 
     function toggleEditView() {
@@ -73,7 +78,7 @@
     <button title="Save properties" class="icon clear" on:click={saveCollection}>
         <i class="bx bx-save"></i>
     </button>
-    <button title="Infer from data" class="icon clear" on:click={appendInferredPropsFromData}>
+    <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={appendInferredPropsFromData}>
         <i class="bx bxs-magic-wand"></i>
     </button>
     <button title="Toggle code view" class="icon clear" on:click={toggleEditView}>
