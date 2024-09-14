@@ -15,7 +15,7 @@ export function createSchemaStore() {
     );
 }
 
-export function createStore<T extends Entity>(path: string) {
+export function createDocumentStore<T extends Entity>(path: string) {
     return derived<Readable<Firestore | null>, DocumentStore<T>>(currentFirestore, (store, set) =>
         set(new DocumentStore(store, path))
     );

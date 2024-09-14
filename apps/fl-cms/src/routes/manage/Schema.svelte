@@ -9,21 +9,19 @@
     import CollectionEditor from './CollectionEditor.svelte';
 
     const schemaStore = createSchemaStore();
+    const schemas = $schemaStore;
     $: canAdd = !$currentClientUser;
     $: canEdit = !$currentClientUser;
 
     let current = writable<Collection | undefined>();
     let pathInput: HTMLInputElement;
-    const documents = derived($schemaStore, (docs) =>
-        docs.toSorted((a, b) => a.path.localeCompare(b.path))
-    );
 
     async function add() {
         const path = pathInput.validity.valid && pathInput.value;
         if (!path) {
             return showWarn('Invalid collection name');
         }
-        const exists = $documents.some((item) => item.path === path);
+        const exists = $schemas.some((item) => item.path === path);
         if (exists) {
             return showWarn('Collection already exists');
         }
@@ -31,7 +29,7 @@
         pathInput.value = '';
 
         try {
-            return $schemaStore?.createSchema(path.split('/'));
+            return $schemaStore?.createSchema(path);
         } catch (ex: any) {
             showError(ex.message);
         }
@@ -45,7 +43,7 @@
     async function remove(ev: Event, path: string) {
         ev.preventDefault();
         if (confirm('Are you sure?')) {
-            return $schemaStore?.removeSchema(path.split('/'));
+            return $schemaStore?.removeNode(path);
         }
     }
 </script>
@@ -57,7 +55,7 @@
 
 <section class="content-64">
     <div class="grid">
-        {#each $documents as item}
+        {#each $schemas as item}
             <div class="flex-center item emphasis">
                 <div title={item.path} class="actions">
                     <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>

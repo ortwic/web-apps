@@ -1,7 +1,7 @@
 <script lang="ts">
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import type { TypedValue } from '../../lib/models/content.type.js';
-    import { createStore, type Entity } from '../../lib/stores/firestore.store';
+    import { createDocumentStore, type Entity } from '../../lib/stores/firestore.store';
     import { marked } from 'marked';
 
     export let params: {
@@ -11,7 +11,7 @@
 
     type EntityWithContent = Entity & { content: TypedValue[] };
 
-    const contentStore = createStore<EntityWithContent>(params.path);
+    const contentStore = createDocumentStore<EntityWithContent>(params.path);
     const entityPromise = $contentStore.getDocument(params.id);
 </script>
 

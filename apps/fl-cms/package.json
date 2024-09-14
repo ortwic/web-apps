@@ -3,16 +3,20 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@9.1.4",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "pnpm test && vite build",
     "preview": "vite preview",
-    "host:beta": "vite build && firebase deploy --only hosting:beta",
+    "host:beta": "pnpm build && firebase deploy --only hosting:beta",
     "host:prod": "firebase deploy --only hosting:prod",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
-    "test:unit": "vitest"
+    "test": "firebase emulators:exec --only firestore 'pnpm vitest run'",
+    "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
+    "test:watch": "firebase emulators:exec --only firestore 'pnpm vitest'"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/svelte": "^5.2.0",

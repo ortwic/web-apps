@@ -1,13 +1,20 @@
+import { derived, type Readable } from "svelte/store";
 import type { Firestore } from "firebase/firestore";
-import { DocumentStore } from "./document.store";
 import type { Collection } from "../models/schema.model";
+import { DocumentStore } from "./document.store";
 
-export class SchemaStore extends DocumentStore<Collection> {
+export class SchemaStore implements Readable<Collection[]> {
+    store: DocumentStore<Collection>;
+    subscribe: Readable<Collection[]>['subscribe'];
+    unsubscribe = () => {};
+
     constructor(firestore: Firestore | null) {
-        super(firestore, '__schema');
+        this.store = new DocumentStore<Collection>(firestore, '__schema');
+        this.subscribe = derived(this.store, this.pipe).subscribe;
+        this.unsubscribe = this.store.unsubscribe;
     }
 
-    protected override pipe(documents: Collection[]) {
+    private pipe(documents: Collection[]) {
         function extend(document: Collection, parent?: Collection): Collection[] {
             if (document.subcollections) {
                 const pathSegments = parent?.path ? [parent.path, document.path] : [document.path];
@@ -19,10 +26,26 @@ export class SchemaStore extends DocumentStore<Collection> {
             return [document];
         }
 
-        return documents.flatMap(c => extend(c));
+        return documents
+            .flatMap(c => extend(c))
+            .toSorted((a, b) => a.path.localeCompare(b.path));
     }
 
-    async createSchema(pathSegments: string[]): Promise<void> {
+    async getNode(path: string): Promise<Collection | null> {
+        function lastNode(parent: Collection | null, segments: string[]): Collection | null {
+            const path = segments.shift();
+            if (path && parent?.subcollections) {
+                const node = parent.subcollections.find(c => c.path === path) ?? null;
+                return segments.length ? lastNode(node, segments) : node;
+            }
+            return parent;
+        }
+
+        const segments = path.split('/');
+        return lastNode(await this.store.getDocument(segments.shift()), segments);
+    }
+
+    async createSchema(path: string): Promise<void> {
         function createTree(segments: string[]): Collection {
             const path = segments.shift()!;
             const subcollections = segments.length > 0 ? [createTree(segments)] : [];
@@ -34,32 +57,47 @@ export class SchemaStore extends DocumentStore<Collection> {
             };
         }
 
-        if (pathSegments.length > 0) {
-            const document = createTree(pathSegments);
-            return super.setDocuments(document);
+        if (path) {
+            const document = createTree(path.split('/'));
+            return this.store.setDocuments(document);
         }
     }
 
-    async updateSchema(document: Collection): Promise<void> {
-        if (!document.parent) {
-            return super.setDocuments(document);
+    async updateProperties(document: Collection): Promise<void> {
+        function updateSubcollection(document: Collection, parent: Collection | undefined): Collection {
+            if (parent && parent.subcollections) {
+                const path = document.pathSegments?.shift();
+                const index = parent.subcollections.findIndex(c => c.path === path);
+                if (index < 0) {
+                    return updateSubcollection(document, parent);
+                } 
+                parent.subcollections[index].properties = document.properties;
+                return parent;
+            }
+            return document;
         }
+
+        const root = updateSubcollection(document, document.parent);
+        return this.store.setDocuments(root);
     }
 
-    async removeSchema(pathSegments: string[]): Promise<void> {
-        if (pathSegments.length > 1) {
-            return this.removeFirstSubcollection(pathSegments);
-        } else if (pathSegments.length) {
-            return super.removeDocuments(pathSegments[0]);
+    async removeNode(path: string): Promise<void> {
+        const segments = path.split('/');
+        if (segments.length > 2) {
+            throw new Error('Removing nested subcollections was not implemented');
+        } else if (segments.length > 1) {
+            return this.removeFirstSubcollection(segments);
+        } else if (segments.length) {
+            return this.store.removeDocuments(segments[0]);
         }
     }
 
     private async removeFirstSubcollection(pathSegments: string[]): Promise<void> {
-        const document = await super.getDocument(pathSegments[0]);
+        const document = await this.store.getDocument(pathSegments[0]);
         if (document?.subcollections) {
             const index = document.subcollections.findIndex(c => c.path === pathSegments[1]);
             document.subcollections.splice(index, 1);
-            return super.setDocuments(document);                
+            return this.store.setDocuments(document);                
         }
     }
 }

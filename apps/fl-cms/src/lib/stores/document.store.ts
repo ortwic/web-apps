@@ -1,7 +1,6 @@
-import type { Readable } from 'svelte/store';
-import { derived, writable, } from 'svelte/store';
+import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
 import type { Firestore } from 'firebase/firestore';
-import { collection, onSnapshot, doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc, writeBatch } from 'firebase/firestore';
 import type { Entity } from '../models/schema.model';
 
 // firestore does not like undefined values so omit them
@@ -20,31 +19,26 @@ const setDocOptions = {
 
 export class DocumentStore<T extends Entity> implements Readable<T[]> {
     private readonly documents = writable<T[]>([]);
+    readonly unsubscribe: () => void;
 
     constructor(private store: Firestore | null, private path: string) {
         if (store) {
             const reference = collection(store, this.path);
-            onSnapshot(reference, (snapshot) => {
-                const docs = snapshot.docs.map(
-                    (doc) =>
-                        ({
-                            id: doc.id,
-                            ...doc.data()
-                        }) as T
-                );
+            this.unsubscribe = onSnapshot(reference, (snapshot) => {
+                const docs = snapshot.docs.map((d) => (<T>{ id: d.id, ...d.data() }));
                 this.documents.set(docs);
             });
+        } else {
+            this.unsubscribe = () => {};
         }
     }
 
-    subscribe = derived(this.documents, this.pipe).subscribe;
-
-    protected pipe(documents: T[]) {
-        return documents;
+    subscribe(run: Subscriber<T[]>, invalidate?: Invalidator<T[]> | undefined): Unsubscriber {
+        return this.documents.subscribe(run, invalidate);
     }
 
-    async getDocument(id: string): Promise<T | null> {
-        if (this.store) {
+    async getDocument(id?: string): Promise<T | null> {
+        if (id && this.store) {
             const docRef = doc(this.store, this.path, id);
             const snapshot = await getDoc(docRef);
             if (snapshot.exists()) {
@@ -81,10 +75,3 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     }
 }
 
-export function timestampReplacer(key: string, value: unknown) {
-    if (value && typeof value === 'object' && 'seconds' in value && 'nanoseconds' in value) {
-        const ts = new Timestamp(Number(value.seconds), Number(value.nanoseconds));
-        return ts.toDate().toISOString();
-    }
-    return value;
-}

@@ -5,7 +5,7 @@
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Collection } from '../../lib/models/schema.model';
-    import { createSchemaStore, createStore } from '../../lib/stores/firestore.store';
+    import { createSchemaStore, createDocumentStore } from '../../lib/stores/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
@@ -18,7 +18,7 @@
 
     async function saveCollection() {
         try {
-            await $schemaStore.updateSchema(item);
+            await $schemaStore.updateProperties(item);
             showInfo(`${item.path} saved`);
         } catch (error) {
             showError(`${error}`);
@@ -45,7 +45,7 @@
             return "map";
         };
         
-        const store = get(createStore(item.path));
+        const store = get(createDocumentStore(item.path));
         const inferredProps = await buildEntityPropertiesFromData(get(store), getType);
         properties = { 
             ...item.properties, 

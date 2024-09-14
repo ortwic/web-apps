@@ -1,11 +1,12 @@
 <script lang="ts">
     import json from 'json5';
+    import { get } from 'svelte/store';
     import { push } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import type { CellComponent } from 'tabulator-tables';
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import type { ColumnOptions } from '../../lib/models/column.model';
-    import { createSchemaStore, createStore, timestampReplacer } from '../../lib/stores/firestore.store';
+    import { createSchemaStore, createDocumentStore, timestampReplacer } from '../../lib/stores/firestore.store';
     import { prepareColumnDefinitions } from '../../lib/table/column.helper';
     import { Table } from '@web-apps/svelte-tabulator';
     import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
@@ -24,9 +25,9 @@
     let uploadInput: HTMLInputElement;
     let importJsonData: Entity[] | null;
 
-    const schemaStore = createSchemaStore();
-    const currentSchema = $schemaStore.getDocument(params.path);
-    const contentStore = createStore(params.path);
+    const schemaStore = get(createSchemaStore());
+    const currentSchema = schemaStore.getNode(params.path);
+    const contentStore = createDocumentStore(params.path);
     const entities = $contentStore;
     const options: ColumnOptions<Entity> = { 
         idField: 'id',
