@@ -1,7 +1,7 @@
 <script lang="ts">
     import json from 'json5';
     import { get } from 'svelte/store';
-    import { push } from 'svelte-spa-router';
+    import { push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import type { CellComponent } from 'tabulator-tables';
     import type { Entity, Collection } from '../../lib/models/schema.model';
@@ -16,26 +16,24 @@
     import CollectionEditor from '../manage/CollectionEditor.svelte';
     import '../../styles/tabulator.css';
     
-    export let params: {
-        path: string
-    };
     let showAddEntry = false;
     let newEntryId: string;
     let showSettings = false;
     let uploadInput: HTMLInputElement;
     let importJsonData: Entity[] | null;
 
+    const documentPath = $querystring!;
     const schemaStore = get(createSchemaStore());
-    const currentSchema = schemaStore.getNode(params.path);
-    const contentStore = createDocumentStore(params.path);
-    const entities = $contentStore;
+    const currentSchema = schemaStore.getNodeFromDocumentPath(documentPath);
+    const contentStore = createDocumentStore(documentPath);
+    const documents = $contentStore;
     const options: ColumnOptions<Entity> = { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
         updateHandler(doc) {
             try {
-                if (params.path !== undefined) {
+                if (documentPath !== undefined) {
                     return $contentStore.setDocuments(doc).then(() => showInfo(`Updated document ${JSON.stringify(doc)}`));
                 }
                 showError(`DocumentId is undefined`);
@@ -48,7 +46,7 @@
         label: '<i class="bx bx-edit"></i> Edit content',
         action: (e: MouseEvent, cell: CellComponent) => {
             const id = cell.getData()['id'];
-            push(`/content/${params.path}/${id}`);
+            push(`/content/${documentPath}/${id}`);
         }
     };
     const deleteAction = {
@@ -113,12 +111,12 @@
 
     function exportAsJson() {
         try {
-            const jsonStr = JSON.stringify($entities, timestampReplacer, 2); 
+            const jsonStr = JSON.stringify($documents, timestampReplacer, 2); 
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${params.path}.json`; 
+            link.download = `${documentPath}.json`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -129,7 +127,7 @@
 </script>
 
 <svelte:head>
-    <title>{params.path}</title>
+    <title>{documentPath}</title>
     <meta name="description" content="Custom Firebase Content Management System" />
 </svelte:head>
 
@@ -147,7 +145,7 @@
         <button title="Settings" class="icon clear" on:click={() => showSettings = true}>
             <i class="bx bx-cog"></i>
         </button>
-        <span slot="title">{params.path}</span>
+        <span slot="title">{documentPath}</span>
     </Toolbar>
 </header>
 
@@ -155,7 +153,7 @@
 <p>Loading...</p>
 {:then schema}
 <section>
-    <Table idField="id" data={entities} persistenceID={params.path}
+    <Table idField="id" data={documents} persistenceID={documentPath}
         columns={prepareColumnDefinitions(schema, {
             ...options,
             actions: getActions(schema)

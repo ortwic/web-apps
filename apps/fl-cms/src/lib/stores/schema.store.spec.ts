@@ -6,7 +6,7 @@ import { SchemaStore } from './schema.store';
 import { setupTestEnvironment } from "../../tests/firebase.setup";
 import type { Properties } from '../packages/firecms_core/types/properties';
 
-describe('schema store', () => {
+describe('schema store CRUD operations', () => {
     let testEnv: RulesTestEnvironment;
     let store: SchemaStore;
 
@@ -19,52 +19,39 @@ describe('schema store', () => {
 
     afterEach(async () => {
         store.unsubscribe();
+
+        // TODO data from previous tests should be removed
         await testEnv?.cleanup();
     });
 
-    it('should create single collection', async () => {
-        // act
-        await store.createSchema('foo');
-        const foo = await store.getNode('foo');
+    it('should prevent timeouts by warming up firestore for very first test', async () => {
+        const invalid = await store.getNode('invalid');
+        expect(invalid).toBeFalsy();
+    })
 
-        // assert
-        expect(foo?.path).equals('foo');
-    });
+    it('should create collections with subcollections', async () => {
+        // act #1
+        await store.createNodes('single');
+        const single = await store.getNode('single');
 
-    it('should create collection with subcollection', async () => {
-        // act
-        await store.createSchema('foo/bar');
-        const [fooExt, barExt] = get(store);
+        // assert #1
+        expect(single?.path).equals('single');
 
-        // assert
-        expect(fooExt?.path).equals('foo');
-        expect(barExt?.path).equals('foo/bar');
-
-        // act
-        const foo = await store.getNode('foo');
-        const bar = await store.getNode('foo/bar');
-
-        // assert
-        expect(foo?.path).equals('foo');
-        expect(bar?.path).equals('bar');
-    });
-
-    it('should create collection with nested subcollections', async () => {
-        // act
-        await store.createSchema('foo/bar/baz');
+        // act #2
+        await store.createNodes('foo/bar/baz');
         const [fooExt, barExt, bazExt] = get(store);
 
-        // assert
+        // assert #2
         expect(fooExt?.path).equals('foo');
         expect(barExt?.path).equals('foo/bar');
         expect(bazExt?.path).equals('foo/bar/baz');
 
-        // act
-        const foo = await store.getNode('foo');
-        const bar = await store.getNode('foo/bar');
-        const baz = await store.getNode('foo/bar/baz');
+        // act #3
+        const foo = await store.getNodeFromDocumentPath('foo');
+        const bar = await store.getNodeFromDocumentPath('foo/1/bar');
+        const baz = await store.getNodeFromDocumentPath('foo/2/bar/3/baz');
 
-        // assert
+        // assert #3
         expect(foo?.path).equals('foo');
         expect(bar?.path).equals('bar');
         expect(baz?.path).equals('baz');
@@ -73,12 +60,12 @@ describe('schema store', () => {
     it('should update properties from schema and subcollection', async () => {
         {
             // arrange
-            await store.createSchema('foo');
+            await store.createNodes('foo');
             const [fooExt] = get(store);
             
             // act #1
             await store.updateProperties({ ...fooExt, properties: { foo_prop: { dataType: 'number' } } });
-            await store.createSchema('foo/bar/baz');
+            await store.createNodes('foo/bar/baz');
         }
 
         {
@@ -87,7 +74,7 @@ describe('schema store', () => {
             await store.updateProperties({ ...barExt!, properties: { bar_prop: { dataType: 'date' } } });
 
             const foo = await store.getNode('foo');
-            const bar = await store.getNode('foo/bar');
+            const bar = await store.getNode('foo', 'bar');
 
             // assert
             expect(foo?.path).equals('foo');
@@ -100,24 +87,34 @@ describe('schema store', () => {
         }
     });
 
-    it('should remove single collection', async () => {
-        // act
-        await store.createSchema('foo');
-        await store.removeNode('foo');
-        const [foo] = get(store);
+    it('should remove collection or subcollection', async () => {
+        // act #1
+        await store.createNodes('single');
+        await store.removeNodes('single');
+        const single = await store.getNode('single');
 
-        // assert
-        expect(foo).toBeUndefined();
-    });
+        // assert #1
+        expect(single).toBeFalsy();
+        
+        // act #2
+        await store.createNodes('foo/bar/baz');
+        await store.removeNodes('foo/bar/baz');
+        let foo = await store.getNode('foo');
+        let bar = await store.getNode('foo', 'bar');
+        const baz = await store.getNode('foo', 'bar', 'baz');
 
-    it('should remove subcollection only', async () => {
-        // act
-        await store.createSchema('foo/bar');
-        await store.removeNode('foo/bar');
-        const [foo, bar] = get(store);
-
-        // assert
+        // assert #2
         expect(foo?.path).equals('foo');
-        expect(bar).toBeUndefined();
+        expect(bar?.path).equals('bar');
+        expect(baz).toBeFalsy();
+
+        // act #3
+        await store.removeNodes('foo/bar');
+        foo = await store.getNode('foo');
+        bar = await store.getNode('foo', 'bar');
+
+        // assert #3
+        expect(foo?.path).equals('foo');
+        expect(bar).toBeFalsy();
     });
 });

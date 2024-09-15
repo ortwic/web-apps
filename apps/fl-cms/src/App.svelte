@@ -18,7 +18,7 @@
   const routes = {
     '/': Schema,
     '/manage': Schema,
-    '/content/:path/': Documents,
+    '/list': Documents,
     '/content/:path/:id': Content,
     '/settings': Settings,
     // '*': NotFound

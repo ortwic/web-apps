@@ -21,6 +21,15 @@
     align-content: center;
 }
 
+.tabulator-popup-container, 
+.tabulator-menu-item {
+    background-color: var(--color-bg-2) !important;
+}
+
+.tabulator-menu-item:hover {
+    background-color: var(--color-bg-0) !important;
+}
+
 .content-preview {
     white-space: normal !important;
     overflow: auto !important;

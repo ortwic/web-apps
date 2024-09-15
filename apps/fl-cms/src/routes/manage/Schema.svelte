@@ -1,19 +1,21 @@
 <script lang="ts">
     import { link } from 'svelte-spa-router';
-    import { derived, writable } from 'svelte/store';
+    import { writable } from 'svelte/store';
     import type { Collection } from '../../lib/models/schema.model';
     import { showError, showWarn } from '../../lib/stores/notification.store';
     import { currentClientUser } from '../../lib/stores/firebase.store';
     import { createSchemaStore } from '../../lib/stores/firestore.store';
     import Modal from '../../lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
+    import SelectDocument from './SelectDocument.svelte';
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
     $: canAdd = !$currentClientUser;
     $: canEdit = !$currentClientUser;
 
-    let current = writable<Collection | undefined>();
+    let showEdit = false, showSelect = false;
+    let current = writable<Collection>();
     let pathInput: HTMLInputElement;
 
     async function add() {
@@ -29,7 +31,7 @@
         pathInput.value = '';
 
         try {
-            return $schemaStore?.createSchema(path);
+            return $schemaStore?.createNodes(path);
         } catch (ex: any) {
             showError(ex.message);
         }
@@ -37,13 +39,20 @@
 
     async function edit(ev: Event, item: Collection) {
         ev.preventDefault();
-        current.set(item);;
+        showEdit = true;
+        current.set(item);
+    }
+
+    function select(ev: Event, item: Collection) {
+        ev.preventDefault();
+        showSelect = true;
+        current.set(item);
     }
 
     async function remove(ev: Event, path: string) {
         ev.preventDefault();
         if (confirm('Are you sure?')) {
-            return $schemaStore?.removeNode(path);
+            return $schemaStore?.removeNodes(path);
         }
     }
 </script>
@@ -66,15 +75,17 @@
                     </button>
                 </div>
                 {#if item.parent}
-                <a use:link href="/content/{item.path}" class="flex-center">
+                <!-- svelte-ignore a11y-interactive-supports-focus -->
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-missing-attribute -->
+                <a role="button" on:click={(ev) => select(ev, item)} class="flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-list-ul"></i>
-                        <i class="bx bx-lg bx-right-arrow-alt"></i>
                     </span>
                 </a>
                 {:else}
-                <a use:link href="/content/{item.path}" class="flex-center">
+                <a use:link href="/list?{item.path}" class="flex-center">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>
@@ -99,9 +110,15 @@
     </div>
 </section>
 
-<Modal open={!!$current} width="100%" on:close={() => (current.set(undefined))}>
-    {#if $current}
+<Modal open={showEdit} width="100%" on:close={() => (showEdit = false)}>
+    {#if showEdit}
     <CollectionEditor item={$current} />
+    {/if}
+</Modal>
+
+<Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
+    {#if showSelect}
+    <SelectDocument item={$current}  />
     {/if}
 </Modal>
 

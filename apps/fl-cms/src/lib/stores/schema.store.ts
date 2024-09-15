@@ -31,7 +31,13 @@ export class SchemaStore implements Readable<Collection[]> {
             .toSorted((a, b) => a.path.localeCompare(b.path));
     }
 
-    async getNode(path: string): Promise<Collection | null> {
+    async getNodeFromDocumentPath(path: string): Promise<Collection | null> {
+        const evenOnly = <T>(_: T, i: number) => i % 2 === 0;
+        const schemaPath = path.split('/').filter(evenOnly);
+        return this.getNode(...schemaPath);
+    }
+
+    async getNode(...pathSegments: string[]): Promise<Collection | null> {
         function lastNode(parent: Collection | null, segments: string[]): Collection | null {
             const path = segments.shift();
             if (path && parent?.subcollections) {
@@ -41,11 +47,10 @@ export class SchemaStore implements Readable<Collection[]> {
             return parent;
         }
 
-        const segments = path.split('/');
-        return lastNode(await this.store.getDocument(segments.shift()), segments);
+        return lastNode(await this.store.getDocument(pathSegments.shift()), pathSegments);
     }
 
-    async createSchema(path: string): Promise<void> {
+    async createNodes(path: string): Promise<void> {
         function createTree(segments: string[]): Collection {
             const path = segments.shift()!;
             const subcollections = segments.length > 0 ? [createTree(segments)] : [];
@@ -64,7 +69,7 @@ export class SchemaStore implements Readable<Collection[]> {
     }
 
     async updateProperties(document: Collection): Promise<void> {
-        function updateSubcollection(document: Collection, parent: Collection | undefined): Collection {
+        const updateSubcollection = (document: Collection, parent: Collection | undefined): Collection => {
             if (parent && parent.subcollections) {
                 const path = document.pathSegments?.shift();
                 const index = parent.subcollections.findIndex(c => c.path === path);
@@ -75,29 +80,36 @@ export class SchemaStore implements Readable<Collection[]> {
                 return parent;
             }
             return document;
-        }
+        };
 
         const root = updateSubcollection(document, document.parent);
         return this.store.setDocuments(root);
     }
 
-    async removeNode(path: string): Promise<void> {
+    async removeNodes(path: string): Promise<void> {
         const segments = path.split('/');
-        if (segments.length > 2) {
-            throw new Error('Removing nested subcollections was not implemented');
-        } else if (segments.length > 1) {
-            return this.removeFirstSubcollection(segments);
+        const removeSubcollection = (document: Collection): boolean => {
+            if (document.subcollections) {
+                const path = segments.shift();
+                const index = document.subcollections.findIndex(c => c.path === path);
+                if (index > -1) {
+                    if (segments.length) {
+                        return removeSubcollection(document.subcollections[index]);
+                    } 
+                    document.subcollections.splice(index, 1);
+                    return true;                    
+                }
+            }
+            return false;
+        };
+
+        if (segments.length > 1) {
+            const document = await this.getNode(segments.shift()!);
+            if(document && removeSubcollection(document)) {
+                return this.store.setDocuments(document);
+            }
         } else if (segments.length) {
             return this.store.removeDocuments(segments[0]);
-        }
-    }
-
-    private async removeFirstSubcollection(pathSegments: string[]): Promise<void> {
-        const document = await this.store.getDocument(pathSegments[0]);
-        if (document?.subcollections) {
-            const index = document.subcollections.findIndex(c => c.path === pathSegments[1]);
-            document.subcollections.splice(index, 1);
-            return this.store.setDocuments(document);                
         }
     }
 }

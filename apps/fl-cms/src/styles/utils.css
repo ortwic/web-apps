@@ -53,6 +53,10 @@
     letter-spacing: .1rem;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 .no-wrap {
     white-space: nowrap;
 }
