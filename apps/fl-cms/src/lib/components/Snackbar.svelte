@@ -26,7 +26,7 @@
         text-align: center;
         opacity: 0.8;
         border-top: 1px solid gray;
-        transition: all 0.2s ease-in-out;
+        transition: all .25s ease-in-out;
     }
 
     .message:hover {

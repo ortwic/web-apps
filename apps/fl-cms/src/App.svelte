@@ -1,11 +1,8 @@
 <script lang="ts">
   import { t } from "svelte-i18n";
   import { onMount } from 'svelte';
-  import { derived } from 'svelte/store';
-  import { slide } from 'svelte/transition';
-  import Router, { link, location, push } from "svelte-spa-router";
+  import Router, { push } from "svelte-spa-router";
   import { onAuthStateChanged } from 'firebase/auth';
-  import { colorScheme } from "@web-apps/svelte-tabulator";
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
   import { currentClientAuth, currentClientUser } from "./lib/stores/firebase.store";
   import Header from "./lib/components/Header.svelte";
@@ -19,13 +16,10 @@
     '/': Schema,
     '/manage': Schema,
     '/list': Documents,
-    '/content/:path/:id': Content,
+    '/content': Content,
     '/settings': Settings,
     // '*': NotFound
   };
-
-  const pathStartsWith = derived(location, l => l.split('/').filter(Boolean).at(0));
-  const themeIcon = derived(colorScheme, s => s === 'light' ? 'bx-moon' : 'bx-sun');
 
   // ensure settings are loaded on client side only
   onMount(() => {
@@ -40,38 +34,13 @@
           push('/settings');
       }
   });
-
-  function toggleTheme() {
-    document.documentElement.classList.remove($colorScheme);
-    colorScheme.set($colorScheme === 'light' ? 'dark' : 'light');
-    document.documentElement.classList.add($colorScheme);
-  }
 </script>
 
 <svelte:head>
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
 </svelte:head>
 
-<Header>
-    <ul>
-        {#if $settingsStore.selectedProjectId}
-        <li class:current={$pathStartsWith === 'manage' || $pathStartsWith === 'content'}
-            in:slide={{ duration: 400, axis: 'x' }} out:slide={{ duration: 400, axis: 'x' }}>
-            <a use:link href="/manage">
-                <span class="emphasis no-wrap">{$settingsStore.selectedProjectId}</span>
-            </a>
-        </li>
-        {/if}
-        <li class:current={$pathStartsWith === 'settings'}>
-            <a use:link href="/settings"><i class="bx bx-cog"></i></a>
-        </li>
-        <li>
-            <button class="clear" on:click={() => toggleTheme()}>
-                <i class="bx {$themeIcon}"></i>
-            </button>
-        </li>
-    </ul>
-</Header>
+<Header />
 
 <main>
   <Router {routes}/>
@@ -81,55 +50,6 @@
 <Snackbar />
 
 <style>
-   .app {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    ul {
-        padding: 0;
-        margin: 0;
-        height: 3em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        list-style: none;
-    }
-
-    li {
-        position: relative;
-        height: 100%;
-    }
-
-    li.current::before {
-        --size: 6px;
-        content: '';
-        width: 0;
-        height: 0;
-        position: absolute;
-        top: 0;
-        left: calc(50% - var(--size));
-        border: var(--size) solid transparent;
-        border-top: var(--size) solid var(--color-theme-1);
-    }
-
-    li > * {
-        display: flex;
-        height: 100%;
-        align-items: center;
-        padding: 0 0.5rem;
-        color: var(--color-text);
-        font-weight: 700;
-        font-size: 0.8rem;
-        text-decoration: none;
-        transition: all .2s ease-in-out;
-    }
-
-    a:hover {
-        color: var(--color-theme-1);
-    }
-
     main {
         flex: 1;
         display: flex;

@@ -4,6 +4,7 @@
     import { push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import type { CellComponent } from 'tabulator-tables';
+    import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import type { ColumnOptions } from '../../lib/models/column.model';
     import { createSchemaStore, createDocumentStore, timestampReplacer } from '../../lib/stores/firestore.store';
@@ -46,7 +47,7 @@
         label: '<i class="bx bx-edit"></i> Edit content',
         action: (e: MouseEvent, cell: CellComponent) => {
             const id = cell.getData()['id'];
-            push(`/content/${documentPath}/${id}`);
+            push(`/content?${documentPath}/${id}`);
         }
     };
     const deleteAction = {
@@ -62,10 +63,18 @@
 
     function getActions(schema: Collection | null) {
         const actions = [deleteAction];
-        if (schema?.properties && 'content' in schema?.properties) {
+        if (hasContentDefinition(schema)) {
             actions.unshift(editAction);
         }
         return actions;
+    }
+
+    function hasContentDefinition(schema: Collection | null): boolean {
+        const props = schema?.properties as Properties;
+        if (props) {
+            return props['content']?.dataType === 'array';
+        }
+        return false;
     }
 
     function addEntry() {

@@ -42,7 +42,10 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
             const docRef = doc(this.store, this.path, id);
             const snapshot = await getDoc(docRef);
             if (snapshot.exists()) {
-                return snapshot.data({ serverTimestamps: 'none' }) as T;
+                return {
+                    id,
+                    ...snapshot.data({ serverTimestamps: 'none' })
+                } as T;
             }
         }
         return null;
