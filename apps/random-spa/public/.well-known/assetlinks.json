@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.web.ran_dom.twa",
+      "sha256_cert_fingerprints": [
+        "A9:81:36:B3:69:86:B0:B3:C5:FE:B5:CB:A5:16:2D:95:3D:D6:CB:7F:76:B5:9E:12:69:8A:A3:F6:54:47:73:61"
+      ]
+    }
+  }
+]
