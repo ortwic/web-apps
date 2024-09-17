@@ -13,8 +13,8 @@ export interface GameDescription extends Entity {
     description: string;
     description_de: string;
     tags: string[];
-    levels: string[];
-    levels_de: string[];
+    levels: string[] | string;
+    levels_de: string[] | string;
 }
 
 export interface GameContent extends Entity {

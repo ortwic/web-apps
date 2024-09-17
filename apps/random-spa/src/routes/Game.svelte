@@ -15,9 +15,10 @@
     }
 
     function levels() {
-        return game.levels_de && lang === 'de' 
+        const levels = game.levels_de && lang === 'de' 
             ? game.levels_de 
             : game.levels;
+        return Array.isArray(levels) ? levels : levels.split(',');
     }
 </script>
 

@@ -59,7 +59,8 @@
     }
 
     function getLevels(game: GameDescription) {
-        return game && game.levels_de && lang === 'de' ? game.levels_de : game?.levels ?? [];
+        const levels = game && game.levels_de && lang === 'de' ? game.levels_de : game?.levels ?? [];
+        return Array.isArray(levels) ? levels : levels.split(',');
     }
 
     function prev() {
