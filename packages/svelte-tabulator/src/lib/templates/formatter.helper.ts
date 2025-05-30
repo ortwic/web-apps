@@ -67,12 +67,14 @@ export function timestamp(): Partial<ColumnDefinition> {
     return {
         formatter(cell: CellComponent): string {
             const value = cell.getValue();
-            const isFirebaseTimestamp = 'toDate' in value && value.toDate instanceof Function;
-            if (isFirebaseTimestamp) {
-                return DateTime.fromJSDate(value.toDate()).toFormat('yyyy-MM-dd HH:mm:ss');
-            }
-            if ('seconds' in value && value.seconds) {
-                return DateTime.fromSeconds(value.seconds).toFormat('yyyy-MM-dd HH:mm:ss');
+            if (value) {
+                const isFirebaseTimestamp = 'toDate' in value && value.toDate instanceof Function;
+                if (isFirebaseTimestamp) {
+                    return DateTime.fromJSDate(value.toDate()).toFormat('yyyy-MM-dd HH:mm:ss');
+                }
+                if ('seconds' in value && value.seconds) {
+                    return DateTime.fromSeconds(value.seconds).toFormat('yyyy-MM-dd HH:mm:ss');
+                }
             }
             return `${value}`;
         },

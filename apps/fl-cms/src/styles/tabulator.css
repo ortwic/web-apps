@@ -34,3 +34,11 @@
     white-space: normal !important;
     overflow: auto !important;
 }
+
+@media (prefers-color-scheme: dark) {
+    .tabulator-row, 
+    .tabulator-header,
+    .tabulator-cell {
+      border-color: #2b2b2b !important;
+    }
+}

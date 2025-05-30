@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev --parallel",
-    "dev:cms": "turbo run dev --parallel -F ./packages/svelte-tabulator -F ./apps/firelighter-cms",
+    "dev:cms": "turbo run dev --parallel -F ./packages/svelte-tabulator -F ./apps/fl-cms",
     "dev:song": "turbo run dev --parallel -F ./packages/svelte-tabulator -F ./apps/song-repo",
     "build": "turbo run build",
     "lint": "turbo run lint"
