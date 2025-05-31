@@ -14,12 +14,12 @@ export class SchemaStore implements Readable<Collection[]> {
     private flatNestedCollections(documents: Collection[]) {
         function extend(document: Collection, parent?: Collection): Collection[] {
             if (document.subcollections) {
-                const pathSegments = parent?.pathSegments 
-                    ? [...parent.pathSegments, document.path] 
-                    : [document.path];
+                const pathSegments = Object.freeze(parent?.pathSegments 
+                    ? [...parent.pathSegments, document.id] 
+                    : [document.id]);
                 const path = pathSegments.join('/');
-                const extended = { ...document, path, parent, pathSegments };
-                const childs = document.subcollections.flatMap(c => extend(<Collection>c, extended));
+                const extended: Collection = { ...document, path, parent, pathSegments };
+                const childs = document.subcollections.flatMap(c => extend(c, extended));
                 return [extended, ...childs];
             }
             return [document];
@@ -38,13 +38,13 @@ export class SchemaStore implements Readable<Collection[]> {
     }
 
     async getNode(...pathSegments: string[]): Promise<Collection | null> {
-        function lastNode(parent: Collection | null, segments: string[]): Collection | null {
-            const path = segments.shift();
-            if (path && parent?.subcollections) {
-                const node = parent.subcollections.find(c => c.path === path) ?? null;
+        function lastNode(document: Collection | null, segments: string[]): Collection | null {
+            const id = segments.shift();
+            if (id && document?.subcollections) {
+                const node = document.subcollections.find(c => c.id === id) ?? null;
                 return segments.length ? lastNode(node, segments) : node;
             }
-            return parent;
+            return document;
         }
 
         const root = await this.store.getDocument(pathSegments.shift());
@@ -52,39 +52,44 @@ export class SchemaStore implements Readable<Collection[]> {
     }
 
     async createNodes(path: string): Promise<void> {
-        function createTree(segments: string[]): Collection {
-            const path = segments.shift()!;
-            const subcollections = segments.length > 0 ? [createTree(segments)] : [];
+        function createTree(segments: string[], parentIds: string[]): Collection {
+            const id = segments.shift()!;
+            const subcollections = segments.length > 0 ? [createTree(segments, [...parentIds, id])] : [];
             return {
-                path,
-                id: path,
-                name: path,
+                id,
+                name: id,
+                path: [...parentIds, id].join('/'),
+                properties: {},
                 subcollections
             };
         }
 
         if (path) {
-            const document = createTree(path.split('/').filter(Boolean));
+            const segments = path.toLowerCase().split('/').filter(Boolean);
+            const document = createTree(segments, []);
             return this.store.setDocuments(document);
         }
     }
 
     async updateProperties(document: Collection): Promise<void> {
+        const segments = document.pathSegments ? document.pathSegments.slice() : [];
         const updateSubcollection = (document: Collection, parent: Collection | undefined): Collection => {
             if (parent && parent.subcollections) {
-                const path = document.pathSegments?.shift();
-                const index = parent.subcollections.findIndex(c => c.path === path);
+                const id = segments.shift();
+                const index = parent.subcollections.findIndex(c => c.id === id);
                 if (index < 0) {
                     return updateSubcollection(document, parent);
                 } 
                 parent.subcollections[index].properties = document.properties;
                 return parent;
             }
+            if (!document.parent) {
+                // firebase doesn't like undefined values
+                delete document.parent;
+            }
             return document;
         };
-
         const root = updateSubcollection(document, document.parent);
-        delete root.parent;
         return this.store.setDocuments(root);
     }
 
@@ -92,8 +97,8 @@ export class SchemaStore implements Readable<Collection[]> {
         const segments = path.split('/');
         const removeSubcollection = (document: Collection): boolean => {
             if (document.subcollections) {
-                const path = segments.shift();
-                const index = document.subcollections.findIndex(c => c.path === path);
+                const id = segments.shift();
+                const index = document.subcollections.findIndex(c => c.id === id);
                 if (index > -1) {
                     if (segments.length) {
                         return removeSubcollection(document.subcollections[index]);

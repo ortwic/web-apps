@@ -53,11 +53,11 @@
         ev.preventDefault();
         let message = 'Are you sure?';
         if (item.subcollections) {
-            const subs = item.subcollections.map((s) => `${item.path}/${s.path}`).join('\n');
+            const subs = item.subcollections.map((s) => `${item.id}/${s.id}`).join('\n');
             message += `\n\nWARNING! This collections will be removed too:\n${subs}`;
         }
         if (confirm(message)) {
-            return $schemaStore?.removeNodes(item.path);
+            return $schemaStore?.removeNodes(item.id);
         }
     }
 </script>

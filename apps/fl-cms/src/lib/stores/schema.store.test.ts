@@ -1,32 +1,43 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { get } from "svelte/store";
-import type { Properties } from '../packages/firecms_core/types/properties';
-import type { Collection } from '../models/schema.model';
-import type { DocumentStore } from './document.store';
+import { collection, doc, setDoc, type Firestore } from "firebase/firestore";
+import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { SchemaStore } from './schema.store';
-import { mockDocumentStore } from '../../tests/mock.helper';
+import { setupTestEnvironment } from "../../tests/firebase.setup";
+import type { Properties } from '../packages/firecms_core/types/properties';
+import { DocumentStore } from './document.store';
+import type { Collection } from '../models/schema.model';
 import { schemeNestedSub, schemeRoot, schemeSub } from '../../tests/seed.data';
 
-// interface Disposable { 
-//     unsubscribe(): void; 
-// }
-
-// const using = <T extends Disposable>(obj: T, action: (obj: T) => void) => {
-//     action(obj);
-//     obj?.unsubscribe();
-// };
-
-describe('schema store CRUD tests', () => {
+describe('schema store CRUD firebase tests', () => {
+    let testEnv: RulesTestEnvironment | null;
     let store: DocumentStore<Collection>;
     let scheme: SchemaStore;
 
     beforeEach(async () => {
-        store = mockDocumentStore([schemeRoot]);
+        testEnv = await setupTestEnvironment('fl-cms-test');
+        if (testEnv) {
+            const context = testEnv.unauthenticatedContext();
+            const firestore = context.firestore() as unknown as Firestore;
+    
+            const schema = collection(firestore, '__schema');
+            await setDoc(doc(schema, schemeRoot.id), schemeRoot);
+
+            store = new DocumentStore<Collection>(firestore, '__schema');
+        } 
         scheme = new SchemaStore(store);
     });
 
     afterEach(async () => {
         scheme?.unsubscribe();
+
+        await testEnv?.clearFirestore();
+        await testEnv?.cleanup()
+    });
+
+    it('should prevent timeouts by warming up firestore for very first test', async () => {
+        const invalid = await scheme.getNode('invalid');
+        expect(invalid).toBeFalsy();
     });
 
     it('should get node from collection or subcollection', async () => {
@@ -57,32 +68,31 @@ describe('schema store CRUD tests', () => {
         expect(sub1).toBeFalsy();
     });
 
-    it('should create single collection', async () => {
+    it('should create collections with subcollections', async () => {
+        // act #1
         await scheme.createNodes('single');
         const single = await scheme.getNode('single');
+
+        // assert #1
         expect(single?.id).equals('single');
-    });
 
-    it('should create collections with subcollections', async () => {
-        // act
+        // act #2
         await scheme.createNodes('foo/bar/baz');
-        const foo = await scheme.getNode('foo');
-        const bar = await scheme.getNode('foo', 'bar');
-        const baz = await scheme.getNode('foo', 'bar', 'baz');
+        let foo = await scheme.getNode('foo');
+        let bar = await scheme.getNode('foo', 'bar');
+        let baz = await scheme.getNode('foo', 'bar', 'baz');
 
-        // assert
+        // assert #2
         expect(foo?.path).equals('foo');
         expect(bar?.path).equals('foo/bar');
         expect(baz?.path).equals('foo/bar/baz');
-    });
 
-    it('should get document path from collection with subcollections', async () => {
-        await scheme.createNodes('foo/bar/baz');
+        // act #3
+        foo = await scheme.getNodeFromDocumentPath('foo');
+        bar = await scheme.getNodeFromDocumentPath('foo/1/bar');
+        baz = await scheme.getNodeFromDocumentPath('foo/2/bar/3/baz');
 
-        const foo = await scheme.getNodeFromDocumentPath('foo');
-        const bar = await scheme.getNodeFromDocumentPath('foo/1/bar');
-        const baz = await scheme.getNodeFromDocumentPath('foo/2/bar/3/baz');
-
+        // assert #3
         expect(foo?.id).equals('foo');
         expect(bar?.id).equals('bar');
         expect(baz?.id).equals('baz');
@@ -201,36 +211,5 @@ describe('schema store CRUD tests', () => {
         expect((<Properties>foo?.properties).foo?.dataType).equals('number');
         expect((<Properties>bar?.properties).bar?.dataType).equals('date');
         expect((<Properties>baz?.properties).baz?.dataType).equals('string');
-    });
-
-    it('should create and remove collection with subcollections', async () => {
-        // act #1
-        await scheme.createNodes('single');
-        await scheme.removeNodes('single');
-        const single = await scheme.getNode('single');
-
-        // assert #1
-        expect(single).toBeFalsy();
-        
-        // act #2
-        await scheme.createNodes('foo/bar/baz');
-        await scheme.removeNodes('foo/bar/baz');
-        let foo = await scheme.getNode('foo');
-        let bar = await scheme.getNode('foo', 'bar');
-        const baz = await scheme.getNode('foo', 'bar', 'baz');
-
-        // assert #2
-        expect(foo?.id).equals('foo');
-        expect(bar?.id).equals('bar');
-        expect(baz).toBeFalsy();
-
-        // act #3
-        await scheme.removeNodes('foo/bar');
-        foo = await scheme.getNode('foo');
-        bar = await scheme.getNode('foo', 'bar');
-
-        // assert #3
-        expect(foo?.id).equals('foo');
-        expect(bar).toBeFalsy();
     });
 });

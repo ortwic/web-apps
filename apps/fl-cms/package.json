@@ -11,11 +11,11 @@
     "host:beta": "pnpm build && firebase deploy --only hosting:beta",
     "host:prod": "firebase deploy --only hosting:prod",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+    "spec": "pnpm vitest spec --testTimeout 0",
     "test": "firebase emulators:exec --only firestore 'pnpm vitest'",
     "test:browser": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
     "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --testTimeout 0'",
-    "test:once": "firebase emulators:exec --only firestore 'pnpm vitest run'",
-    "test:unit": "pnpm vitest"
+    "test:once": "firebase emulators:exec --only firestore 'pnpm vitest run'"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",
@@ -43,6 +43,7 @@
     "svelte-jsoneditor": "^0.23.7",
     "svelte-spa-router": "^3.3.0",
     "tabulator-tables": "^6.2.1",
+    "ts-deepmerge": "^7.0.3",
     "tslib": "^2.6.3",
     "typescript": "^5.5.3",
     "vite": "^5.4.1",

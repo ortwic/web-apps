@@ -2,14 +2,16 @@ import type { DocumentData } from "firebase/firestore";
 import type { EntityCollection } from "../packages/firecms_core/types/collections";
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-type PureCollection = Omit<EntityCollection<{}>, 'subcollections'>;
+type PureCollection = Omit<EntityCollection<{}>, 'subcollections' | 'path'>;
 
 export type Collection = PartialBy<PureCollection, 'properties'> & {
-    pathSegments?: string[];
+    pathSegments?: readonly string[];
+    get path(): string;
     parent?: Collection;
     subcollections?: Collection[];
 };
 
 export type Entity = {
     id: string;
+    title?: string;
 } & DocumentData;

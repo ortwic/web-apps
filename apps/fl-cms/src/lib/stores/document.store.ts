@@ -1,5 +1,5 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
-import type { Firestore } from 'firebase/firestore';
+import type { Firestore, SetOptions } from 'firebase/firestore';
 import { collection, onSnapshot, doc, getDoc, writeBatch } from 'firebase/firestore';
 import type { Entity } from '../models/schema.model';
 import { showWarn } from './notification.store';
@@ -14,7 +14,7 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
     return data;
 };
 
-const setDocOptions = {
+const defaultSetOptions = {
     merge: true
 };
 
@@ -22,8 +22,11 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     private readonly documents = writable<T[]>([]);
     readonly unsubscribe: () => void = () => {};
 
-    constructor(private store: Firestore | null, private path: string) {
-        const pathValid = path.split('/').length % 2 !== 0;
+    constructor(private store: Firestore | null, 
+        private path: string, 
+        private options: SetOptions = defaultSetOptions
+    ) {
+        const pathValid = path.split('/').length % 2 > 0;
         if (!pathValid) {
             showWarn(`Invalid path ${path}`);
         }
@@ -61,7 +64,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
 
             documents.forEach((data) => {
                 const docRef = doc(this.store!, this.path, data.id);
-                batch.set(docRef, omitUndefinedFields(data), setDocOptions);
+                batch.set(docRef, omitUndefinedFields(data), this.options);
             });
 
             await batch.commit();
