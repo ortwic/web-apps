@@ -11,9 +11,10 @@
     "host:beta": "pnpm build && firebase deploy --only hosting:beta",
     "host:prod": "firebase deploy --only hosting:prod",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
-    "test": "firebase emulators:exec --only firestore 'pnpm vitest run'",
-    "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
-    "test:watch": "firebase emulators:exec --only firestore 'pnpm vitest'",
+    "test": "firebase emulators:exec --only firestore 'pnpm vitest'",
+    "test:browser": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
+    "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --testTimeout 0'",
+    "test:once": "firebase emulators:exec --only firestore 'pnpm vitest run'",
     "test:unit": "pnpm vitest"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/marked": "^5.0.0",
     "@types/object-hash": "^3.0.6",
     "@types/tabulator-tables": "^6.2.2",
+    "@vitest/browser": "^3.1.4",
     "@web-apps/svelte-tabulator": "workspace:^",
     "firebase": "^10.12.4",
     "jsdom": "^22.1.0",
@@ -45,6 +47,6 @@
     "typescript": "^5.5.3",
     "vite": "^5.4.1",
     "vite-plugin-pwa": "^0.16.4",
-    "vitest": "^1.6.0"
+    "vitest": "^3.1.4"
   }
 }

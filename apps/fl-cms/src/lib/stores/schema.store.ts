@@ -1,23 +1,22 @@
 import { derived, type Readable } from "svelte/store";
-import type { Firestore } from "firebase/firestore";
 import type { Collection } from "../models/schema.model";
-import { DocumentStore } from "./document.store";
+import type { DocumentStore } from "./document.store";
 
 export class SchemaStore implements Readable<Collection[]> {
-    store: DocumentStore<Collection>;
     subscribe: Readable<Collection[]>['subscribe'];
     unsubscribe = () => {};
 
-    constructor(firestore: Firestore | null) {
-        this.store = new DocumentStore<Collection>(firestore, '__schema');
-        this.subscribe = derived(this.store, this.pipe).subscribe;
+    constructor(private store: DocumentStore<Collection>) {
+        this.subscribe = derived(this.store, this.flatNestedCollections).subscribe;
         this.unsubscribe = this.store.unsubscribe;
     }
 
-    private pipe(documents: Collection[]) {
+    private flatNestedCollections(documents: Collection[]) {
         function extend(document: Collection, parent?: Collection): Collection[] {
             if (document.subcollections) {
-                const pathSegments = parent?.path ? [parent.path, document.path] : [document.path];
+                const pathSegments = parent?.pathSegments 
+                    ? [...parent.pathSegments, document.path] 
+                    : [document.path];
                 const path = pathSegments.join('/');
                 const extended = { ...document, path, parent, pathSegments };
                 const childs = document.subcollections.flatMap(c => extend(<Collection>c, extended));
@@ -26,9 +25,10 @@ export class SchemaStore implements Readable<Collection[]> {
             return [document];
         }
 
-        return documents
+        const model = documents
             .flatMap(c => extend(c))
             .toSorted((a, b) => a.path.localeCompare(b.path));
+        return model;
     }
 
     async getNodeFromDocumentPath(path: string): Promise<Collection | null> {
@@ -47,7 +47,8 @@ export class SchemaStore implements Readable<Collection[]> {
             return parent;
         }
 
-        return lastNode(await this.store.getDocument(pathSegments.shift()), pathSegments);
+        const root = await this.store.getDocument(pathSegments.shift());
+        return lastNode(root, pathSegments);
     }
 
     async createNodes(path: string): Promise<void> {
@@ -63,7 +64,7 @@ export class SchemaStore implements Readable<Collection[]> {
         }
 
         if (path) {
-            const document = createTree(path.split('/'));
+            const document = createTree(path.split('/').filter(Boolean));
             return this.store.setDocuments(document);
         }
     }
@@ -83,6 +84,7 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         const root = updateSubcollection(document, document.parent);
+        delete root.parent;
         return this.store.setDocuments(root);
     }
 

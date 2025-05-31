@@ -2,6 +2,7 @@ import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, wr
 import type { Firestore } from 'firebase/firestore';
 import { collection, onSnapshot, doc, getDoc, writeBatch } from 'firebase/firestore';
 import type { Entity } from '../models/schema.model';
+import { showWarn } from './notification.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -19,18 +20,21 @@ const setDocOptions = {
 
 export class DocumentStore<T extends Entity> implements Readable<T[]> {
     private readonly documents = writable<T[]>([]);
-    readonly unsubscribe: () => void;
+    readonly unsubscribe: () => void = () => {};
 
     constructor(private store: Firestore | null, private path: string) {
-        if (store) {
+        const pathValid = path.split('/').length % 2 !== 0;
+        if (!pathValid) {
+            showWarn(`Invalid path ${path}`);
+        }
+
+        if (store && pathValid) {
             const reference = collection(store, this.path);
             this.unsubscribe = onSnapshot(reference, (snapshot) => {
                 const docs = snapshot.docs.map((d) => (<T>{ id: d.id, ...d.data() }));
                 this.documents.set(docs);
             });
-        } else {
-            this.unsubscribe = () => {};
-        }
+        } 
     }
 
     subscribe(run: Subscriber<T[]>, invalidate?: Invalidator<T[]> | undefined): Unsubscriber {

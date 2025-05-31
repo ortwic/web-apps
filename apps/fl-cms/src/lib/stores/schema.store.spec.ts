@@ -1,12 +1,50 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { get } from "svelte/store";
-import type { Firestore } from "firebase/firestore";
+import { collection, doc, setDoc, type Firestore } from "firebase/firestore";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { SchemaStore } from './schema.store';
 import { setupTestEnvironment } from "../../tests/firebase.setup";
 import type { Properties } from '../packages/firecms_core/types/properties';
+import { DocumentStore } from './document.store';
+import type { Collection } from '../models/schema.model';
 
-describe('schema store CRUD operations', () => {
+const initialNestedSub: Collection = {
+    id: 'sub11',
+    path: 'sub11',
+    name: 'Nested Sub',
+    properties: {
+        prop111: {
+            name: 'Prop 1.1.1',
+            dataType: 'string'
+        }
+    }
+};
+const initialSub: Collection = {
+    id: 'sub1',
+    path: 'sub1',
+    name: 'Sub',
+    properties: {
+        prop11: {
+            name: 'Prop 1.1',
+            dataType: 'string'
+        }
+    },
+    subcollections: [initialNestedSub]
+};
+const initialRoot: Collection = {
+    id: 'root',
+    path: 'root',
+    name: 'Root',
+    properties: {
+        prop1: {
+            name: 'Prop 1',
+            dataType: 'string'
+        }
+    },
+    subcollections: [initialSub]
+};
+
+describe('schema store CRUD integration tests (requires firebase emulators)', () => {
     let testEnv: RulesTestEnvironment;
     let store: SchemaStore;
 
@@ -14,8 +52,16 @@ describe('schema store CRUD operations', () => {
         testEnv = await setupTestEnvironment();
         const context = testEnv.unauthenticatedContext();
         const firestore = context.firestore() as unknown as Firestore;
-        store = new SchemaStore(firestore);
+
+        await seedFirestore(firestore);
+        const ds = new DocumentStore<Collection>(firestore, '__schema');
+        store = new SchemaStore(ds);
     });
+    
+    async function seedFirestore(firestore: Firestore) {
+        const schema = collection(firestore, '__schema');
+        await setDoc(doc(schema, initialRoot.id), initialRoot);
+    }
 
     afterEach(async () => {
         store.unsubscribe();
@@ -27,7 +73,35 @@ describe('schema store CRUD operations', () => {
     it('should prevent timeouts by warming up firestore for very first test', async () => {
         const invalid = await store.getNode('invalid');
         expect(invalid).toBeFalsy();
-    })
+    });
+
+    it('should get node from collection or subcollection', async () => {
+        expect(await store.getNode('root')).toEqual(initialRoot);    
+        expect(await store.getNode('root', 'sub1')).toEqual(initialSub);    
+        expect(await store.getNode('root', 'sub1', 'sub11')).toEqual(initialNestedSub);    
+    });
+
+    it('should remove initial collection and subcollections', async () => {
+        // act #1
+        await store.removeNodes('root/sub1/sub11');
+        let init = await store.getNode('root');
+        let sub1 = await store.getNode('root', 'sub1');
+        const sub11 = await store.getNode('root', 'sub1', 'sub11');
+
+        // assert #1
+        expect(init?.path).equals('root');
+        expect(sub1?.path).equals('sub1');
+        expect(sub11).toBeFalsy();
+
+        // act #2
+        await store.removeNodes('root/sub1');
+        init = await store.getNode('root');
+        sub1 = await store.getNode('root', 'sub1');
+
+        // assert #2
+        expect(init?.path).equals('root');
+        expect(sub1).toBeFalsy();
+    });
 
     it('should create collections with subcollections', async () => {
         // act #1
@@ -87,7 +161,7 @@ describe('schema store CRUD operations', () => {
         }
     });
 
-    it('should remove collection or subcollection', async () => {
+    it('should create and remove collection with subcollections', async () => {
         // act #1
         await store.createNodes('single');
         await store.removeNodes('single');

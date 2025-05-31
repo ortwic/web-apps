@@ -5,13 +5,13 @@ import { getFirestore, Timestamp } from 'firebase/firestore';
 import { currentClientApp } from './firebase.store';
 import { DocumentStore } from './document.store';
 import { SchemaStore } from './schema.store';
-import type { Entity } from '../models/schema.model';
+import type { Collection, Entity } from '../models/schema.model';
 
 export const currentFirestore = derived(currentClientApp, (app) => app ? getFirestore(app) : null);
 
 export function createSchemaStore() {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
-        set(new SchemaStore(store))
+        set(new SchemaStore(new DocumentStore<Collection>(store, '__schema')))
     );
 }
 

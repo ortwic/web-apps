@@ -42,6 +42,10 @@ _Below is an example of how you can instruct your audience on installing and set
     pnpm dev
     ```
 
+## Testing
+
+_If you'd like to debug tests, start the **JavaScript Debug Terminal** and execute `pnpm test:debug`._
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Contributing

@@ -49,10 +49,15 @@
         current.set(item);
     }
 
-    async function remove(ev: Event, path: string) {
+    async function remove(ev: Event, item: Collection) {
         ev.preventDefault();
-        if (confirm('Are you sure?')) {
-            return $schemaStore?.removeNodes(path);
+        let message = 'Are you sure?';
+        if (item.subcollections) {
+            const subs = item.subcollections.map((s) => `${item.path}/${s.path}`).join('\n');
+            message += `\n\nWARNING! This collections will be removed too:\n${subs}`;
+        }
+        if (confirm(message)) {
+            return $schemaStore?.removeNodes(item.path);
         }
     }
 </script>
@@ -70,7 +75,7 @@
                     <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
                         <i class="bx bx-edit"></i>
                     </button>
-                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item.path)}>
+                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item)}>
                         <i class="bx bx-trash danger"></i>
                     </button>
                 </div>
@@ -97,7 +102,7 @@
         <div class="flex-center item">
             <div class="actions"><br/></div>
             <input disabled={canAdd}
-                type="text" pattern="\w+\/?\w+"
+                type="text" pattern="[\w\/]+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
                 placeholder="Collection"

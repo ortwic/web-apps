@@ -18,6 +18,15 @@ export default defineConfig({
         include: ['./src/**/*.{test,spec}.ts'],
         environment: 'jsdom',
         setupFiles: ['src/setuptest.ts'],
+        browser: {
+            enabled: false,
+            provider: 'preview',
+            instances: [
+                {
+                    browser: 'thorium',
+                }
+            ]
+        },
     },
     server: {
         port: 5000
