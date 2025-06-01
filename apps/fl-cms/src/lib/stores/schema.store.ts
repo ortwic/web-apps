@@ -59,7 +59,6 @@ export class SchemaStore implements Readable<Collection[]> {
                 id,
                 name: id,
                 path: [...parentIds, id].join('/'),
-                properties: {},
                 subcollections
             };
         }
@@ -71,26 +70,37 @@ export class SchemaStore implements Readable<Collection[]> {
         }
     }
 
-    async updateProperties(document: Collection): Promise<void> {
-        const segments = document.pathSegments ? document.pathSegments.slice() : [];
-        const updateSubcollection = (document: Collection, parent: Collection | undefined): Collection => {
-            if (parent && parent.subcollections) {
+    async updateProperties(target: Collection): Promise<void> {
+        if (!target.path?.trim()) {
+            throw new Error('document has no path');
+        }
+
+        const setProperties = (node: Collection | undefined): void => {
+            if (node) {
                 const id = segments.shift();
-                const index = parent.subcollections.findIndex(c => c.id === id);
-                if (index < 0) {
-                    return updateSubcollection(document, parent);
-                } 
-                parent.subcollections[index].properties = document.properties;
-                return parent;
+                if (target.id === id) {
+                    if ('merge' in this.store.options && this.store.options.merge) {
+                        node.properties = { ...node.properties, ...target.properties };
+                    } else {
+                        node.properties = target.properties;
+                    }
+                } else if (node.subcollections) {
+                    const sub = node.subcollections.find(c => c.id === segments[0]);
+                    setProperties(sub);
+                }
+                if (!node.parent) {
+                    // firebase doesn't like undefined values
+                    delete node.parent;
+                }
             }
-            if (!document.parent) {
-                // firebase doesn't like undefined values
-                delete document.parent;
-            }
-            return document;
         };
-        const root = updateSubcollection(document, document.parent);
-        return this.store.setDocuments(root);
+
+        const segments = target.path.split('/');
+        const root = await this.getNode(segments[0]);
+        if (root) {
+            setProperties(root);
+            await this.store.setDocuments(root);
+        }
     }
 
     async removeNodes(path: string): Promise<void> {
@@ -111,9 +121,9 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         if (segments.length > 1) {
-            const document = await this.getNode(segments.shift()!);
-            if(document && removeSubcollection(document)) {
-                return this.store.setDocuments(document);
+            const root = await this.getNode(segments.shift()!);
+            if(root && removeSubcollection(root)) {
+                return this.store.setDocuments(root);
             }
         } else if (segments.length) {
             return this.store.removeDocuments(segments[0]);

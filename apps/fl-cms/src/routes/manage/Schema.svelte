@@ -57,7 +57,7 @@
             message += `\n\nWARNING! This collections will be removed too:\n${subs}`;
         }
         if (confirm(message)) {
-            return $schemaStore?.removeNodes(item.id);
+            return $schemaStore?.removeNodes(item.path);
         }
     }
 </script>

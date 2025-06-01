@@ -8,6 +8,7 @@ const defaultOptions = { merge: true };
 export const mockDocumentStore = <T extends Entity>(docs: T[], options = defaultOptions) => {
     const store = writable<T[]>([...docs]);
     return {
+        options,
         subscribe: store.subscribe,
         getDocument: (id?: string) => Promise.resolve(get(store).find(d => d.id === id)),
         setDocuments: (...documents: T[]) => store.update(docs => (

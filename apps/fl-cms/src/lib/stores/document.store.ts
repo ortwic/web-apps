@@ -14,7 +14,7 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
     return data;
 };
 
-const defaultSetOptions = {
+const defaultSetOptions: SetOptions = {
     merge: true
 };
 
@@ -24,7 +24,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
 
     constructor(private store: Firestore | null, 
         private path: string, 
-        private options: SetOptions = defaultSetOptions
+        public options: SetOptions = defaultSetOptions
     ) {
         const pathValid = path.split('/').length % 2 > 0;
         if (!pathValid) {
