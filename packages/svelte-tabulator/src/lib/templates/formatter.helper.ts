@@ -67,7 +67,7 @@ export function timestamp(): Partial<ColumnDefinition> {
     return {
         formatter(cell: CellComponent): string {
             const value = cell.getValue();
-            if (value) {
+            if (value && typeof value === 'object') {
                 const isFirebaseTimestamp = 'toDate' in value && value.toDate instanceof Function;
                 if (isFirebaseTimestamp) {
                     return DateTime.fromJSDate(value.toDate()).toFormat('yyyy-MM-dd HH:mm:ss');
