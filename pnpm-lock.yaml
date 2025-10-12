@@ -337,7 +337,7 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2
       '@types/tabulator-tables':
-        specifier: ^6.2.6
+        specifier: ^6.2.2
         version: 6.2.6
       jsdom:
         specifier: ^22.1.0
@@ -355,8 +355,8 @@ importers:
         specifier: ^3.8.4
         version: 3.8.4(@babel/core@7.27.4)(postcss-load-config@3.1.4(postcss@8.4.45))(postcss@8.4.45)(sass@1.77.6)(svelte@4.2.18)
       tabulator-tables:
-        specifier: ^6.2.1
-        version: 6.2.1
+        specifier: ^6.3.1
+        version: 6.3.1
       tslib:
         specifier: ^2.6.3
         version: 2.6.3
@@ -5421,6 +5421,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   sourcemap-codec@1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
@@ -5703,6 +5704,9 @@ packages:
 
   tabulator-tables@6.2.1:
     resolution: {integrity: sha512-iCyLUzE9xEesEWqHDzNgShr6fpIIsRXnvTSDxiEti3sVbVYwlRt5HTBnXsl8bxY+4p64Rxxdlk9jT3voNLcIZQ==}
+
+  tabulator-tables@6.3.1:
+    resolution: {integrity: sha512-qFW7kfadtcaISQIibKAIy0f3eeIXUVi8242Vly1iJfMD79kfEGzfczNuPBN/80hDxHzQJXYbmJ8VipI40hQtfA==}
 
   teeny-request@9.0.0:
     resolution: {integrity: sha512-resvxdc6Mgb7YEThw6G6bExlXKkv6+YbuzGg9xuXxSgxJF7Ozs+o8Y9+2R3sArdWdW8nOokoQb1yrpFB0pQK2g==}
@@ -13174,6 +13178,8 @@ snapshots:
   symbol-tree@3.2.4: {}
 
   tabulator-tables@6.2.1: {}
+
+  tabulator-tables@6.3.1: {}
 
   teeny-request@9.0.0(encoding@0.1.13):
     dependencies:

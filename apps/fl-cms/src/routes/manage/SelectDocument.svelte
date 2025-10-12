@@ -1,26 +1,59 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
+    import { derived } from "svelte/store";
     import type { Collection } from "../../lib/models/schema.model";
+    import Modal from "../../lib/components/Modal.svelte";
     import Toolbar from "../../lib/components/Toolbar.svelte";
     import { createDocumentStore } from "../../lib/stores/firestore.store";
 
     export let item: Collection;
-    const contentStore = createDocumentStore(item.pathSegments![0]);
-    const documents = $contentStore;
+    export let path: string;
+    let showSelect = false;
+    let contentStore = createDocumentStore(path);
+    const navigation = derived($contentStore, documents => documents.map(d => navigationInfo(d.id)));
 
-    function contentUrl(id: string) {
-        return `/list?${item.path.replace(/\//, `/${id}/`)}`;
+    function navigationInfo(id: string) {
+        const segments = item.pathSegments || item.path.split('/');
+        const current = segments.indexOf(path.split('/').pop()!) + 1;
+        return {
+            id,
+            nested: segments.length > current + 1,
+            path: `${path}/${id}/${segments[current]}`
+        };
+    }
+
+    function select(ev: Event) {
+        ev.preventDefault();
+        showSelect = true;
     }
 </script>
 
 <Toolbar>
-    <span slot="title">{item.path}</span>
+    <span slot="title" class="no-wrap">{path}</span>
 </Toolbar>
 <ul>
-    {#each $documents as doc}
+    {#each $navigation as nav}
+    {#if nav.nested}
     <li>
-        <a use:link href={contentUrl(doc.id)}>{doc.id}</a>
+        <!-- svelte-ignore a11y-interactive-supports-focus -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-missing-attribute -->
+        <a role="button" on:click={(ev) => select(ev)} class="pointer">
+            {nav.id}
+        </a>
+        <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
+            {#if showSelect}
+            <svelte:self {item} path={nav.path} />
+            {/if}
+        </Modal>
     </li>
+    {:else}
+    <li>
+        <a use:link href='/list?{nav.path}'>
+            {nav.id}
+        </a>
+    </li>
+    {/if}
     {/each}
 </ul>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { link } from 'svelte-spa-router';
-    import { writable } from 'svelte/store';
+    import { derived, writable } from 'svelte/store';
     import type { Collection } from '../../lib/models/schema.model';
     import { showError, showWarn } from '../../lib/stores/notification.store';
     import { currentClientUser } from '../../lib/stores/firebase.store';
@@ -16,6 +16,7 @@
 
     let showEdit = false, showSelect = false;
     let current = writable<Collection>();
+    let currentPath = derived(current, (item) => item && item.pathSegments && item.pathSegments[0] || '');
     let pathInput: HTMLInputElement;
 
     async function add() {
@@ -123,7 +124,7 @@
 
 <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
     {#if showSelect}
-    <SelectDocument item={$current}  />
+    <SelectDocument item={$current} path={$currentPath} />
     {/if}
 </Modal>
 

@@ -1,6 +1,6 @@
 import { marked } from "marked";
-import type { ColumnDefinition, CellComponent, Editor } from "tabulator-tables";
-import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
+import type { CellComponent, Editor } from "tabulator-tables";
+import { autoFilter, label, timestamp, type ColumnDefinition } from "@web-apps/svelte-tabulator";
 import type { Collection } from "../models/schema.model";
 import type { AnyProperty } from "../packages/firecms_core/types/properties";
 import type { TypedValue } from "../models/content.type";
