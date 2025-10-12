@@ -8,7 +8,7 @@
 
     export let item: Collection;
     export let path: string;
-    let showSelect = false;
+    let lastSelectedId = '';
     let contentStore = createDocumentStore(path);
     const navigation = derived($contentStore, documents => documents.map(d => navigationInfo(d.id)));
 
@@ -22,10 +22,11 @@
         };
     }
 
-    function select(ev: Event) {
+    function select(ev: Event, id: string) {
         ev.preventDefault();
-        showSelect = true;
+        lastSelectedId = id;
     }
+
 </script>
 
 <Toolbar>
@@ -38,11 +39,11 @@
         <!-- svelte-ignore a11y-interactive-supports-focus -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-missing-attribute -->
-        <a role="button" on:click={(ev) => select(ev)} class="pointer">
+        <a role="button" on:click={(ev) => select(ev, nav.id)} class="pointer">
             {nav.id}
         </a>
-        <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
-            {#if showSelect}
+        <Modal open={lastSelectedId === nav.id} width="{nav.path.length + 4}em" on:close={() => (lastSelectedId = '')}>
+            {#if lastSelectedId === nav.id}
             <svelte:self {item} path={nav.path} />
             {/if}
         </Modal>

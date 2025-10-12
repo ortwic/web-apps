@@ -1,7 +1,7 @@
 <script lang="ts">
     import json from 'json5';
     import { get } from 'svelte/store';
-    import { push, querystring } from 'svelte-spa-router';
+    import { link, push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import type { CellComponent } from 'tabulator-tables';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
@@ -154,7 +154,7 @@
         <button title="Settings" class="icon clear" on:click={() => showSettings = true}>
             <i class="bx bx-cog"></i>
         </button>
-        <span slot="title">{documentPath}</span>
+        <span slot="title"><a use:link href="/manage">{documentPath}</a></span>
     </Toolbar>
 </header>
 
