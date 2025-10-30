@@ -1,17 +1,25 @@
 import json from 'json5';
 import type { FirebaseOptions } from "firebase/app";
 import { derived, writable } from 'svelte/store';
-
-export interface AppSettings {
-    selectedProjectId: string;
-    firebaseConfigs: Record<string, FirebaseOptions>;
-}
+import type { AppSettings } from './settings.type';
 
 export const CONFIG_KEY = 'firelighter-settings';
-export const settingsStore = writable<AppSettings>({
+export const EMULATOR_KEY = 'localhost';
+export const DefaultAppSettings: AppSettings = {
     selectedProjectId: '',
-    firebaseConfigs: {}
-});
+    firebaseConfigs: {
+        [EMULATOR_KEY]: {
+            apiKey: 'localhost-emulator',
+            authDomain: 'http://localhost:9099',
+            databaseURL: 'http://localhost:8080',
+            projectId: EMULATOR_KEY,
+            storageBucket: 'localhost.appspot.com',
+            messagingSenderId: 'localhost',
+            appId: 'localhost'
+        }
+    }
+};
+export const settingsStore = writable<AppSettings>(DefaultAppSettings);
 export const currentFirebaseConfig = derived(settingsStore, (settings) => settings.firebaseConfigs[settings.selectedProjectId]);
 
 export function saveSelectedProjectId(projectId: string): AppSettings {
@@ -36,10 +44,7 @@ export function removeFirebaseConfig(projectId: string): AppSettings {
 
 export function loadSettings(): AppSettings {
     const value = localStorage.getItem(CONFIG_KEY);
-    return value && json.parse<AppSettings>(value) || {
-        selectedProjectId: '',
-        firebaseConfigs: {}
-    };
+    return value && json.parse<AppSettings>(value) || DefaultAppSettings;
 }
 
 function saveSettings(settings: AppSettings): AppSettings {

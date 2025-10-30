@@ -1,14 +1,15 @@
 <script lang="ts">
     import { GoogleAuthProvider, signInWithPopup, type Auth } from 'firebase/auth';
-    import { showInfo } from '../stores/notification.store';
     import { createEventDispatcher } from 'svelte';
+    import { showInfo } from '../stores/notification.store';
+    import { emulationStore } from '../stores/firestore.store';
 
     const dispatcher = createEventDispatcher();
 
     export let auth: Auth | null;
 
     async function login(auth: Auth | null) {
-        if (auth) {    
+        if (auth && !$emulationStore?.maybeConnect()) {
             const credentials = await signInWithPopup(auth, new GoogleAuthProvider());
             showInfo(`User logged in as ${credentials.user.displayName}!`);
             dispatcher('login', credentials.user);

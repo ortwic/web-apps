@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { Auth, User } from "firebase/auth";
     import { signOut } from "firebase/auth";
+    import { emulationStore } from "../stores/firestore.store";
 
     export let auth: Auth | null;
     export let user: User | null;
 
     function logout() {
-        if (auth) {
+        if (auth && !$emulationStore?.maybeDisconnect()) {
             signOut(auth);
         }
     }
