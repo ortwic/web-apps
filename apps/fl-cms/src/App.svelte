@@ -2,9 +2,7 @@
   import { t } from "svelte-i18n";
   import { onMount } from 'svelte';
   import Router, { push } from "svelte-spa-router";
-  import { onAuthStateChanged } from 'firebase/auth';
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
-  import { currentClientAuth, currentClientUser } from "./lib/stores/firebase.store";
   import Header from "./lib/components/Header.svelte";
   import Snackbar from "./lib/components/Snackbar.svelte";
   import Content from "./routes/content/Content.svelte";
@@ -25,10 +23,6 @@
   onMount(() => {
       const settings = loadSettings();
       settingsStore.set(settings);
-
-      if ($currentClientAuth) {
-          onAuthStateChanged($currentClientAuth, currentClientUser.set)
-      }
       
       if (!settings.selectedProjectId) { 
           push('/settings');

@@ -1,11 +1,14 @@
 <script lang="ts">
     import json from 'json5';
     import { onMount } from 'svelte';
+    import { derived } from 'svelte/store';
     import { querystring } from 'svelte-spa-router';
     import type { FirebaseOptions } from 'firebase/app';
-    import { currentFirebaseConfig, removeFirebaseConfig, saveFirebaseConfig } from '../../lib/stores/settings.store';
+    import { removeFirebaseConfig, saveFirebaseConfig, settingsStore } from '../../lib/stores/settings.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
 
+    const currentFirebaseConfig = derived(settingsStore, (settings) => settings.firebaseConfigs[settings.selectedProjectId]);
+    
     const placeholder = `const firebaseConfig = {
   "apiKey": "AIzaSy...DGo4k",
   "authDomain": "myapp-project-123.firebaseapp.com",

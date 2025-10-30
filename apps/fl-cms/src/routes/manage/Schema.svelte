@@ -3,7 +3,7 @@
     import { derived, writable } from 'svelte/store';
     import type { Collection } from '../../lib/models/schema.model';
     import { showError, showWarn } from '../../lib/stores/notification.store';
-    import { currentClientUser } from '../../lib/stores/firebase.store';
+    import { currentClientUser } from '../../lib/stores/app.store';
     import { createSchemaStore } from '../../lib/stores/firestore.store';
     import Modal from '../../lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';

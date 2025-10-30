@@ -9,18 +9,17 @@ export const DefaultAppSettings: AppSettings = {
     selectedProjectId: '',
     firebaseConfigs: {
         [EMULATOR_KEY]: {
-            apiKey: 'localhost-emulator',
+            apiKey: 'default',
             authDomain: 'http://localhost:9099',
             databaseURL: 'http://localhost:8080',
             projectId: EMULATOR_KEY,
             storageBucket: 'localhost.appspot.com',
-            messagingSenderId: 'localhost',
-            appId: 'localhost'
+            messagingSenderId: 'default',
+            appId: 'default'
         }
     }
 };
 export const settingsStore = writable<AppSettings>(DefaultAppSettings);
-export const currentFirebaseConfig = derived(settingsStore, (settings) => settings.firebaseConfigs[settings.selectedProjectId]);
 
 export function saveSelectedProjectId(projectId: string): AppSettings {
     const settings = loadSettings();

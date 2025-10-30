@@ -1,22 +1,22 @@
 <script lang="ts">
-    import { GoogleAuthProvider, signInWithPopup, type Auth } from 'firebase/auth';
     import { createEventDispatcher } from 'svelte';
-    import { showInfo } from '../stores/notification.store';
-    import { emulationStore } from '../stores/firestore.store';
+    import { appStore } from '../stores/app.store';
 
     const dispatcher = createEventDispatcher();
 
-    export let auth: Auth | null;
-
-    async function login(auth: Auth | null) {
-        if (auth && !$emulationStore?.maybeConnect()) {
-            const credentials = await signInWithPopup(auth, new GoogleAuthProvider());
-            showInfo(`User logged in as ${credentials.user.displayName}!`);
-            dispatcher('login', credentials.user);
-        }
+    async function login() {
+        await $appStore.signIn()
+        dispatcher('login');
     }
 </script>
 
-<button disabled={!auth} on:click={() => login(auth)}>
-    <i class="bx bx-lg bx-log-in"></i> <span>Login with Google</span>
+<button disabled={!$appStore.validConfig} on:click={() => login()}>
+    <i class="bx bx-lg bx-log-in"></i> 
+    <span> 
+        {#if $appStore.useEmulator}
+        Login to emulator
+        {:else}
+        Login with Google
+        {/if}
+    </span>
 </button>

@@ -1,11 +1,10 @@
 <script lang="ts">
     import { derived } from 'svelte/store';
     import { push } from 'svelte-spa-router';
-    import type { User } from 'firebase/auth';
     import { colorScheme } from '@web-apps/svelte-tabulator';
     import Login from '../../lib/components/Login.svelte';
     import Logout from '../../lib/components/Logout.svelte';
-    import { currentClientAuth, currentClientUser } from '../../lib/stores/firebase.store';
+    import { currentClientUser } from '../../lib/stores/app.store';
     import SelectProject from './SelectProject.svelte';
     import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
 
@@ -16,12 +15,6 @@
         colorScheme.set($colorScheme === 'light' ? 'dark' : 'light');
         document.documentElement.classList.add($colorScheme);
     }
-    
-    function login(user: User | null) {
-        currentClientUser.set(user);
-        push('/manage');
-    }
-
 </script>
 
 <svelte:head>
@@ -38,9 +31,9 @@
         </p>
 
         {#if $currentClientUser}
-        <Logout auth={$currentClientAuth} user={$currentClientUser} />
+        <Logout user={$currentClientUser} />
         {:else}
-        <Login auth={$currentClientAuth} on:login={({ detail: user }) => login(user)} />
+        <Login on:login={() => push('/manage')} />
         {/if}
 
         <p>

@@ -1,16 +1,13 @@
 import type { Readable } from 'svelte/store';
 import type { Firestore } from 'firebase/firestore';
 import { derived } from 'svelte/store';
-import { getFirestore, Timestamp } from 'firebase/firestore';
-import { currentClientApp } from './firebase.store';
-import { settingsStore } from './settings.store';
+import { Timestamp } from 'firebase/firestore';
+import { appStore } from './app.store';
 import { DocumentStore } from './document.store';
 import { SchemaStore } from './schema.store';
 import type { Collection, Entity } from '../models/schema.model';
-import Emulator from './emulator.class';
 
-export const currentFirestore = derived(currentClientApp, (app) => app ? getFirestore(app) : null);
-export const emulationStore = derived([currentFirestore, settingsStore], ([store, settings]) => store ? new Emulator(store, settings) : null);
+export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
 export function createSchemaStore() {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
