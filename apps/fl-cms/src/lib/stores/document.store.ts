@@ -2,13 +2,15 @@ import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, wr
 import type { Firestore, SetOptions } from 'firebase/firestore';
 import { collection, onSnapshot, doc, getDoc, writeBatch } from 'firebase/firestore';
 import type { Entity } from '../models/schema.model';
-import { showWarn } from './notification.store';
+import { showError, showWarn } from './notification.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
     Object.keys(data).forEach((key) => {
-        if (data[key] === undefined) {
+        if (data[key] === undefined || data[key] === null) {
             delete data[key];
+        } else if (typeof data[key] === 'object') {
+            omitUndefinedFields(data[key] as Record<string, unknown>);
         }
     });
     return data;
@@ -62,12 +64,20 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         if (this.store && documents.length) {
             const batch = writeBatch(this.store);
 
-            documents.forEach((data) => {
+            const commitedData = documents.map((data) => {
+                const dataWithoutNullValues = omitUndefinedFields(data);
                 const docRef = doc(this.store!, this.path, data.id);
-                batch.set(docRef, omitUndefinedFields(data), this.options);
+                batch.set(docRef, dataWithoutNullValues, this.options);
+                return dataWithoutNullValues;
             });
 
-            await batch.commit();
+            try {            
+                await batch.commit();
+            } catch (error: any) {
+                console.error(error);
+                console.debug(commitedData);
+                showError(error.message);                
+            }
         }
     }
 

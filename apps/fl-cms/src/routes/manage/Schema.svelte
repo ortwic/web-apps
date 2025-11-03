@@ -8,6 +8,7 @@
     import Modal from '../../lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
     import SelectDocument from './SelectDocument.svelte';
+  import { onMount } from 'svelte';
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
@@ -18,6 +19,12 @@
     let current = writable<Collection>();
     let currentPath = derived(current, (item) => item && item.pathSegments && item.pathSegments[0] || '');
     let pathInput: HTMLInputElement;
+
+    onMount(() => {
+        if (!$currentClientUser) {
+            showWarn('You are not logged in: Read only mode.');
+        }
+    })
 
     async function add() {
         const path = pathInput.validity.valid && pathInput.value;

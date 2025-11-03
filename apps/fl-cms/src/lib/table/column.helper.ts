@@ -90,7 +90,7 @@ function getCustomDefinitionByType<T>(field: string, prop: AnyProperty, options:
                     const array = <TypedValue[]>cell.getValue();
                     return array ? array
                         .filter(v => typeof v?.value === 'string')
-                        .map(n => marked(<string>n.value))
+                        .map(n => marked(<string>n.value, { mangle: false, headerIds: false }))
                         .join('') : '';
                 }
             }
