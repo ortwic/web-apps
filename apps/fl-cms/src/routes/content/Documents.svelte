@@ -8,7 +8,7 @@
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import type { ColumnOptions } from '../../lib/models/column.model';
     import { createSchemaStore, createDocumentStore, timestampReplacer } from '../../lib/stores/firestore.store';
-    import { prepareColumnDefinitions } from '../../lib/table/column.helper';
+    import { createDefault, prepareColumnDefinitions } from '../../lib/table/column.helper';
     import { Table } from '@web-apps/svelte-tabulator';
     import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import Toolbar from '../../lib/components/Toolbar.svelte';
@@ -77,10 +77,10 @@
         return false;
     }
 
-    function addEntry() {
-        $contentStore.setDocuments({
-            id: newEntryId
-        });
+    function addEntry(collection: Collection | null) {
+        const document = createDefault<Entity>(collection);
+        document.id = newEntryId;
+        $contentStore.setDocuments(document);
         showAddEntry = false;
         newEntryId = '';
     }
@@ -173,9 +173,9 @@
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>
     <h2>Enter unique documentId</h2>
     <input id="entry-id" type="text" required placeholder="documentId" pattern="\w+"
-        bind:value={newEntryId} on:keydown={(e) => e.key === 'Enter' && addEntry()} />
+        bind:value={newEntryId} on:keydown={(e) => e.key === 'Enter' && addEntry(schema)} />
     <br/>
-    <button disabled={!newEntryId} on:click={addEntry}>
+    <button disabled={!newEntryId} on:click={() => addEntry(schema)}>
         <i class="bx bx-plus"></i>
         Add to collection
     </button>

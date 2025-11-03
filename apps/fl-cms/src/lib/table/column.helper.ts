@@ -23,22 +23,21 @@ function actionColumn<T>(options: ColumnOptions<T>): ColumnDefinition {
 
 export function prepareColumnDefinitions<T>(collection: Collection | null, options: ColumnOptions<T>): ColumnDefinition[] {
     const columns = options.actions ? [actionColumn(options)] : [];
-    if (collection?.properties) {
-        Object.entries(collection.properties as Record<string, AnyProperty>).forEach(([field, prop]) => {
-            const custom = getCustomDefinitionByType(field, prop, options);
-            columns.push({
-                field,
-                title: field,
-                resizable: true,
-                sorter: 'string',
-                maxWidth: options?.maxWidth,
-                headerMenu: [],
-                headerFilter: 'input',
-                ...autoFilter(),
-                ...custom
-            });
+    const props = Object.entries(collection?.properties as Record<string, AnyProperty> ?? []);
+    props.forEach(([field, prop]) => {
+        const custom = getCustomDefinitionByType(field, prop, options);
+        columns.push({
+            field,
+            title: field,
+            resizable: true,
+            sorter: 'string',
+            maxWidth: options?.maxWidth,
+            headerMenu: [],
+            headerFilter: 'input',
+            ...autoFilter(),
+            ...custom
         });
-    }
+    });
     return columns;
 }
 
@@ -134,3 +133,29 @@ function getStrings(value: object): string {
     }
     return '';
 };
+
+export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
+    const obj: Record<string, unknown> = { };
+    const props = Object.entries(collection?.properties as Record<string, AnyProperty> ?? []);
+    props.forEach(([field, prop]) => {
+        obj[field] = prop.defaultValue ?? defaultValueByType(prop);
+    });
+    return obj as T;
+}
+
+function defaultValueByType(prop: AnyProperty): unknown {
+    switch (prop.dataType) {
+        case 'string':
+            return '';
+        case 'number':
+            return 0;
+        case 'boolean':
+            return false;
+        case 'array':
+            return [];
+        case 'map':
+            return createDefault(prop);
+        default:
+            return null;
+    }
+}
