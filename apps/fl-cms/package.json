@@ -20,6 +20,12 @@
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",
+    "@milkdown/core": "^7.17.1",
+    "@milkdown/plugin-block": "^7.17.1",
+    "@milkdown/plugin-cursor": "^7.17.1",
+    "@milkdown/plugin-history": "^7.17.1",
+    "@milkdown/preset-commonmark": "^7.17.1",
+    "@milkdown/theme-nord": "^7.17.1",
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/svelte": "^5.2.0",

@@ -8,7 +8,8 @@
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import type { ColumnOptions } from '../../lib/models/column.model';
     import { createSchemaStore, createDocumentStore, timestampReplacer } from '../../lib/stores/firestore.store';
-    import { createDefault, prepareColumnDefinitions } from '../../lib/table/column.helper';
+    import { prepareColumnDefinitions } from '../../lib/table/column.helper';
+    import { createDefault } from '../../lib/table/property.helper';
     import { Table } from '@web-apps/svelte-tabulator';
     import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import Toolbar from '../../lib/components/Toolbar.svelte';
