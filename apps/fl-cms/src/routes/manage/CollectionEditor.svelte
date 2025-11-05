@@ -45,7 +45,7 @@
             return "map";
         };
         
-        const store = get(createDocumentStore(item.path)); // TODO path could be invalid here
+        const store = get(createDocumentStore(item.path, { merge: false }));
         const inferredProps = await buildEntityPropertiesFromData(get(store), getType);
         properties = { 
             ...item.properties, 

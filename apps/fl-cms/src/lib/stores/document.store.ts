@@ -1,6 +1,9 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
-import type { Firestore, SetOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, getDoc, writeBatch } from 'firebase/firestore';
+import type { CollectionReference, DocumentData, Firestore, QueryConstraint, SetOptions } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query } from 'firebase/firestore';
+import { collectionData, docData } from 'rxfire/firestore';
+import { of, type Observable } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 import type { Entity } from '../models/schema.model';
 import { showError, showWarn } from './notification.store';
 
@@ -25,16 +28,16 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     readonly unsubscribe: () => void = () => {};
 
     constructor(private store: Firestore | null, 
-        private path: string, 
+        private path: string | undefined, 
         public options: SetOptions = defaultSetOptions
     ) {
-        const pathValid = path.split('/').length % 2 > 0;
+        const pathValid = path && path.split('/').length % 2 > 0;
         if (!pathValid) {
-            showWarn(`Invalid path ${path}`);
+            console.warn(`Invalid path: ${path}`);
         }
 
         if (store && pathValid) {
-            const reference = collection(store, this.path);
+            const reference = collection(store, path);
             this.unsubscribe = onSnapshot(reference, (snapshot) => {
                 const docs = snapshot.docs.map((d) => (<T>{ id: d.id, ...d.data() }));
                 this.documents.set(docs);
@@ -46,18 +49,21 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         return this.documents.subscribe(run, invalidate);
     }
 
-    async getDocument(id?: string): Promise<T | null> {
+    public getDocuments<T>(...constraints: QueryConstraint[]): Observable<T[]> {
+        if (!this.store) {
+            return of([]);
+        }
+        const items = collection(this.store, this.path) as CollectionReference<T>;
+        const q = query<T, DocumentData>(items, ...constraints);
+        return collectionData<T>(q, this.options).pipe(startWith([]));
+    }
+    
+    public getDocument(id?: string): Observable<T | null> {
         if (id && this.store) {
             const docRef = doc(this.store, this.path, id);
-            const snapshot = await getDoc(docRef);
-            if (snapshot.exists()) {
-                return {
-                    id,
-                    ...snapshot.data({ serverTimestamps: 'none' })
-                } as T;
-            }
+            return docData(docRef, { idField: 'id' });
         }
-        return null;
+        return of(null);
     }
 
     async setDocuments(...documents: T[]) {

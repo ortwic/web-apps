@@ -14,19 +14,18 @@
         const segments = path && path.split('/') || [];
         if (segments.length > 1) {
             if (segments.length % 2 === 0) {
-                const id = segments.pop();
                 return {
-                    id,
+                    id: segments.pop(),
                     path: segments.join('/'),
                     schema: segments.filter((v, i) => i % 2 === 0)
                 };
             }
-
-            console.warn('Invalid path: ' + path);
         }
         return {};
     });
-    const contentStore = derived(pathInfo, ({ path }) => get(createDocumentStore<ContentDocument>(path ?? '')));
+    const contentStore = derived(pathInfo, ({ path }) => get(createDocumentStore<ContentDocument>(path)));
+    const documentStore = derived([contentStore, pathInfo], ([contentStore, { id }]) => contentStore.getDocument(id));
+    const document = $documentStore;
 
     let addSectionMenu: PopupMenu;
     let contentTypes = writable<Record<string, AnyProperty>>({});
@@ -59,18 +58,13 @@
     }
 </script>
 
-{#await $contentStore.getDocument($pathInfo.id)}
-    <Toolbar>
-        <span slot="title">Loading ...</span>
-    </Toolbar>
-{:then document}
 <section class="content-64">
-    {#if document}
+    {#if $document}
         <Toolbar>
-            <span slot="title">{document.id}</span>
+            <span slot="title">{$document.id}</span>
         </Toolbar>
         
-        {#each document.content as { type, value }}
+        {#each $document.content as { type, value }}
             <div class="element grid">
                 <div class="sidebar">
                     <span class="emphasis">{type}</span>
@@ -91,7 +85,7 @@
         <PopupMenu bind:this={addSectionMenu}>
             <div class="flex-y">
                 {#each Object.keys($contentTypes) as type}
-                    <button class="btn" on:click={() => addSection(type, document)}>
+                    <button class="btn" on:click={() => addSection(type, $document)}>
                         <span class="emphasis"> {type}</span>
                     </button>
                 {/each}
@@ -103,7 +97,6 @@
         </Toolbar>
     {/if}
 </section>
-{/await}
 
 <style lang="scss">
     .element {

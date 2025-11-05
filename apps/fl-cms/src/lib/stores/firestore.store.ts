@@ -1,5 +1,5 @@
 import type { Readable } from 'svelte/store';
-import type { Firestore } from 'firebase/firestore';
+import type { Firestore, SetOptions } from 'firebase/firestore';
 import { derived } from 'svelte/store';
 import { Timestamp } from 'firebase/firestore';
 import { appStore } from './app.store';
@@ -9,15 +9,15 @@ import type { Collection, Entity } from '../models/schema.model';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
-export function createSchemaStore() {
+export function createSchemaStore(options?: SetOptions) {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
-        set(new SchemaStore(new DocumentStore<Collection>(store, '__schema')))
+        set(new SchemaStore(new DocumentStore<Collection>(store, '__schema', options)))
     );
 }
 
-export function createDocumentStore<T extends Entity>(path: string) {
+export function createDocumentStore<T extends Entity>(path?: string, options?: SetOptions) {
     return derived<Readable<Firestore | null>, DocumentStore<T>>(currentFirestore, (store, set) =>
-        set(new DocumentStore(store, path))
+        set(new DocumentStore(store, path, options))
     );
 }
 

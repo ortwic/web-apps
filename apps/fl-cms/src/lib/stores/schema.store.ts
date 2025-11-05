@@ -1,6 +1,7 @@
 import { derived, type Readable } from "svelte/store";
 import type { Collection } from "../models/schema.model";
 import type { DocumentStore } from "./document.store";
+import { firstValueFrom, map } from "rxjs";
 
 export class SchemaStore implements Readable<Collection[]> {
     subscribe: Readable<Collection[]>['subscribe'];
@@ -47,8 +48,9 @@ export class SchemaStore implements Readable<Collection[]> {
             return document;
         }
 
-        const root = await this.store.getDocument(pathSegments.shift());
-        return lastNode(root, pathSegments);
+        const node = this.store.getDocument(pathSegments.shift())
+            .pipe(map(d => lastNode(d, pathSegments)));
+        return await firstValueFrom(node);
     }
 
     async createNodes(path: string): Promise<void> {
