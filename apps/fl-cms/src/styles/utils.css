@@ -53,6 +53,10 @@
     letter-spacing: .1rem;
 }
 
+.small {
+    font-size: small;
+}
+
 .pointer {
     cursor: pointer;
 }

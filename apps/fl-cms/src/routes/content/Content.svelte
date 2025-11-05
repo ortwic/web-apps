@@ -1,8 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { derived, get, writable } from 'svelte/store';
+    import collapse from 'svelte-collapse';
     import { querystring } from 'svelte-spa-router';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
+    import Expand from '../../lib/components/Expand.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
     import type { ContentDocument } from '../../lib/models/content.type';
@@ -27,7 +29,8 @@
     const documentStore = derived([contentStore, pathInfo], ([contentStore, { id }]) => contentStore.getDocument(id));
     const document = $documentStore;
 
-    let addSectionMenu: PopupMenu;
+    let currentIndex: number | undefined;
+    let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
     let contentTypes = writable<Record<string, AnyProperty>>({});
 
     onMount(async () => {
@@ -51,10 +54,35 @@
         }
     }
 
-    function addSection(type: string, document: ContentDocument) {
+    function showPopupMenu(event: MouseEvent, index: number) {
+        currentIndex = index;
+        editSectionMenu.showPopupMenu(event);
+    }
+
+    function insertSection(type: string, document: ContentDocument) {
         const value = defaultValueByType($contentTypes[type]) as object;
-        document.content.push({ type, value });
+        if (currentIndex !== undefined && currentIndex < document.content.length -1) {
+            if (currentIndex < 1) {
+                document.content.unshift({ type, value });
+            } else {
+                const end = document.content.splice(currentIndex + 1);
+                document.content.push({ type, value }, ...end);
+            }
+        } else {
+            document.content.push({ type, value });
+        }
         $contentStore.setDocuments(document);
+
+        currentIndex = undefined;
+    }
+
+    function removeSection(document: ContentDocument) {
+        if (currentIndex !== undefined) {
+            document.content.splice(currentIndex, 1);
+            $contentStore.setDocuments(document);
+
+            currentIndex = undefined;
+        }
     }
 </script>
 
@@ -64,28 +92,42 @@
             <span slot="title">{$document.id}</span>
         </Toolbar>
         
-        {#each $document.content as { type, value }}
-            <div class="element grid">
-                <div class="sidebar">
-                    <span class="emphasis">{type}</span>
-                </div>
-
+        {#each $document.content as { type, value }, index}
+        <Expand>
+            <span slot="header" class="spacer x-flex-full">
+                <span></span>
+                <span class="small emphasis">{type}</span>
+                <button class="clear" on:click={(ev) => showPopupMenu(ev, index)}>⋮</button>
+            </span>
+            <div class="element" use:collapse={{ open: true, duration: 200, easing: 'ease-in-out' }}>
                 {#if typeof value === 'string'}
                     <TextEditor {value} />
                 {:else}
                     <pre>{JSON.stringify(value, null, 2)}</pre>
                 {/if}
             </div>
+        </Expand>
         {/each}
 
         <button class="clear" on:click={addSectionMenu.showPopupMenu}>
             <i class="bx bx-plus"></i>
         </button>
 
+        <PopupMenu bind:this={editSectionMenu}>
+            <div class="small menu no-wrap y-flex">
+                <button class="btn" on:click={addSectionMenu.showPopupMenu}>
+                    <span class="emphasis"><i class="bx bx-plus"></i> add section</span>
+                </button>
+                <button class="btn" on:click={() => removeSection($document)}>
+                    <span class="emphasis"><i class="bx bx-minus"></i> remove section</span>
+                </button>
+            </div>
+        </PopupMenu>
+
         <PopupMenu bind:this={addSectionMenu}>
-            <div class="flex-y">
+            <div class="small menu y-flex">
                 {#each Object.keys($contentTypes) as type}
-                    <button class="btn" on:click={() => addSection(type, $document)}>
+                    <button class="btn" on:click={() => insertSection(type, $document)}>
                         <span class="emphasis"> {type}</span>
                     </button>
                 {/each}
@@ -109,32 +151,8 @@
         background-color: var(--color-bg-3);
     }
 
-    .grid {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 1rem;
-
-        .sidebar {
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--color-bg-1);
-            border: 1px solid var(--color-bg-1);
-            width: 3rem;
-
-            span {
-                display: block;
-                transform: rotate(-90deg);
-            }
-        }
-    }
-
-    .flex-y {
-        display: flex;
-        flex-direction: column;
-        padding: .2em;
-        width: 10em;
+    .menu {
+        background-color: var(--color-bg-2);
 
         button {
             text-align: left;

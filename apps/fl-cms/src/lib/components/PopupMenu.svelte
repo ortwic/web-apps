@@ -1,6 +1,8 @@
 <script lang='ts'>
-  import { onDestroy } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
   import { fade } from "svelte/transition";
+
+  const dispatch = createEventDispatcher()
 
   export let width: string | number = "auto";
   let menu: HTMLDivElement;
@@ -34,10 +36,11 @@
 
   function hide() {
     visible = false;
+    dispatch('hide');
   }
 </script>
 
-<div class="container" aria-hidden="true" bind:this={menu} style:left style:top style:width
+<div class="container" aria-hidden="{!visible}" bind:this={menu} style:left style:top style:width
     bind:offsetWidth bind:offsetHeight on:click={hide}>
     {#if visible}
     <div class='popup-menu' in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
