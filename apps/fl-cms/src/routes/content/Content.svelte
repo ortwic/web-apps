@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { derived, get, writable } from 'svelte/store';
-    import collapse from 'svelte-collapse';
     import { querystring } from 'svelte-spa-router';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
     import Expand from '../../lib/components/Expand.svelte';
@@ -10,6 +9,7 @@
     import type { ContentDocument } from '../../lib/models/content.type';
     import { defaultValueByType } from '../../lib/table/property.helper';
     import { createDocumentStore, createSchemaStore } from '../../lib/stores/firestore.store';
+    import { showInfo } from '../../lib/stores/notification.store';
     import TextEditor from './TextEditor.svelte';
 
     const pathInfo = derived(querystring, (path) => {
@@ -54,6 +54,16 @@
         }
     }
 
+    function update(document: ContentDocument, content: string, index: number) {
+        const section = document.content[index];
+        if (section.value !== content) {
+            section.value = content;
+            $contentStore.setDocuments(document);
+            
+            showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
+        }
+    }
+
     function showPopupMenu(event: MouseEvent, index: number) {
         currentIndex = index;
         editSectionMenu.showPopupMenu(event);
@@ -90,6 +100,10 @@
     {#if $document}
         <Toolbar>
             <span slot="title">{$document.id}</span>
+
+            <button class="clear" on:click={addSectionMenu.showPopupMenu}>
+                <i class="bx bx-plus"></i>
+            </button>
         </Toolbar>
         
         {#each $document.content as { type, value }, index}
@@ -99,19 +113,18 @@
                 <span class="small emphasis">{type}</span>
                 <button class="clear" on:click={(ev) => showPopupMenu(ev, index)}>⋮</button>
             </span>
-            <div class="element" use:collapse={{ open: true, duration: 200, easing: 'ease-in-out' }}>
+            <div class="element">
                 {#if typeof value === 'string'}
-                    <TextEditor {value} />
+                    <TextEditor {value} intervalInSecs={10}
+                        on:focus={() => currentIndex = index}
+                        on:autosave={({ detail }) => update($document, detail, index)}
+                        on:blur={({ detail }) => update($document, detail, index)} />
                 {:else}
                     <pre>{JSON.stringify(value, null, 2)}</pre>
                 {/if}
             </div>
         </Expand>
         {/each}
-
-        <button class="clear" on:click={addSectionMenu.showPopupMenu}>
-            <i class="bx bx-plus"></i>
-        </button>
 
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small menu no-wrap y-flex">

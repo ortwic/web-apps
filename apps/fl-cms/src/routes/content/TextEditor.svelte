@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher } from 'svelte';
-    import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
+    import { createEventDispatcher, onDestroy } from 'svelte';
+    import { Editor, rootCtx, defaultValueCtx, editorViewCtx, serializerCtx } from '@milkdown/core';
     import { nord } from '@milkdown/theme-nord';
     import { commonmark } from '@milkdown/preset-commonmark';
     import { block } from '@milkdown/plugin-block';
@@ -8,14 +8,17 @@
     import { history } from '@milkdown/plugin-history';
 
     export let value: string = '';
+    export let intervalInSecs = 0;
+    let intervalId: ReturnType<typeof setInterval>;
+
+    onDestroy(() => clearInterval(intervalId));
 
     const dispatch = createEventDispatcher();
-    let editorContainer: HTMLDivElement;
 
-    onMount(async () => {
-        const editor = await Editor.make()
+    function editor(div: HTMLElement) {
+        Editor.make()
             .config((ctx) => {
-                ctx.set(rootCtx, editorContainer);
+                ctx.set(rootCtx, div);
                 ctx.set(defaultValueCtx, value);
             })
             .config(nord)
@@ -23,26 +26,36 @@
             .use(block)
             .use(cursor)
             .use(history)
-            .create();
-
-        editor.action((ctx) => {
-            // const view = ctx.get(rootCtx).firstChild?.['editorView'];
-            // if (view) {
-            //     view.setProps({
-            //         handleDOMEvents: {
-            //             input: () => {
-            //                 const text = view.state.doc.textContent;
-            //                 dispatch('change', text);
-            //                 return false;
-            //             }
-            //         }
-            //     });
-            // }
-        });
-    });
+            .create()
+            .then(editor => {
+                editor.action((ctx) => {
+                    const editorView = ctx.get(editorViewCtx);
+                    const serializer = ctx.get(serializerCtx);
+                    const update = (type: string) => {
+                        const md = serializer(editorView.state.doc);
+                        dispatch(type, md);
+                    };
+                    editorView.setProps({
+                        handleDOMEvents: {
+                            focus() {
+                                dispatch('focus');
+                                if (intervalInSecs > 0) {
+                                    intervalId = setInterval(() => update('autosave'), intervalInSecs * 1000);
+                                }
+                            },
+                            input: () => update('input'),
+                            blur() {
+                                update('blur');
+                                clearInterval(intervalId);
+                            },
+                        }
+                    });
+                });
+            });
+    }
 </script>
 
-<div bind:this={editorContainer} class="milkdown"></div>
+<div use:editor class="milkdown"></div>
 
 <style>
 </style>
