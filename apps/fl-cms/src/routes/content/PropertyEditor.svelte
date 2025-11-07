@@ -4,6 +4,7 @@
   import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
   import { currentClientUser } from "../../lib/stores/app.store";
   import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
+  import Expand from '../../lib/components/Expand.svelte';
   
   export let document: ContentDocument;
   export let properties: Record<string, AnyProperty> | undefined;
@@ -39,13 +40,15 @@
     <li title="{prop.dataType}">
         <div class="grid">
             {#if isImage(prop)}
-            <details class="colspan" open>
-                <summary class="emphasis no-wrap">{prop.name}</summary>
-                <div class="grid">
-                    <img src="{document[field]}" alt="{prop.name}" style="width: 12em;">
-                    <textarea {disabled} id="{field}" value="{document[field]}" />                            
-                </div>
-            </details>
+            <span class="colspan">
+                <Expand>
+                    <span slot="header" class="emphasis no-wrap">{prop.name}</span>
+                    <div class="grid">
+                        <img src="{document[field]}" alt="{prop.name}" style="width: 12em;">
+                        <textarea {disabled} id="{field}" value="{document[field]}" />                            
+                    </div>
+                </Expand>
+            </span>
             {:else if prop.dataType === 'string'}
             <label for="{field}">{prop.name}</label>
             <input type="text" {disabled} id="{field}" 
@@ -62,12 +65,12 @@
                 value="{isoToLocal(field)}" 
                 on:input={(ev) => update(ev, field)} />
             {:else if prop.dataType === 'map'}
-            <details open>
-                <summary class="emphasis no-wrap">{prop.name}</summary>
+            <Expand>
+                <span slot="header" class="emphasis no-wrap">{prop.name}</span>
                 <span class="indent">
                     <svelte:self document="{document[field]}" properties="{prop.properties}" />
                 </span>
-            </details>
+            </Expand>
             {:else}
             <pre id="{field}" class="colspan">{JSON.stringify(prop, null, 2)}</pre>
             {/if}
@@ -101,11 +104,7 @@
         grid-column: 1 / span 2;
     }
 
-    summary {
-        cursor: pointer;
-    }
-
-    details > .indent {
+    span.indent {
         text-indent: 1em;
     }
 </style>

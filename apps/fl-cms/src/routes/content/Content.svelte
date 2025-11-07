@@ -1,9 +1,8 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import { derived, get } from 'svelte/store';
     import { link, querystring } from 'svelte-spa-router';
-    import { firstValueFrom, map, tap } from 'rxjs';
-    import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
+    import { map } from 'rxjs';
+    import type { AnyProperty, Properties, StringProperty } from '../../lib/packages/firecms_core/types/properties';
     import Expand from '../../lib/components/Expand.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
@@ -31,17 +30,21 @@
     const document = $documentStore;
 
     const currentSchema = getCurrentScheme(querystring);
+    const properties = currentSchema.pipe(
+        map(schema => Object.entries(schema?.properties as Properties)
+            .filter(([field]) => field !== 'content')
+            .reduce((acc, [field, prop]) => {
+                acc[field] = prop;
+                return acc;
+            }, {} as Record<string, AnyProperty>)
+        )
+    );
     const contentTypes = currentSchema.pipe(
-        map(schema => arrayToMap((schema?.properties as Properties)['content'])), 
-        tap(types => console.log(Object.keys(types).length ? types : "TODO fix empty object from observable"))
+        map(schema => arrayToMap((schema?.properties as Properties)['content']))
     );
 
     let currentIndex: number | undefined;
     let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
-    let resolvedContentTypes: Record<string, AnyProperty> = {};
-
-    // TODO last value incoming is always an empty object so as a workaround make observable a promise 
-    onMount(async () => resolvedContentTypes = await firstValueFrom(contentTypes));
 
     function showPopupMenu(event: MouseEvent, index?: number) {
         if (index !== undefined) {
@@ -51,14 +54,18 @@
             addSectionMenu.showPopupMenu(event);
         }
     }
-    
+
+    function isMarkdown(type: string) {
+        return ($contentTypes && $contentTypes[type] as StringProperty)?.markdown === true;
+    }
+
     async function updateProperty(document: ContentDocument, { field, value }: UpdatePropertyArgs) {
         document[field] = value;
         await $contentStore.setDocuments(document);
     }
 
     function insertSection(type: string, document: ContentDocument) {
-        const value = defaultValueByType(resolvedContentTypes[type]) as object;
+        const value = defaultValueByType($contentTypes[type]) as object;
         if (currentIndex !== undefined && currentIndex < document.content.length -1) {
             if (currentIndex < 1) {
                 document.content.unshift({ type, value });
@@ -100,12 +107,12 @@
             <span slot="title"><a use:link href="/manage">{$document.id}</a></span>
         </Toolbar>
 
-        <Expand>
+        <Expand open={false}>
             <span slot="header" class="center">
-                <button class="clear small emphasis" on:click={showPopupMenu}>Page Details ⋮</button>
+                <button class="clear small emphasis" on:click={showPopupMenu}>{$currentSchema?.name} Details ⋮</button>
             </span>
             <div>
-                <PropertyEditor document={$document} properties={$currentSchema?.properties} 
+                <PropertyEditor document={$document} properties={$properties} 
                     on:update={({ detail }) => updateProperty($document, detail)}/>
             </div>
         </Expand>
@@ -116,7 +123,7 @@
                 <button class="clear small emphasis" on:click={(ev) => showPopupMenu(ev, index)}>{type} ⋮</button>
             </span>
             <div class="element">
-                {#if typeof value === 'string'}
+                {#if typeof value === 'string' && isMarkdown(type)}
                     <TextEditor {value} intervalInSecs={10}
                         on:focus={() => currentIndex = index}
                         on:autosave={({ detail }) => updateSection($document, detail, index)}
@@ -141,7 +148,7 @@
 
         <PopupMenu bind:this={addSectionMenu}>
             <div class="small menu y-flex">
-                {#each Object.keys(resolvedContentTypes) as type}
+                {#each Object.keys($contentTypes) as type}
                     <button class="btn" on:click={() => insertSection(type, $document)}>
                         <span class="emphasis"> {type}</span>
                     </button>

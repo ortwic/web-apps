@@ -56,7 +56,8 @@ export class SchemaStore implements Readable<Collection[]> {
         }
 
         return this.store.getDocument(pathSegments.shift())
-            .pipe(map(d => lastNode(d, pathSegments)));
+            // pass copy of array, otherwise oberservable would fire multiple times
+            .pipe(map(d => lastNode(d, [...pathSegments])));
     }
 
     async createCollections(path: string): Promise<void> {

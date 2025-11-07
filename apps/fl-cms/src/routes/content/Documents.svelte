@@ -161,9 +161,6 @@
     </Toolbar>
 </header>
 
-<!-- TODO last value incoming is always an empty object 
-    so as a workaround make observable a promise 
--->
 {#await firstValueFrom(currentSchema)}
 <p>Loading...</p>
 {:then schema}

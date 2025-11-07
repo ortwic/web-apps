@@ -14,7 +14,7 @@
     let showJsonView = false;
     let properties = item.properties || {};
 
-    const schemaStore = createSchemaStore();
+    const schemaStore = createSchemaStore({ merge: false });
 
     async function saveCollection() {
         try {
