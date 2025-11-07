@@ -4,7 +4,7 @@
     import type { Collection } from "../../lib/models/schema.model";
     import Modal from "../../lib/components/Modal.svelte";
     import Toolbar from "../../lib/components/Toolbar.svelte";
-    import { createDocumentStore } from "../../lib/stores/firestore.store";
+    import { createDocumentStore } from "../../lib/stores/db/firestore.store";
 
     export let item: Collection;
     export let path: string;

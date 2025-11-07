@@ -1,11 +1,13 @@
 import type { Readable } from 'svelte/store';
 import type { Firestore, SetOptions } from 'firebase/firestore';
-import { derived } from 'svelte/store';
+import { derived, get } from 'svelte/store';
 import { Timestamp } from 'firebase/firestore';
-import { appStore } from './app.store';
-import { DocumentStore } from './document.store';
-import { SchemaStore } from './schema.store';
-import type { Collection, Entity } from '../models/schema.model';
+import { switchMap } from 'rxjs';
+import { appStore } from '../app.store';
+import { DocumentStore } from './document.service';
+import { SchemaStore } from './schema.service';
+import type { Collection, Entity } from '../../models/schema.model';
+import { fromStore } from '../../utils/rx.store';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
@@ -15,13 +17,18 @@ export function createSchemaStore(options?: SetOptions) {
     );
 }
 
+export function getCurrentScheme(path: Readable<string | undefined>) {
+    const schemaStore = get(createSchemaStore());
+    return fromStore(path).pipe(switchMap(p => schemaStore.getCollection(p)));
+}
+
 export function createDocumentStore<T extends Entity>(path?: string, options?: SetOptions) {
     return derived<Readable<Firestore | null>, DocumentStore<T>>(currentFirestore, (store, set) =>
         set(new DocumentStore(store, path, options))
     );
 }
 
-export function timestampReplacer(key: string, value: unknown) {
+export function timestampToIsoDate<T>(value: T) {
     if (value && typeof value === 'object' && 'seconds' in value && 'nanoseconds' in value) {
         const ts = new Timestamp(Number(value.seconds), Number(value.nanoseconds));
         return ts.toDate().toISOString();

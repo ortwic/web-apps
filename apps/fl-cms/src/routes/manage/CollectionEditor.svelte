@@ -5,7 +5,7 @@
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Collection } from '../../lib/models/schema.model';
-    import { createSchemaStore, createDocumentStore } from '../../lib/stores/firestore.store';
+    import { createSchemaStore, createDocumentStore } from '../../lib/stores/db/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';

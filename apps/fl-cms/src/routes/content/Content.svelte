@@ -1,16 +1,18 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { derived, get, writable } from 'svelte/store';
-    import { querystring } from 'svelte-spa-router';
+    import { derived, get } from 'svelte/store';
+    import { link, querystring } from 'svelte-spa-router';
+    import { firstValueFrom, map, tap } from 'rxjs';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
     import Expand from '../../lib/components/Expand.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
-    import type { ContentDocument } from '../../lib/models/content.type';
-    import { defaultValueByType } from '../../lib/table/property.helper';
-    import { createDocumentStore, createSchemaStore } from '../../lib/stores/firestore.store';
+    import type { ContentDocument, UpdatePropertyArgs } from '../../lib/models/content.type';
+    import { arrayToMap, defaultValueByType } from '../../lib/utils/property.helper';
+    import { createDocumentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { showInfo } from '../../lib/stores/notification.store';
     import TextEditor from './TextEditor.svelte';
+    import PropertyEditor from './PropertyEditor.svelte';
 
     const pathInfo = derived(querystring, (path) => {
         const segments = path && path.split('/') || [];
@@ -18,8 +20,7 @@
             if (segments.length % 2 === 0) {
                 return {
                     id: segments.pop(),
-                    path: segments.join('/'),
-                    schema: segments.filter((v, i) => i % 2 === 0)
+                    path: segments.join('/')
                 };
             }
         }
@@ -29,48 +30,35 @@
     const documentStore = derived([contentStore, pathInfo], ([contentStore, { id }]) => contentStore.getDocument(id));
     const document = $documentStore;
 
+    const currentSchema = getCurrentScheme(querystring);
+    const contentTypes = currentSchema.pipe(
+        map(schema => arrayToMap((schema?.properties as Properties)['content'])), 
+        tap(types => console.log(Object.keys(types).length ? types : "TODO fix empty object from observable"))
+    );
+
     let currentIndex: number | undefined;
     let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
-    let contentTypes = writable<Record<string, AnyProperty>>({});
+    let resolvedContentTypes: Record<string, AnyProperty> = {};
 
-    onMount(async () => {
-        await initContentTypes();
-    });
+    // TODO last value incoming is always an empty object so as a workaround make observable a promise 
+    onMount(async () => resolvedContentTypes = await firstValueFrom(contentTypes));
 
-    async function initContentTypes() {
-        const path = $pathInfo.schema;
-        if (path) {
-            const schemaStore = get(createSchemaStore());
-            const node = await schemaStore.getNode(...path);
-            const contentDescription = (node?.properties as Properties)['content'];
-            if (contentDescription && contentDescription.dataType === "array") {
-                const types: Record<string, AnyProperty> = {};
-                Object.entries(contentDescription.oneOf?.properties ?? {})
-                    .forEach(([field, prop]) => {
-                        types[field] = prop;
-                    });
-                contentTypes.set(types);
-            }
+    function showPopupMenu(event: MouseEvent, index?: number) {
+        if (index !== undefined) {
+            currentIndex = index;
+            editSectionMenu.showPopupMenu(event);
+        } else {
+            addSectionMenu.showPopupMenu(event);
         }
     }
-
-    function update(document: ContentDocument, content: string, index: number) {
-        const section = document.content[index];
-        if (section.value !== content) {
-            section.value = content;
-            $contentStore.setDocuments(document);
-            
-            showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
-        }
-    }
-
-    function showPopupMenu(event: MouseEvent, index: number) {
-        currentIndex = index;
-        editSectionMenu.showPopupMenu(event);
+    
+    async function updateProperty(document: ContentDocument, { field, value }: UpdatePropertyArgs) {
+        document[field] = value;
+        await $contentStore.setDocuments(document);
     }
 
     function insertSection(type: string, document: ContentDocument) {
-        const value = defaultValueByType($contentTypes[type]) as object;
+        const value = defaultValueByType(resolvedContentTypes[type]) as object;
         if (currentIndex !== undefined && currentIndex < document.content.length -1) {
             if (currentIndex < 1) {
                 document.content.unshift({ type, value });
@@ -79,11 +67,21 @@
                 document.content.push({ type, value }, ...end);
             }
         } else {
-            document.content.push({ type, value });
+            document.content.unshift({ type, value });
         }
         $contentStore.setDocuments(document);
 
         currentIndex = undefined;
+    }
+
+    async function updateSection(document: ContentDocument, content: string, index: number) {
+        const section = document.content[index];
+        if (section.value !== content) {
+            section.value = content;
+            await $contentStore.setDocuments(document);
+            
+            showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
+        }
     }
 
     function removeSection(document: ContentDocument) {
@@ -99,26 +97,30 @@
 <section class="content-64">
     {#if $document}
         <Toolbar>
-            <span slot="title">{$document.id}</span>
-
-            <button class="clear" on:click={addSectionMenu.showPopupMenu}>
-                <i class="bx bx-plus"></i>
-            </button>
+            <span slot="title"><a use:link href="/manage">{$document.id}</a></span>
         </Toolbar>
+
+        <Expand>
+            <span slot="header" class="center">
+                <button class="clear small emphasis" on:click={showPopupMenu}>Page Details ⋮</button>
+            </span>
+            <div>
+                <PropertyEditor document={$document} properties={$currentSchema?.properties} 
+                    on:update={({ detail }) => updateProperty($document, detail)}/>
+            </div>
+        </Expand>
         
         {#each $document.content as { type, value }, index}
         <Expand>
-            <span slot="header" class="spacer x-flex-full">
-                <span></span>
-                <span class="small emphasis">{type}</span>
-                <button class="clear" on:click={(ev) => showPopupMenu(ev, index)}>⋮</button>
+            <span slot="header" class="center">
+                <button class="clear small emphasis" on:click={(ev) => showPopupMenu(ev, index)}>{type} ⋮</button>
             </span>
             <div class="element">
                 {#if typeof value === 'string'}
                     <TextEditor {value} intervalInSecs={10}
                         on:focus={() => currentIndex = index}
-                        on:autosave={({ detail }) => update($document, detail, index)}
-                        on:blur={({ detail }) => update($document, detail, index)} />
+                        on:autosave={({ detail }) => updateSection($document, detail, index)}
+                        on:blur={({ detail }) => updateSection($document, detail, index)} />
                 {:else}
                     <pre>{JSON.stringify(value, null, 2)}</pre>
                 {/if}
@@ -139,7 +141,7 @@
 
         <PopupMenu bind:this={addSectionMenu}>
             <div class="small menu y-flex">
-                {#each Object.keys($contentTypes) as type}
+                {#each Object.keys(resolvedContentTypes) as type}
                     <button class="btn" on:click={() => insertSection(type, $document)}>
                         <span class="emphasis"> {type}</span>
                     </button>

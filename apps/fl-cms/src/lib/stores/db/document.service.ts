@@ -4,8 +4,8 @@ import { collection, onSnapshot, doc, writeBatch, query } from 'firebase/firesto
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import type { Entity } from '../models/schema.model';
-import { showError, showWarn } from './notification.store';
+import type { Entity } from '../../models/schema.model';
+import { showError, showWarn } from '../notification.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {

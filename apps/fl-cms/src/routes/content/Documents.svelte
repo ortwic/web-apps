@@ -1,15 +1,14 @@
 <script lang="ts">
     import json from 'json5';
-    import { get } from 'svelte/store';
     import { link, push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import type { CellComponent } from 'tabulator-tables';
+    import { firstValueFrom, map } from 'rxjs';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Entity, Collection } from '../../lib/models/schema.model';
-    import type { ColumnOptions } from '../../lib/models/column.model';
-    import { createSchemaStore, createDocumentStore, timestampReplacer } from '../../lib/stores/firestore.store';
-    import { prepareColumnDefinitions } from '../../lib/table/column.helper';
-    import { createDefault } from '../../lib/table/property.helper';
+    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../lib/stores/db/firestore.store';
+    import { prepareColumnDefinitions } from '../../lib/utils/column.helper';
+    import { createDefault } from '../../lib/utils/property.helper';
     import { Table } from '@web-apps/svelte-tabulator';
     import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import Toolbar from '../../lib/components/Toolbar.svelte';
@@ -25,30 +24,21 @@
     let importJsonData: Entity[] | null;
 
     const documentPath = $querystring!;
-    const schemaStore = get(createSchemaStore());
-    const currentSchema = schemaStore.getNodeFromDocumentPath(documentPath);
+    const currentSchema = getCurrentScheme(querystring);
     const contentStore = createDocumentStore(documentPath);
     const documents = $contentStore;
-    const options: ColumnOptions<Entity> = { 
+    const columns = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
-        updateHandler(doc) {
-            try {
-                if (documentPath !== undefined) {
-                    return $contentStore.setDocuments(doc).then(() => showInfo(`Updated document ${JSON.stringify(doc)}`));
-                }
-                showError(`DocumentId is undefined`);
-            } catch (error: any) {
-                showError(`Failed to update document: ${error?.message}`);
-            }
-        }
-    };
+        updateHandler: update, 
+        actions: getActions(s) 
+    })));
     const editAction = {
         label: '<i class="bx bx-edit"></i> Edit content',
         action: (e: MouseEvent, cell: CellComponent) => {
             const id = cell.getData()['id'];
-            push(`/content?${documentPath}/${id}`);
+            push(`/content?${$querystring}/${id}`);
         }
     };
     const deleteAction = {
@@ -86,6 +76,18 @@
         newEntryId = '';
     }
 
+    function update<T extends Entity>(doc: T) {
+        try {
+            if (documentPath !== undefined) {
+                return $contentStore.setDocuments(doc)
+                    .then(() => showInfo(`Updated document ${JSON.stringify(doc)}`));
+            }
+            showError(`DocumentId is undefined`);
+        } catch (error: any) {
+            showError(`Failed to update document: ${error?.message}`);
+        }
+    }
+
     function selectFile() {
         // ensure onchange fires for same file again
         uploadInput.value = '';
@@ -121,7 +123,7 @@
 
     function exportAsJson() {
         try {
-            const jsonStr = JSON.stringify($documents, timestampReplacer, 2); 
+            const jsonStr = JSON.stringify($documents, (k, v) => timestampToIsoDate(v), 2); 
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -159,20 +161,19 @@
     </Toolbar>
 </header>
 
-{#await currentSchema}
+<!-- TODO last value incoming is always an empty object 
+    so as a workaround make observable a promise 
+-->
+{#await firstValueFrom(currentSchema)}
 <p>Loading...</p>
 {:then schema}
 <section>
-    <Table idField="id" data={documents} persistenceID={documentPath}
-        columns={prepareColumnDefinitions(schema, {
-            ...options,
-            actions: getActions(schema)
-        })} 
+    <Table idField="id" data={documents} persistenceID={documentPath} columns={$columns}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
 </section>
 
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>
-    <h2>Enter unique documentId</h2>
+    <p>Enter unique id for {schema?.name}</p>
     <input id="entry-id" type="text" required placeholder="documentId" pattern="\w+"
         bind:value={newEntryId} on:keydown={(e) => e.key === 'Enter' && addEntry(schema)} />
     <br/>

@@ -5,3 +5,8 @@ export type TypedValue = {
     value: string | object;
     type: string;
 };
+
+  export type UpdatePropertyArgs<T = unknown> = {
+      field: string;
+      value: T;
+  };

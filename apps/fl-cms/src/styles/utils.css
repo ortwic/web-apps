@@ -14,6 +14,10 @@
     margin: 0 auto;
 }
 
+.center {
+    text-align: center;
+}
+
 .info {
     font-style: italic;
     background-color: var(--color-bg-3);

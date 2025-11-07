@@ -1,19 +1,18 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
     import type { Collection } from '../../lib/models/schema.model';
     import { showError, showWarn } from '../../lib/stores/notification.store';
     import { currentClientUser } from '../../lib/stores/app.store';
-    import { createSchemaStore } from '../../lib/stores/firestore.store';
+    import { createSchemaStore } from '../../lib/stores/db/firestore.store';
     import Modal from '../../lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
     import SelectDocument from './SelectDocument.svelte';
-  import { onMount } from 'svelte';
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
-    $: canAdd = !$currentClientUser;
-    $: canEdit = !$currentClientUser;
+    $: disabled = !$currentClientUser;
 
     let showEdit = false, showSelect = false;
     let current = writable<Collection>();
@@ -39,7 +38,7 @@
         pathInput.value = '';
 
         try {
-            return $schemaStore?.createNodes(path);
+            return $schemaStore?.createCollections(path);
         } catch (ex: any) {
             showError(ex.message);
         }
@@ -65,7 +64,7 @@
             message += `\n\nWARNING! This collections will be removed too:\n${subs}`;
         }
         if (confirm(message)) {
-            return $schemaStore?.removeNodes(item.path);
+            return $schemaStore?.removeCollections(item.path);
         }
     }
 </script>
@@ -80,10 +79,10 @@
         {#each $schemas as item}
             <div class="flex-center item emphasis">
                 <div title={item.path} class="actions">
-                    <button disabled={canEdit} class="clear" on:click={(ev) => edit(ev, item)}>
+                    <button {disabled} class="clear" on:click={(ev) => edit(ev, item)}>
                         <i class="bx bx-edit"></i>
                     </button>
-                    <button disabled={canEdit} class="clear" on:click={(ev) => remove(ev, item)}>
+                    <button {disabled} class="clear" on:click={(ev) => remove(ev, item)}>
                         <i class="bx bx-trash danger"></i>
                     </button>
                 </div>
@@ -109,14 +108,14 @@
         {/each}
         <div class="flex-center item">
             <div class="actions"><br/></div>
-            <input disabled={canAdd}
+            <input {disabled}
                 type="text" pattern="[\w\/]+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
                 placeholder="Collection"
             />
             <br/>
-            <button disabled={canAdd} class="clear" on:click={add}>
+            <button {disabled} class="clear" on:click={add}>
                 <i class="bx bx-plus"></i>
             </button>
         </div>

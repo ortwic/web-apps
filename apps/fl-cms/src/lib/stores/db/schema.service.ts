@@ -1,7 +1,7 @@
 import { derived, type Readable } from "svelte/store";
-import type { Collection } from "../models/schema.model";
-import type { DocumentStore } from "./document.store";
-import { firstValueFrom, map } from "rxjs";
+import type { Collection } from "../../models/schema.model";
+import type { DocumentStore } from "./document.service";
+import { firstValueFrom, map, of, Observable } from "rxjs";
 
 export class SchemaStore implements Readable<Collection[]> {
     subscribe: Readable<Collection[]>['subscribe'];
@@ -32,13 +32,20 @@ export class SchemaStore implements Readable<Collection[]> {
         return model;
     }
 
-    async getNodeFromDocumentPath(path: string): Promise<Collection | null> {
-        const evenOnly = <T>(_: T, i: number) => i % 2 === 0;
-        const schemaPath = path.split('/').filter(evenOnly);
-        return this.getNode(...schemaPath);
+    async getCollectionAsync(path?: string): Promise<Collection | null> {
+        return await firstValueFrom(this.getCollection(path));
     }
 
-    async getNode(...pathSegments: string[]): Promise<Collection | null> {
+    getCollection(path?: string): Observable<Collection | null> {
+        if (path) {
+            const evenOnly = <T>(_: T, i: number) => i % 2 === 0;
+            const schemaPath = path.split('/').filter(evenOnly);
+            return this.getCollectionInternal(...schemaPath);
+        }
+        return of(null);
+    }
+
+    getCollectionInternal(...pathSegments: string[]): Observable<Collection | null> {
         function lastNode(document: Collection | null, segments: string[]): Collection | null {
             const id = segments.shift();
             if (id && document?.subcollections) {
@@ -48,12 +55,11 @@ export class SchemaStore implements Readable<Collection[]> {
             return document;
         }
 
-        const node = this.store.getDocument(pathSegments.shift())
+        return this.store.getDocument(pathSegments.shift())
             .pipe(map(d => lastNode(d, pathSegments)));
-        return await firstValueFrom(node);
     }
 
-    async createNodes(path: string): Promise<void> {
+    async createCollections(path: string): Promise<void> {
         function createTree(segments: string[], parentIds: string[]): Collection {
             const id = segments.shift()!;
             const subcollections = segments.length > 0 ? [createTree(segments, [...parentIds, id])] : [];
@@ -98,14 +104,14 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         const segments = target.path.split('/');
-        const root = await this.getNode(segments[0]);
+        const root = await firstValueFrom(this.getCollectionInternal(segments[0]));
         if (root) {
             setProperties(root);
             await this.store.setDocuments(root);
         }
     }
 
-    async removeNodes(path: string): Promise<void> {
+    async removeCollections(path: string): Promise<void> {
         const segments = path.split('/');
         const removeSubcollection = (document: Collection): boolean => {
             if (document.subcollections) {
@@ -123,7 +129,7 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         if (segments.length > 1) {
-            const root = await this.getNode(segments.shift()!);
+            const root = await firstValueFrom(this.getCollectionInternal(segments.shift()!));
             if(root && removeSubcollection(root)) {
                 return this.store.setDocuments(root);
             }

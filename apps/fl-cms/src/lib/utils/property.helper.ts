@@ -26,3 +26,14 @@ export function defaultValueByType(prop: AnyProperty): unknown {
             return null;
     }
 }
+
+export function arrayToMap(property: AnyProperty) {
+    if (property && property.dataType === "array") {
+        return Object.entries(property.oneOf?.properties ?? {})
+            .reduce((acc, [field, prop]) => {
+                acc[field] = prop;
+                return acc;
+            }, {} as Record<string, AnyProperty>);
+    }
+    return {};
+}

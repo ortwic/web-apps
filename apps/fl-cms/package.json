@@ -13,10 +13,10 @@
     "host:prod": "firebase deploy --only hosting:prod",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
     "spec": "pnpm vitest spec --testTimeout 0",
-    "test": "firebase emulators:exec --only firestore 'pnpm vitest'",
-    "test:browser": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
-    "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --testTimeout 0'",
-    "test:once": "firebase emulators:exec --only firestore 'pnpm vitest run'"
+    "test": "firebase emulators:exec --only firestore:8088 'pnpm vitest'",
+    "test:browser": "firebase emulators:exec --only firestore:8088 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
+    "test:debug": "firebase emulators:exec --only firestore:8088 'pnpm vitest --testTimeout 0'",
+    "test:once": "firebase emulators:exec --only firestore:8088 'pnpm vitest run'"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",
