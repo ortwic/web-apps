@@ -49,3 +49,16 @@ export function arrayToMap(property: AnyProperty) {
     }
     return {};
 }
+
+export function mergeObject<T>(old: T, value: T) {
+    if (Array.isArray(old)) {
+        return [
+            ...old,
+            value
+        ];
+    } else if (typeof old === 'object') {
+        return { ...old, ...value };
+    } else {
+        return value;
+    }
+}

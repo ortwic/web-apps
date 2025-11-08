@@ -1,3 +1,4 @@
+import 'svelte-jsoneditor/themes/jse-theme-dark.css';
 import './styles/common.css'
 import './styles/utils.css'
 import App from './App.svelte'

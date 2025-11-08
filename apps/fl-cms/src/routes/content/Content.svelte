@@ -1,18 +1,21 @@
 <script lang="ts">
+    import json from 'json5';
     import { derived, get } from 'svelte/store';
     import { link, querystring } from 'svelte-spa-router';
-    import { map } from 'rxjs';
-    import type { AnyProperty, Properties, StringProperty } from '../../lib/packages/firecms_core/types/properties';
+    import { map, startWith } from 'rxjs';
+    import { colorScheme } from '@web-apps/svelte-tabulator';
+    import type { AnyProperty, MapProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
     import Expand from '../../lib/components/Expand.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
-    import type { ContentDocument, UpdatePropertyArgs } from '../../lib/models/content.type';
+    import type { ContentDocument } from '../../lib/models/content.type';
     import { currentClientUser } from '../../lib/stores/app.store';
-    import { arrayToMap, defaultValueByType } from '../../lib/utils/property.helper';
+    import { arrayToMap, defaultValueByType, isMarkdown, mergeObject } from '../../lib/utils/property.helper';
     import { createDocumentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
-    import { showInfo } from '../../lib/stores/notification.store';
-    import TextEditor from './TextEditor.svelte';
+    import { showError, showInfo } from '../../lib/stores/notification.store';
+    import MarkdownEditor from './MarkdownEditor.svelte';
     import PropertyEditor from './PropertyEditor.svelte';
+    import { JSONEditor, Mode, type Content } from 'svelte-jsoneditor';
 
     $: disabled = !$currentClientUser;
 
@@ -43,11 +46,19 @@
         )
     );
     const contentTypes = currentSchema.pipe(
-        map(schema => arrayToMap((schema?.properties as Properties)['content']))
+        map(schema => arrayToMap((schema?.properties as Properties)['content'])),
+        startWith({} as Record<string, AnyProperty>)
     );
 
     let currentIndex: number | undefined;
     let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
+
+    function contentProperties(type: string)  {
+        if ($contentTypes && $contentTypes[type]) {
+            const prop = $contentTypes[type] as MapProperty;
+            return prop?.properties as Record<string, AnyProperty>;
+        }
+    }
 
     function showPopupMenu(event: MouseEvent, index?: number) {
         if (index !== undefined) {
@@ -58,12 +69,8 @@
         }
     }
 
-    function isMarkdown(type: string) {
-        return ($contentTypes && $contentTypes[type] as StringProperty)?.markdown === true;
-    }
-
-    async function updateProperty(document: ContentDocument, { field, value }: UpdatePropertyArgs) {
-        document[field] = value;
+    async function updateProperty(document: ContentDocument, obj: Record<string, unknown>) {
+        Object.entries(obj).forEach(([field, value]) => document[field] = value);
         await $contentStore.setDocuments(document);
     }
 
@@ -84,10 +91,22 @@
         currentIndex = undefined;
     }
 
-    async function updateSection(document: ContentDocument, content: string, index: number) {
+    async function updateJson(document: ContentDocument, content: Content, index: number) {
+        if ('text' in content) {
+            try {   
+                const value = json.parse(content.text);
+                await updateSection(document, value, index);
+            } catch (error) {
+                showError(`Invalid JSON: ${error}`);
+            }
+        }
+    }
+
+    async function updateSection(document: ContentDocument, value: object, index: number) {
         const section = document.content[index];
-        if (section.value !== content) {
-            section.value = content;
+        if (section.value !== value) {
+            section.value = mergeObject(section.value, value);
+            console.log({ [index]: section.value })
             await $contentStore.setDocuments(document);
             
             showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
@@ -114,7 +133,7 @@
             <span slot="header" class="center">
                 <button class="clear small emphasis" on:click={showPopupMenu}>Details of {$currentSchema?.name} ⋮</button>
             </span>
-            <div>
+            <div class="section">
                 <PropertyEditor document={$document} properties={$properties} 
                     on:update={({ detail }) => updateProperty($document, detail)}/>
             </div>
@@ -125,14 +144,22 @@
             <span slot="header" class="center">
                 <button class="clear small emphasis" on:click={(ev) => showPopupMenu(ev, index)}>{type} ⋮</button>
             </span>
-            <div class="element">
-                {#if typeof value === 'string' && isMarkdown(type)}
-                    <TextEditor {value} intervalInSecs={10}
+            <div class="section" class:jse-theme-dark={$colorScheme === 'dark'}>
+                {#if typeof value === 'string' && isMarkdown($contentTypes[type])}
+                    <MarkdownEditor {value} intervalInSecs={10}
                         on:focus={() => currentIndex = index}
                         on:autosave={({ detail }) => updateSection($document, detail, index)}
                         on:blur={({ detail }) => updateSection($document, detail, index)} />
+                {:else if Array.isArray(value)}
+                    <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
+                        onChange={(content) => updateJson($document, content, index)} />
+                {:else if typeof value === 'object'}
+                    <PropertyEditor document={value} properties={contentProperties(type)} 
+                        on:update={({ detail }) => updateSection($document, detail, index)}/>
                 {:else}
-                    <pre>{JSON.stringify(value, null, 2)}</pre>
+                    <h2 class="emphasis center">WYSIWYG yet not implemented</h2>
+                    <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
+                        onChange={(content) => updateJson($document, content, index)} />
                 {/if}
             </div>
         </Expand>
@@ -167,16 +194,6 @@
 </section>
 
 <style lang="scss">
-    .element {
-        border: 1px solid transparent;
-        transition: all .25s ease-in-out;
-    }
-
-    .element:hover {
-        border-color: var(--color-theme-1);
-        background-color: var(--color-bg-3);
-    }
-
     .menu {
         background-color: var(--color-bg-2);
 

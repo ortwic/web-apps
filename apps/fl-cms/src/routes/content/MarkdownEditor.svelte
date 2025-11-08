@@ -55,7 +55,7 @@
     }
 </script>
 
-<div use:editor class="milkdown"></div>
+<div use:editor class="input"></div>
 
 <style>
 </style>

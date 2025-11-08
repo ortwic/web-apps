@@ -3,6 +3,7 @@
     import { get } from 'svelte/store';
     import { type Content, JSONEditor, Mode } from 'svelte-jsoneditor'
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
+    import { colorScheme } from '@web-apps/svelte-tabulator';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Collection } from '../../lib/models/schema.model';
     import { createSchemaStore, createDocumentStore } from '../../lib/stores/db/firestore.store';
@@ -88,7 +89,9 @@
 </Toolbar>
 
 {#if showJsonView}
+<div class:jse-theme-dark={$colorScheme === 'dark'}>    
     <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: properties }} onChange={setProperties} />
+</div>
 {:else}
     <CollectionEditorTable properties={properties} />
 {/if}

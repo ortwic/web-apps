@@ -1,14 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import type { ContentDocument, UpdatePropertyArgs } from "../../lib/models/content.type";
+  import type { DocumentData } from "firebase/firestore";
   import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
   import { currentClientUser } from "../../lib/stores/app.store";
   import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
   import Expand from '../../lib/components/Expand.svelte';
-  import { isImageUrl } from "../../lib/utils/property.helper";
+  import { isImageUrl, isMarkdown, mergeObject } from "../../lib/utils/property.helper";
   import ImageSelect from "./ImageSelect.svelte";
+  import MarkdownEditor from "./MarkdownEditor.svelte";
   
-  export let document: ContentDocument;
+  export let document: DocumentData;
   export let properties: Record<string, AnyProperty> | undefined;
 
   const dispatch = createEventDispatcher();
@@ -24,10 +25,18 @@
     }
   }
 
-  function update(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string) {
-    const value = event.currentTarget.value;
-    const detail: UpdatePropertyArgs = { field, value };
-    dispatch('update', detail);
+  function update(value: string, field: string) {
+    dispatch('update', { [field]: value });
+  }
+
+  function updateInput(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string) {
+    dispatch('update', { [field]: event.currentTarget.value });
+  }
+
+  function updateNested(old: object, value: object, field: string) {
+    if (old !== value) {
+        dispatch('update', { [field]: mergeObject(old, value) });
+    }
   }
 
 </script>
@@ -40,26 +49,32 @@
             {#if isImageUrl(prop)}
             <label for="{field}">{prop.name}</label>
             <ImageSelect imageUrl={document[field]} {prop} />
+            {:else if isMarkdown(prop)}
+            <span class="colspan">
+                <MarkdownEditor value={document[field] ?? ''}
+                    on:blur={({ detail }) => update(detail, field)} />
+            </span>
             {:else if prop.dataType === 'string'}
             <label for="{field}">{prop.name}</label>
             <input type="text" {disabled} id="{field}" 
                 value="{document[field] ?? ''}" 
-                on:input={(ev) => update(ev, field)} />
+                on:input={(ev) => updateInput(ev, field)} />
             {:else if prop.dataType === 'number'}
             <label for="{field}">{prop.name}</label>
             <input type="number" {disabled} id="{field}" 
                 value="{document[field] ?? ''}" 
-                on:input={(ev) => update(ev, field)} />
+                on:input={(ev) => updateInput(ev, field)} />
             {:else if prop.dataType === 'date'}
             <label for="{field}">{prop.name}</label>
             <input type="datetime-local" {disabled} id="{field}" 
                 value="{isoToLocal(field)}" 
-                on:input={(ev) => update(ev, field)} />
+                on:input={(ev) => updateInput(ev, field)} />
             {:else if prop.dataType === 'map'}
             <Expand>
                 <span slot="header" class="emphasis no-wrap center">{prop.name}</span>
                 <div class="indent">
-                    <svelte:self document="{document[field]}" properties="{prop.properties}" />
+                    <svelte:self document="{document[field]}" properties="{prop.properties}"
+                        on:update={({ detail }) => updateNested(document[field], detail, field)} />
                 </div>
             </Expand>
             {:else}
