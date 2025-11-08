@@ -1,4 +1,4 @@
-import type { MenuObject, CellComponent, MenuSeparator } from "tabulator-tables";
+import type { MenuObject, CellComponent, MenuSeparator } from "@web-apps/svelte-tabulator";
 
 export interface ColumnOptions<T> {
     idField: string & keyof T;

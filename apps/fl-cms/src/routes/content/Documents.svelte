@@ -2,15 +2,14 @@
     import json from 'json5';
     import { link, push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
-    import type { CellComponent } from 'tabulator-tables';
     import { firstValueFrom, map } from 'rxjs';
+    import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
+    import type { CellComponent } from '@web-apps/svelte-tabulator';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { prepareColumnDefinitions } from '../../lib/utils/column.helper';
     import { createDefault } from '../../lib/utils/property.helper';
-    import { Table } from '@web-apps/svelte-tabulator';
-    import { appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import Modal from '../../lib/components/Modal.svelte';
     import { showError, showInfo } from '../../lib/stores/notification.store';

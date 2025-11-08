@@ -65,9 +65,6 @@ importers:
       '@types/object-hash':
         specifier: ^3.0.6
         version: 3.0.6
-      '@types/tabulator-tables':
-        specifier: ^6.2.2
-        version: 6.2.2
       '@vitest/browser':
         specifier: ^3.1.4
         version: 3.1.4(vite@5.4.3(@types/node@22.18.12)(sass@1.77.6)(terser@5.40.0))(vitest@3.1.4)
@@ -119,9 +116,6 @@ importers:
       svelte-spa-router:
         specifier: ^3.3.0
         version: 3.3.0
-      tabulator-tables:
-        specifier: ^6.2.1
-        version: 6.2.1
       ts-deepmerge:
         specifier: ^7.0.3
         version: 7.0.3
