@@ -13,6 +13,7 @@
     --color-theme-1: #646cff;
     --color-theme-2: #535bf2;
     --color-text: #dedede;
+    --color-text-disabled: #a0a0a0;
     --column-width: 42rem;
     --column-margin-top: 4rem;
   
@@ -28,6 +29,7 @@
     --color-theme-1: #ff3e00;
     --color-theme-2: #4075a6;
     --color-text: #213547;
+    --color-text-disabled: #4d6983;
     --color-bg-0: #cad8e4;
     --color-bg-1: #cedce8;
     --color-bg-2: #f9f9f9;
@@ -126,7 +128,7 @@ button {
     font-family: inherit;
     transition: all .25s ease-in-out;
 }
-button:hover {
+button:not([disabled]):hover {
     border-color: var(--color-theme-1);
 }
 input:focus,
@@ -135,6 +137,15 @@ select:focus,
 button:focus,
 button:focus-visible {
     outline: 4px auto var(--color-theme-1);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+    cursor: not-allowed;
+    color: var(--color-text-disabled);
+    background-color: var(--color-bg-2);
 }
 
 button.clear {
@@ -178,6 +189,11 @@ a:not([disabled]):hover > i.bx,
 button:not([disabled]):hover > i.bx {
     color: var(--color-theme-1);
     border-color: var(--color-theme-1);
+}
+
+img.preview {
+    max-width: 12em;
+    object-fit: contain;
 }
 
 .label {

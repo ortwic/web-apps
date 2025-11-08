@@ -1,5 +1,5 @@
 import type { Collection } from "../models/schema.model";
-import type { AnyProperty } from "../packages/firecms_core/types/properties";
+import type { AnyProperty, StringProperty } from "../packages/firecms_core/types/properties";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -25,6 +25,18 @@ export function defaultValueByType(prop: AnyProperty): unknown {
         default:
             return null;
     }
+}
+
+export function isImageUrl(prop: AnyProperty): boolean {
+    const sp = prop as StringProperty;
+    return sp 
+        && sp.storage?.storeUrl === true 
+        && sp.storage?.acceptedFiles?.includes('image/*') === true;
+}
+
+export function isMarkdown(prop: AnyProperty): boolean {
+    const sp = prop as StringProperty;
+    return sp && sp.markdown === true;
 }
 
 export function arrayToMap(property: AnyProperty) {

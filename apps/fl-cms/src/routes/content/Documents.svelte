@@ -67,8 +67,8 @@
         return false;
     }
 
-    function addEntry(collection: Collection | null) {
-        const document = createDefault<Entity>(collection);
+    function addEntry(schema: Collection | null) {
+        const document = createDefault<Entity>(schema);
         document.id = newEntryId;
         $contentStore.setDocuments(document);
         showAddEntry = false;

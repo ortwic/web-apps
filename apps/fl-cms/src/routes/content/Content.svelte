@@ -7,11 +7,14 @@
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
     import type { ContentDocument, UpdatePropertyArgs } from '../../lib/models/content.type';
+    import { currentClientUser } from '../../lib/stores/app.store';
     import { arrayToMap, defaultValueByType } from '../../lib/utils/property.helper';
     import { createDocumentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { showInfo } from '../../lib/stores/notification.store';
     import TextEditor from './TextEditor.svelte';
     import PropertyEditor from './PropertyEditor.svelte';
+
+    $: disabled = !$currentClientUser;
 
     const pathInfo = derived(querystring, (path) => {
         const segments = path && path.split('/') || [];
@@ -31,7 +34,7 @@
 
     const currentSchema = getCurrentScheme(querystring);
     const properties = currentSchema.pipe(
-        map(schema => Object.entries(schema?.properties as Properties)
+        map(schema => Object.entries(schema?.properties as Properties ?? [])
             .filter(([field]) => field !== 'content')
             .reduce((acc, [field, prop]) => {
                 acc[field] = prop;
@@ -109,7 +112,7 @@
 
         <Expand open={false}>
             <span slot="header" class="center">
-                <button class="clear small emphasis" on:click={showPopupMenu}>{$currentSchema?.name} Details ⋮</button>
+                <button class="clear small emphasis" on:click={showPopupMenu}>Details of {$currentSchema?.name} ⋮</button>
             </span>
             <div>
                 <PropertyEditor document={$document} properties={$properties} 
@@ -137,10 +140,10 @@
 
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small menu no-wrap y-flex">
-                <button class="btn" on:click={addSectionMenu.showPopupMenu}>
+                <button class="btn" {disabled} on:click={addSectionMenu.showPopupMenu}>
                     <span class="emphasis"><i class="bx bx-plus"></i> add section</span>
                 </button>
-                <button class="btn" on:click={() => removeSection($document)}>
+                <button class="btn" {disabled} on:click={() => removeSection($document)}>
                     <span class="emphasis"><i class="bx bx-minus"></i> remove section</span>
                 </button>
             </div>
@@ -148,8 +151,9 @@
 
         <PopupMenu bind:this={addSectionMenu}>
             <div class="small menu y-flex">
+                <div class="center emphasis" style="margin:.4em .8em">Add section</div>
                 {#each Object.keys($contentTypes) as type}
-                    <button class="btn" on:click={() => insertSection(type, $document)}>
+                    <button class="btn" {disabled} on:click={() => insertSection(type, $document)}>
                         <span class="emphasis"> {type}</span>
                     </button>
                 {/each}
