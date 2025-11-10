@@ -5,7 +5,7 @@
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
-  
+
     --color-bg-0: #303030;
     --color-bg-1: #242424;
     --color-bg-2: #1a1a1a;
@@ -17,7 +17,7 @@
     --column-width: 42rem;
     --column-margin-top: 4rem;
   
-    color-scheme: light dark;
+    color-scheme: dark;
     color: var(--color-text);
     background-color: var(--bg-color);
   
@@ -25,15 +25,19 @@
     color: var(--color-text);
 }
 
-.light {
-    --color-theme-1: #ff3e00;
-    --color-theme-2: #4075a6;
-    --color-text: #213547;
-    --color-text-disabled: #4d6983;
-    --color-bg-0: #cad8e4;
-    --color-bg-1: #cedce8;
-    --color-bg-2: #f9f9f9;
-    --color-bg-3: #ffffff;
+@media (prefers-color-scheme: light) {
+    :root:not(.dark):not(.light), .light {
+        --color-theme-1: #008eff;
+        --color-theme-2: #4075a6;
+        --color-text: #213547;
+        --color-text-disabled: #4d6983;
+        --color-bg-0: #cad8e4;
+        --color-bg-1: #cedce8;
+        --color-bg-2: #f9f9f9;
+        --color-bg-3: #ffffff;
+
+        color-scheme: light;
+    }
 }
   
 body {
