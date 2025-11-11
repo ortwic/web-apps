@@ -10,7 +10,7 @@
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
     import type { ContentDocument } from '../../lib/models/content.type';
     import { currentClientUser } from '../../lib/stores/app.store';
-    import { arrayToMap, defaultValueByType, isMarkdown, mergeObject } from '../../lib/utils/property.helper';
+    import { arrayToMap, defaultValueByType, isMapProperty, isMarkdown, mergeObject } from '../../lib/utils/property.helper';
     import { createDocumentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
     import MarkdownEditor from './MarkdownEditor.svelte';
@@ -49,15 +49,16 @@
         map(schema => arrayToMap((schema?.properties as Properties)['content'])),
         startWith({} as Record<string, AnyProperty>)
     );
+    const contentMapTypes = currentSchema.pipe(
+        map(schema => arrayToMap((schema?.properties as Properties)['content'], isMapProperty)),
+        startWith({} as Record<string, MapProperty>)
+    );
 
     let currentIndex: number | undefined;
     let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
 
     function contentProperties(type: string)  {
-        if ($contentTypes && $contentTypes[type]) {
-            const prop = $contentTypes[type] as MapProperty;
-            return prop?.properties as Record<string, AnyProperty>;
-        }
+        return $contentMapTypes[type]?.properties as Record<string, AnyProperty>;
     }
 
     function showPopupMenu(event: MouseEvent, index?: number) {
@@ -76,13 +77,8 @@
 
     function insertSection(type: string, document: ContentDocument) {
         const value = defaultValueByType($contentTypes[type]) as object;
-        if (currentIndex !== undefined && currentIndex < document.content.length -1) {
-            if (currentIndex < 1) {
-                document.content.unshift({ type, value });
-            } else {
-                const end = document.content.splice(currentIndex + 1);
-                document.content.push({ type, value }, ...end);
-            }
+        if (currentIndex !== undefined && currentIndex < document.content.length) {
+            document.content.splice(currentIndex + 1, 0, { type, value });
         } else {
             document.content.unshift({ type, value });
         }
