@@ -142,10 +142,9 @@
             </span>
             <div class="section" class:jse-theme-dark={$colorScheme === 'dark'}>
                 {#if typeof value === 'string' && isMarkdown($contentTypes[type])}
-                    <MarkdownEditor {value} intervalInSecs={10}
+                    <MarkdownEditor {value} placeholder={type}
                         on:focus={() => currentIndex = index}
-                        on:autosave={({ detail }) => updateSection($document, detail, index)}
-                        on:blur={({ detail }) => updateSection($document, detail, index)} />
+                        on:change={({ detail }) => updateSection($document, detail, index)} />
                 {:else if Array.isArray(value)}
                     <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
                         onChange={(content) => updateJson($document, content, index)} />

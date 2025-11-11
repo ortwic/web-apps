@@ -51,8 +51,8 @@
             <ImageSelect imageUrl={document[field]} {prop} />
             {:else if isMarkdown(prop)}
             <span class="colspan">
-                <MarkdownEditor value={document[field] ?? ''}
-                    on:blur={({ detail }) => update(detail, field)} />
+                <MarkdownEditor value={document[field] ?? ''} placeholder={prop.name}
+                    on:change={({ detail }) => update(detail, field)} />
             </span>
             {:else if prop.dataType === 'string'}
             <label for="{field}">{prop.name}</label>
@@ -85,8 +85,10 @@
     {/each}
 </ul>
 {:else}
-    <span class="emphasis">error parsing properties</span>
+    <h2 class="emphasis">error parsing properties</h2>
+    {#if properties}
     <pre>{JSON.stringify(properties, null, 2)}</pre>
+    {/if}
 {/if}
 
 <style>
