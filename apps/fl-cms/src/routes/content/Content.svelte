@@ -1,7 +1,9 @@
 <script lang="ts">
     import json from 'json5';
+    import { flip } from 'svelte/animate';
     import { derived, get } from 'svelte/store';
     import { link, querystring } from 'svelte-spa-router';
+    import { nanoid } from 'nanoid';
     import { map, startWith } from 'rxjs';
     import { colorScheme } from '@web-apps/svelte-tabulator';
     import type { AnyProperty, MapProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
@@ -78,13 +80,31 @@
     function insertSection(type: string, document: ContentDocument) {
         const value = defaultValueByType($contentTypes[type]) as object;
         if (currentIndex !== undefined && currentIndex < document.content.length) {
-            document.content.splice(currentIndex + 1, 0, { type, value });
+            document.content.splice(currentIndex + 1, 0, { type, value, id: nanoid() });
         } else {
-            document.content.unshift({ type, value });
+            document.content.unshift({ type, value, id: nanoid() });
         }
         $contentStore.setDocuments(document);
 
         currentIndex = undefined;
+    }
+
+    function moveUp(document: ContentDocument, index: number) {
+        if (index > 0) {
+            const section = document.content[index];
+            document.content.splice(index, 1);
+            document.content.splice(index - 1, 0, section);
+            $contentStore.setDocuments(document);
+        }
+    }
+
+    function moveDown(document: ContentDocument, index: number) {
+        if (index < document.content.length - 1) {
+            const section = document.content[index];
+            document.content.splice(index, 1);
+            document.content.splice(index + 1, 0, section);
+            $contentStore.setDocuments(document);
+        }
     }
 
     async function updateJson(document: ContentDocument, content: Content, index: number) {
@@ -126,8 +146,15 @@
         </Toolbar>
 
         <Expand open={false}>
-            <span slot="header" class="center">
-                <button class="clear small emphasis" on:click={showPopupMenu}>Details of {$currentSchema?.name} ⋮</button>
+            <span slot="header" class="center x-flex-full">
+                <span></span>
+                <span class="clear small emphasis">Details of {$currentSchema?.name}</span>
+                <div class="commands">
+                    <button class="icon clear" {disabled} title="Add section"
+                        on:click={addSectionMenu.showPopupMenu}>
+                        <i class="bx bx-plus"></i>
+                    </button>
+                </div>
             </span>
             <div class="section">
                 <PropertyEditor document={$document} properties={$properties} 
@@ -135,38 +162,60 @@
             </div>
         </Expand>
         
-        {#each $document.content as { type, value }, index}
+        {#each $document.content as { type, value, id }, i (id ?? json.stringify({ type, value }))}
+        <div animate:flip={{ duration: 300 }}>
         <Expand>
-            <span slot="header" class="center">
-                <button class="clear small emphasis" on:click={(ev) => showPopupMenu(ev, index)}>{type} ⋮</button>
+            <span slot="header" class="center x-flex-full">
+                <span></span>
+                <span class="clear small emphasis">{type}</span>
+                <div class="commands">
+                    {#if i > 0}
+                    <button class="icon clear" {disabled} title="Move up"
+                        on:click={() => moveUp($document, i)}>
+                        <i class="bx bx-up-arrow"></i>
+                    </button>
+                    {/if}
+                    {#if i < $document.content.length - 1}
+                    <button class="icon clear" {disabled} title="Move down"
+                        on:click={() => moveDown($document, i)}>
+                        <i class="bx bx-down-arrow"></i>
+                    </button>
+                    {/if}
+                    <button class="icon clear" {disabled} title="Add section"
+                        on:click={addSectionMenu.showPopupMenu}>
+                        <i class="bx bx-plus"></i>
+                    </button>
+                    <button class="icon clear" {disabled} title="Edit section"
+                        on:click={(ev) => showPopupMenu(ev, i)}>
+                        <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
+                    </button>
+                </div>
             </span>
             <div class="section" class:jse-theme-dark={$colorScheme === 'dark'}>
                 {#if typeof value === 'string' && isMarkdown($contentTypes[type])}
                     <MarkdownEditor {value} placeholder={type}
-                        on:focus={() => currentIndex = index}
-                        on:change={({ detail }) => updateSection($document, detail, index)} />
+                        on:focus={() => currentIndex = i}
+                        on:change={({ detail }) => updateSection($document, detail, i)} />
                 {:else if Array.isArray(value)}
                     <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
-                        onChange={(content) => updateJson($document, content, index)} />
+                        onChange={(content) => updateJson($document, content, i)} />
                 {:else if typeof value === 'object'}
                     <PropertyEditor document={value} properties={contentProperties(type)} 
-                        on:update={({ detail }) => updateSection($document, detail, index)}/>
+                        on:update={({ detail }) => updateSection($document, detail, i)}/>
                 {:else}
                     <h2 class="emphasis center">WYSIWYG yet not implemented</h2>
                     <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
-                        onChange={(content) => updateJson($document, content, index)} />
+                        onChange={(content) => updateJson($document, content, i)} />
                 {/if}
             </div>
         </Expand>
+        </div>
         {/each}
 
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small menu no-wrap y-flex">
-                <button class="btn" {disabled} on:click={addSectionMenu.showPopupMenu}>
-                    <span class="emphasis"><i class="bx bx-plus"></i> add section</span>
-                </button>
                 <button class="btn" {disabled} on:click={() => removeSection($document)}>
-                    <span class="emphasis"><i class="bx bx-minus"></i> remove section</span>
+                    <span class="emphasis"><i class="bx bx-trash danger"></i> remove</span>
                 </button>
             </div>
         </PopupMenu>
@@ -195,5 +244,9 @@
         button {
             text-align: left;
         }
+    }
+
+    .commands {
+        padding-right: 2em;
     }
 </style>
