@@ -13,7 +13,7 @@
     import { arrayToMap, defaultValueByType, isMapProperty, isMarkdown, mergeObject } from '../../lib/utils/property.helper';
     import { createDocumentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
-    import MarkdownEditor from './MarkdownEditor.svelte';
+    import MarkdownEditor from '../../lib/components/MarkdownEditor.svelte';
     import PropertyEditor from './PropertyEditor.svelte';
     import { JSONEditor, Mode, type Content } from 'svelte-jsoneditor';
 

@@ -13,7 +13,11 @@ export default defineConfig({
       },
     },
   },
-  plugins: [svelte()],
+  plugins: [svelte({
+    compilerOptions: {
+      customElement: true
+    }
+  })],
   server: {
     port: 5000
   }

@@ -7,7 +7,7 @@
   import Expand from '../../lib/components/Expand.svelte';
   import { isImageUrl, isMarkdown, mergeObject } from "../../lib/utils/property.helper";
   import ImageSelect from "./ImageSelect.svelte";
-  import MarkdownEditor from "./MarkdownEditor.svelte";
+  import MarkdownEditor from "../../lib/components/MarkdownEditor.svelte";
   
   export let document: DocumentData;
   export let properties: Record<string, AnyProperty> | undefined;
