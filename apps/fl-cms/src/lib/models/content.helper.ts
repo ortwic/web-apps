@@ -1,5 +1,5 @@
-import type { Collection } from "../models/schema.model";
-import type { AnyProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties";
+import type { Collection } from "./schema.model";
+import type { AnyProperty, ArrayProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -39,8 +39,8 @@ export function isMarkdown(prop: AnyProperty): boolean {
     return sp && sp.markdown === true;
 }
 
-export const isMapProperty = (prop: AnyProperty): prop is MapProperty => prop.dataType === "map";
-
+export const isMapProperty = (prop: AnyProperty): prop is MapProperty => prop?.dataType === "map";
+export const isArrayProperty = (prop: AnyProperty): prop is ArrayProperty => prop?.dataType === "array";
 export function arrayToMap<T extends AnyProperty>(
     property: AnyProperty, 
     typeGuard?: (prop: AnyProperty) => prop is T

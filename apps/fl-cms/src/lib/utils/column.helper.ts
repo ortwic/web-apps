@@ -3,9 +3,8 @@ import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
 import type { ColumnDefinition, CellComponent, Editor } from "@web-apps/svelte-tabulator";
 import type { Collection } from "../models/schema.model";
 import type { AnyProperty, MapProperty } from "../packages/firecms_core/types/properties";
-import type { TypedValue } from "../models/content.type";
 import type { ColumnOptions } from "../models/column.model";
-import { isImageUrl, isMarkdown } from "./property.helper";
+import { isImageUrl, isMarkdown } from "../models/content.helper";
 
 export function prepareColumnDefinitions<T>(schema: Collection | null, options: ColumnOptions<T>): ColumnDefinition[] {
     const columns = options.actions ? [actionColumn(options)] : [];
@@ -87,9 +86,9 @@ function getCustomDefinitionByType<T>(field: string, prop: AnyProperty, options:
                     element.classList.add('content-preview');
                     element.style.maxHeight = maxHeight;
                     
-                    const array = <TypedValue[]>cell.getValue();
+                    const array = <{ value: unknown }[]>cell.getValue();
                     return array ? array
-                        .filter(v => typeof v?.value === 'string')
+                        .filter(item => typeof item?.value === 'string')
                         .map(n => marked(<string>n.value, { mangle: false, headerIds: false }))
                         .join('') : '';
                 }

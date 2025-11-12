@@ -50,16 +50,16 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     }
 
     public getDocuments<T>(...constraints: QueryConstraint[]): Observable<T[]> {
-        if (!this.store) {
-            return of([]);
+        if (this.store && this.path) {
+            const items = collection(this.store, this.path) as CollectionReference<T>;
+            const q = query<T, DocumentData>(items, ...constraints);
+            return collectionData<T>(q, this.options).pipe(startWith([]));
         }
-        const items = collection(this.store, this.path) as CollectionReference<T>;
-        const q = query<T, DocumentData>(items, ...constraints);
-        return collectionData<T>(q, this.options).pipe(startWith([]));
+        return of([]);
     }
     
     public getDocument(id?: string): Observable<T | null> {
-        if (id && this.store) {
+        if (id && this.store && this.path) {
             const docRef = doc(this.store, this.path, id);
             return docData(docRef, { idField: 'id' });
         }
@@ -67,7 +67,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     }
 
     async setDocuments(...documents: T[]) {
-        if (this.store && documents.length) {
+        if (this.store && this.path && documents.length) {
             const batch = writeBatch(this.store);
 
             const commitedData = documents.map((data) => {
@@ -88,7 +88,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     }
 
     async removeDocuments(...ids: string[]) {
-        if (this.store) {
+        if (this.store && this.path) {
             const batch = writeBatch(this.store);
 
             ids.forEach((id) => {

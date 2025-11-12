@@ -9,7 +9,7 @@
     import type { Entity, Collection } from '../../lib/models/schema.model';
     import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../lib/stores/db/firestore.store';
     import { prepareColumnDefinitions } from '../../lib/utils/column.helper';
-    import { createDefault } from '../../lib/utils/property.helper';
+    import { createDefault } from '../../lib/models/content.helper';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import Modal from '../../lib/components/Modal.svelte';
     import { showError, showInfo } from '../../lib/stores/notification.store';

@@ -1,7 +1,9 @@
 import type { Entity } from "./schema.model";
 
-export type ContentDocument = Entity & { content: TypedValue[] };
-export type TypedValue = {
+export type Content = Entity & { content: Section[] };
+
+type Section = {
     value: string | object;
     type: string;
+    id?: string;
 };

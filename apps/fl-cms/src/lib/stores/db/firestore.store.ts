@@ -8,6 +8,7 @@ import { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
 import type { Collection, Entity } from '../../models/schema.model';
 import { fromStore } from '../../utils/rx.store';
+import type { Content } from '../../models/content.type';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
@@ -22,6 +23,12 @@ export function getCurrentScheme(path: Readable<string | undefined>): Observable
         fromStore(createSchemaStore()), 
         fromStore(path)
     ]).pipe(switchMap(([store, path]) => store.getCollection(path)));
+}
+
+export function getContentStore(path?: string, options?: SetOptions) {
+    return derived<Readable<Firestore | null>, DocumentStore<Content>>(currentFirestore, (store, set) =>
+        set(new DocumentStore(store, path, options))
+    );
 }
 
 export function createDocumentStore<T extends Entity>(path?: string, options?: SetOptions) {

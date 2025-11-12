@@ -1,16 +1,16 @@
 <script lang="ts">
+  import { Editor as MarkdownEditor } from "bytemd";
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
   import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
   import { currentClientUser } from "../../lib/stores/app.store";
   import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
   import Expand from '../../lib/components/Expand.svelte';
-  import { isImageUrl, isMarkdown, mergeObject } from "../../lib/utils/property.helper";
+  import { isImageUrl, isMarkdown, mergeObject } from "../../lib/models/content.helper";
   import ImageSelect from "./ImageSelect.svelte";
-  import MarkdownEditor from "../../lib/components/MarkdownEditor.svelte";
   
   export let document: DocumentData;
-  export let properties: Record<string, AnyProperty> | undefined;
+  export let properties: Record<string, AnyProperty>;
 
   const dispatch = createEventDispatcher();
 
@@ -52,7 +52,7 @@
             {:else if isMarkdown(prop)}
             <span class="colspan">
                 <MarkdownEditor value={document[field] ?? ''} placeholder={prop.name}
-                    on:change={({ detail }) => update(detail, field)} />
+                    on:change={({ detail }) => update(detail['value'], field)} />
             </span>
             {:else if prop.dataType === 'string'}
             <label for="{field}">{prop.name}</label>
