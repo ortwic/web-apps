@@ -34,6 +34,14 @@
     width: 100%;
 }
 
+.x-flex {
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    gap: .6rem;
+    flex-flow: wrap;
+}
+
 .x-flex-full {
     display: flex;
     justify-content: space-between;
@@ -75,6 +83,10 @@
 
 .fa-check-square::before {
   content: '☑ ';
+}
+
+.popup-menu {
+    background-color: var(--color-bg-2);
 }
 
 @media (prefers-color-scheme: light) {

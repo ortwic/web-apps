@@ -5,6 +5,7 @@
   import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
   import { currentClientUser } from "../../lib/stores/app.store";
   import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
+  import { confirmed } from "../../lib/utils/keyboard.helper";
   import Expand from '../../lib/components/Expand.svelte';
   import { isImageUrl, isMarkdown, mergeObject } from "../../lib/models/content.helper";
   import ImageSelect from "./ImageSelect.svelte";
@@ -25,7 +26,7 @@
     }
   }
 
-  function update(value: string, field: string) {
+  function update<T>(value: T, field: string) {
     dispatch('update', { [field]: value });
   }
 
@@ -39,6 +40,27 @@
     }
   }
 
+  function addEntry(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string) {
+    if (Array.isArray(document[field])) {
+        document[field].push(event.currentTarget.value);
+        update(document[field], field);
+        event.currentTarget.value = '';
+    }
+  }
+  
+  function updateEntry(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string, index: number) {
+    if (Array.isArray(document[field])) {
+        if (!event.currentTarget.value) {
+            // remove
+            document[field].splice(index, 1);
+        } else {
+            // update
+            document[field][index] = event.currentTarget.value;
+        }
+        update(document[field], field);
+    }
+  }
+
 </script>
 
 {#if typeof properties === 'object'}
@@ -46,39 +68,58 @@
     {#each Object.entries(properties) as [field, prop]}
     <li title="{prop.dataType}">
         <div class="grid">
-            {#if isImageUrl(prop)}
-            <label for="{field}">{prop.name}</label>
-            <ImageSelect imageUrl={document[field]} {prop} />
-            {:else if isMarkdown(prop)}
-            <span class="colspan">
-                <MarkdownEditor value={document[field] ?? ''} placeholder={prop.name}
-                    on:change={({ detail }) => update(detail['value'], field)} />
-            </span>
-            {:else if prop.dataType === 'string'}
-            <label for="{field}">{prop.name}</label>
-            <input type="text" {disabled} id="{field}" 
-                value="{document[field] ?? ''}" 
-                on:input={(ev) => updateInput(ev, field)} />
-            {:else if prop.dataType === 'number'}
-            <label for="{field}">{prop.name}</label>
-            <input type="number" {disabled} id="{field}" 
-                value="{document[field] ?? ''}" 
-                on:input={(ev) => updateInput(ev, field)} />
-            {:else if prop.dataType === 'date'}
-            <label for="{field}">{prop.name}</label>
-            <input type="datetime-local" {disabled} id="{field}" 
-                value="{isoToLocal(field)}" 
-                on:input={(ev) => updateInput(ev, field)} />
-            {:else if prop.dataType === 'map'}
+            {#if prop.dataType === 'map'}
             <Expand>
-                <span slot="header" class="emphasis no-wrap center">{prop.name}</span>
+                <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
                 <div class="indent">
                     <svelte:self document="{document[field]}" properties="{prop.properties}"
                         on:update={({ detail }) => updateNested(document[field], detail, field)} />
                 </div>
             </Expand>
+            {:else if isMarkdown(prop)}
+            <span class="colspan">
+                <MarkdownEditor value={document[field] ?? ''} placeholder={prop.name}
+                    on:change={({ detail }) => update(detail['value'], field)} />
+            </span>
             {:else}
-            <pre id="{field}" class="colspan">{JSON.stringify(prop, null, 2)}</pre>
+                <label for="{field}">{prop.name ?? field}</label>
+                {#if isImageUrl(prop)}
+                <ImageSelect imageUrl={document[field]} {prop} />
+                {:else if prop.dataType === 'string'}
+                <input type="text" {disabled} id="{field}" 
+                    value="{document[field] ?? ''}" 
+                    on:input={(ev) => updateInput(ev, field)} />
+                {:else if prop.dataType === 'boolean'}
+                <input type="checkbox" {disabled} id="{field}" 
+                    checked="{document[field] ?? false}" 
+                    on:input={(ev) => updateInput(ev, field)} />
+                {:else if prop.dataType === 'number'}
+                <input type="number" {disabled} id="{field}" 
+                    value="{document[field] ?? ''}" 
+                    on:input={(ev) => updateInput(ev, field)} />
+                {:else if prop.dataType === 'date'}
+                <input type="datetime-local" {disabled} id="{field}" 
+                    value="{isoToLocal(field)}" 
+                    on:input={(ev) => updateInput(ev, field)} />
+                {:else if prop.dataType === 'array'}
+                <div class="y-flex">
+                    {#if Array.isArray(document[field])}
+                        {#each document[field] as item, i}
+                        <input type="text" {disabled} id="{field}" value="{item}" 
+                            title="Delete text to remove entry"
+                            on:keyup={(ev) => confirmed(ev) && updateEntry(ev, field, i)}
+                            on:blur={(ev) => updateEntry(ev, field, i)} />
+                        {/each}
+                    
+                        <input type="text" {disabled} id="{field}" placeholder="Add new item"
+                            on:keyup={(ev) => confirmed(ev) && addEntry(ev, field)} />
+                    {/if}                
+                </div>
+                {:else}
+                <span>
+                    <pre id="{field}" class="colspan">{JSON.stringify(document[field], null, 2)}</pre>
+                </span>
+                {/if}
             {/if}
         </div>
     </li>

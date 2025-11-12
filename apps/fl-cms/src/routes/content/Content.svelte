@@ -5,7 +5,6 @@
     import { nanoid } from 'nanoid';
     import { combineLatest, map, startWith, switchMap } from 'rxjs';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
-    import Expand from '../../lib/components/Expand.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
     import type { Content } from '../../lib/models/content.type';
@@ -15,7 +14,6 @@
     import { showInfo } from '../../lib/stores/notification.store';
     import { fromStore } from '../../lib/utils/rx.store';
     import Section from './Section.svelte';
-    import PropertyEditor from './PropertyEditor.svelte';
 
     $: disabled = !$currentClientUser;
 
@@ -96,10 +94,10 @@
         }
     }
 
-    async function updateSection(document: Content, value: object, index: number) {
+    async function updateSection(document: Content, partial: object, index: number) {
         const section = document.content[index];
-        if (section.value !== value) {
-            section.value = mergeObject(section.value, value);
+        if (section.value !== partial) {
+            section.value = mergeObject(section.value, partial);
             await $contentStore$.setDocuments(document);
             
             showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
@@ -122,58 +120,49 @@
             <span slot="title"><a use:link href="/manage">{$document$.id}</a></span>
         </Toolbar>
 
-        <Expand open={false}>
-            <span slot="header" class="x-flex-full">
-                <span class="clear small emphasis">Details of {$currentSchema?.name}</span>
-                <div class="commands">
-                    <button class="icon clear" {disabled} title="Add section"
-                        on:click={addSectionMenu.showPopupMenu}>
-                        <i class="bx bx-plus"></i>
-                    </button>
-                </div>
+        <Section open={false} value={$document$} title="Details of {$currentSchema?.name}"
+            property={{ dataType: 'map', properties: $properties }} type="details"
+            on:change={({ detail }) => updateProperty($document$, detail)}>
+            <span slot="commands">
+                <button class="icon clear" {disabled} title="Add section"
+                    on:click={addSectionMenu.showPopupMenu}>
+                    <i class="bx bx-plus"></i>
+                </button>
             </span>
-            <div class="section">
-                <PropertyEditor document={$document$} properties={$properties} 
-                    on:update={({ detail }) => updateProperty($document$, detail)}/>
-            </div>
-        </Expand>
+        </Section>
         
         {#each $document$.content as { type, value, id }, i (id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
-        <Expand>
-            <span slot="header" class="x-flex-full">
-                <span class="clear small emphasis">{type}</span>
-                <div class="commands">
-                    {#if i > 0}
-                    <button class="icon clear" {disabled} title="Move up"
-                        on:click={() => moveUp($document$, i)}>
-                        <i class="bx bx-up-arrow"></i>
-                    </button>
-                    {/if}
-                    {#if i < $document$.content.length - 1}
-                    <button class="icon clear" {disabled} title="Move down"
-                        on:click={() => moveDown($document$, i)}>
-                        <i class="bx bx-down-arrow"></i>
-                    </button>
-                    {/if}
-                    <button class="icon clear" {disabled} title="Add section"
-                        on:click={addSectionMenu.showPopupMenu}>
-                        <i class="bx bx-plus"></i>
-                    </button>
-                    <button class="icon clear" {disabled} title="Edit section"
-                        on:click={(ev) => showPopupMenu(ev, i)}>
-                        <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
-                    </button>
-                </div>
+        <Section {value} {type} property={$contentTypes[type]} {disabled}
+            on:change={({ detail }) => updateSection($document$, detail, i)}>
+            <span slot="commands">
+                <button class="icon clear" {disabled} title="Add section"
+                    on:click={addSectionMenu.showPopupMenu}>
+                    <i class="bx bx-plus"></i>
+                </button>
+                {#if i > 0}
+                <button class="icon clear" {disabled} title="Move up"
+                    on:click={() => moveUp($document$, i)}>
+                    <i class="bx bx-up-arrow"></i>
+                </button>
+                {/if}
+                {#if i < $document$.content.length - 1}
+                <button class="icon clear" {disabled} title="Move down"
+                    on:click={() => moveDown($document$, i)}>
+                    <i class="bx bx-down-arrow"></i>
+                </button>
+                {/if}
+                <button class="icon clear" {disabled} title="Edit section"
+                    on:click={(ev) => showPopupMenu(ev, i)}>
+                    <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
+                </button>
             </span>
-            <Section {value} {type} property={$contentTypes[type]} 
-                on:change={({ detail }) => updateSection($document$, detail, i)} />
-        </Expand>
+        </Section>
         </div>
         {/each}
 
         <PopupMenu bind:this={editSectionMenu}>
-            <div class="small menu no-wrap y-flex">
+            <div class="small popup-menu no-wrap y-flex">
                 <button class="btn" {disabled} on:click={() => removeSection($document$)}>
                     <span class="emphasis"><i class="bx bx-trash danger"></i> remove</span>
                 </button>
@@ -181,7 +170,7 @@
         </PopupMenu>
 
         <PopupMenu bind:this={addSectionMenu}>
-            <div class="small menu y-flex">
+            <div class="small popup-menu y-flex">
                 <div class="center emphasis" style="margin:.4em .8em">&mdash; Add &mdash;</div>
                 {#each Object.keys($contentTypes) as type}
                     <button class="btn" {disabled} on:click={() => insertSection(type, $document$)}>
@@ -198,11 +187,4 @@
 </section>
 
 <style lang="scss">
-    .menu {
-        background-color: var(--color-bg-2);
-    }
-
-    .commands {
-        padding-right: 2em;
-    }
 </style>

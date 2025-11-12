@@ -1,5 +1,6 @@
 import type { Collection } from "./schema.model";
 import type { AnyProperty, ArrayProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties";
+import type { ValueType } from "./content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -10,7 +11,7 @@ export function createDefault<T extends Record<string, unknown>>(collection: Pic
     return obj as T;
 }
 
-export function defaultValueByType(prop: AnyProperty): unknown {
+export function defaultValueByType(prop: AnyProperty): ValueType {
     switch (prop.dataType) {
         case 'string':
             return '';
@@ -57,12 +58,7 @@ export function arrayToMap<T extends AnyProperty>(
 }
 
 export function mergeObject<T>(old: T, value: T) {
-    if (Array.isArray(old)) {
-        return [
-            ...old,
-            value
-        ];
-    } else if (typeof old === 'object') {
+    if (typeof old === 'object' && !Array.isArray(old)) {
         return { ...old, ...value };
     } else {
         return value;
