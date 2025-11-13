@@ -2,6 +2,7 @@ import 'svelte-jsoneditor/themes/jse-theme-dark.css';
 import './styles/common.css';
 import './styles/utils.css';
 import './styles/bytemd-custom.css';
+import './lib/utils/array.extension';
 import App from './App.svelte';
 
 const app = new App({
