@@ -5,16 +5,21 @@
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import { colorScheme } from '@web-apps/svelte-tabulator';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
+    import { templates } from '../../lib/data/predefinedCollections';
     import type { Collection } from '../../lib/models/schema.model';
     import { createSchemaStore, createDocumentStore } from '../../lib/stores/db/firestore.store';
     import { showError, showInfo } from '../../lib/stores/notification.store';
+    import PopupMenu from '../../lib/components/PopupMenu.svelte';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
 
     export let item: Collection;
-    let showJsonView = false;
+    let showJsonView = true;
     let properties = item.properties || {};
+    let templateMenu: PopupMenu;
 
+    // Calculation of popup within a dialog element fails, so use static position as a workaround
+    const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
     const schemaStore = createSchemaStore({ merge: false });
 
     async function saveCollection() {
@@ -55,6 +60,11 @@
         item.properties = properties;
     }
 
+    function loadTemplate(key: string) {
+        properties = templates[key].properties;
+        item.properties = properties;
+    }
+
     function setProperties(content: Content) {
         item.properties = parseProperties(content);
     }
@@ -79,6 +89,9 @@
     <button title="Save properties" class="icon clear" on:click={saveCollection}>
         <i class="bx bx-save"></i>
     </button>
+    <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(staticTemplatePopupPosition)}>
+        <i class="bx bxs-box"></i>
+    </button>
     <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={appendInferredPropsFromData}>
         <i class="bx bxs-magic-wand"></i>
     </button>
@@ -95,3 +108,14 @@
 {:else}
     <CollectionEditorTable properties={properties} />
 {/if}
+
+<PopupMenu bind:this={templateMenu}>
+    <div class="small popup-menu y-flex">
+        <div class="center emphasis" style="margin:.4em .8em">&mdash; Load &mdash;</div>
+        {#each Object.keys(templates) as key}
+            <button class="btn" on:click={() => loadTemplate(key)}>
+                <span class="emphasis"> {key}</span>
+            </button>
+        {/each}
+    </div>
+</PopupMenu>
