@@ -8,6 +8,7 @@
     "dev": "vite",
     "fse": "firebase emulators:start --only auth,firestore --project=localhost --import firestore.local --export-on-exit",
     "build": "pnpm test && vite build",
+    "build:icons": "node scripts/export-icons.mjs",
     "preview": "vite preview",
     "host:beta": "pnpm build && firebase deploy --only hosting:beta",
     "host:prod": "firebase deploy --only hosting:prod",
@@ -40,6 +41,7 @@
     "object-hash": "^3.0.0",
     "rxfire": "^6.0.3",
     "rxjs": "^7.8.2",
+    "sharp": "^0.34.5",
     "svelte": "^4.2.18",
     "svelte-check": "^3.8.5",
     "svelte-collapse": "^0.1.4",
@@ -50,7 +52,7 @@
     "tslib": "^2.6.3",
     "typescript": "^5.5.3",
     "vite": "^5.4.1",
-    "vite-plugin-pwa": "^0.16.4",
+    "vite-plugin-pwa": "^0.16.7",
     "vitest": "^3.1.4"
   }
 }
