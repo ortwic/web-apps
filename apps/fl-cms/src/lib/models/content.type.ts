@@ -1,11 +1,11 @@
 import type { Entity } from "./schema.model";
 
-export type Content = Entity & { content: Section[] };
+export type Content = Entity & { content: SectionType[] };
 
-type Section = {
+export type SectionType = {
     value: ValueType;
     type: string;
-    id?: string;
+    __id?: string | number;
 };
 
 export type ValueType = string | number | boolean | object | null;

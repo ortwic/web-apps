@@ -2,17 +2,17 @@
     import { flip } from 'svelte/animate';
     import { link, querystring } from 'svelte-spa-router';
     import json from 'json5';
-    import { nanoid } from 'nanoid';
     import { combineLatest, map, startWith, switchMap } from 'rxjs';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
     import Toolbar from '../../lib/components/Toolbar.svelte';
     import PopupMenu from '../../lib/components/PopupMenu.svelte';
-    import type { Content } from '../../lib/models/content.type';
+    import type { Content, SectionType } from '../../lib/models/content.type';
     import { currentClientUser } from '../../lib/stores/app.store';
     import { arrayToMap, defaultValueByType, mergeObject } from '../../lib/models/content.helper';
     import { getContentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
-    import { showInfo } from '../../lib/stores/notification.store';
+    import { showInfo, showWarn } from '../../lib/stores/notification.store';
     import { fromStore } from '../../lib/utils/rx.store';
+    import { isUnique } from '../../lib/utils/ui.helper';
     import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
@@ -50,9 +50,9 @@
     let currentIndex: number | undefined;
     let addSectionMenu: PopupMenu, editSectionMenu: PopupMenu;
 
-    function showPopupMenu(event: MouseEvent, index?: number) {
-        if (index !== undefined) {
-            currentIndex = index;
+    function showPopupMenu(event: MouseEvent, role: 'add' | 'edit', index?: number) {
+        currentIndex = index;
+        if (role === 'edit') {
             editSectionMenu.showPopupMenu(event);
         } else {
             addSectionMenu.showPopupMenu(event);
@@ -65,31 +65,26 @@
     }
 
     function insertSection(type: string, document: Content) {
-        const value = defaultValueByType($contentTypes[type]) as object;
-        if (currentIndex !== undefined && currentIndex < document.content.length) {
-            document.content.splice(currentIndex + 1, 0, { type, value, id: nanoid() });
-        } else {
-            document.content.unshift({ type, value, id: nanoid() });
+        const item: SectionType = {
+            type,
+            value: defaultValueByType($contentTypes[type]),
+            __id: Date.now()
+        };
+        if (currentIndex !== undefined && isUnique(document.content, item)
+            && document.content.insert(item, currentIndex + 1)) {
+            $contentStore$.setDocuments(document);
         }
-        $contentStore$.setDocuments(document);
-
         currentIndex = undefined;
     }
 
     function moveUp(document: Content, index: number) {
-        if (index > 0) {
-            const section = document.content[index];
-            document.content.splice(index, 1);
-            document.content.splice(index - 1, 0, section);
+        if (document.content.swap(index, index - 1)) {
             $contentStore$.setDocuments(document);
         }
     }
 
     function moveDown(document: Content, index: number) {
-        if (index < document.content.length - 1) {
-            const section = document.content[index];
-            document.content.splice(index, 1);
-            document.content.splice(index + 1, 0, section);
+        if (document.content.swap(index, index + 1)) {
             $contentStore$.setDocuments(document);
         }
     }
@@ -105,8 +100,7 @@
     }
 
     function removeSection(document: Content) {
-        if (currentIndex !== undefined) {
-            document.content.splice(currentIndex, 1);
+        if (currentIndex !== undefined && document.content.remove(currentIndex)) {
             $contentStore$.setDocuments(document);
 
             currentIndex = undefined;
@@ -125,35 +119,31 @@
             on:change={({ detail }) => updateProperty($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" {disabled} title="Add section"
-                    on:click={addSectionMenu.showPopupMenu}>
+                    on:click={(ev) => showPopupMenu(ev, 'add', 0)}>
                     <i class="bx bx-plus"></i>
                 </button>
             </span>
         </Section>
         
-        {#each $document$.content as { type, value, id }, i (id ?? json.stringify({ type, value }))}
+        {#each $document$.content as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
         <Section {value} {type} property={$contentTypes[type]} {disabled}
             on:change={({ detail }) => updateSection($document$, detail, i)}>
             <span slot="commands">
                 <button class="icon clear" {disabled} title="Add section"
-                    on:click={addSectionMenu.showPopupMenu}>
+                    on:click={(ev) => showPopupMenu(ev, 'add', i)}>
                     <i class="bx bx-plus"></i>
                 </button>
-                {#if i > 0}
                 <button class="icon clear" {disabled} title="Move up"
                     on:click={() => moveUp($document$, i)}>
                     <i class="bx bx-up-arrow"></i>
                 </button>
-                {/if}
-                {#if i < $document$.content.length - 1}
                 <button class="icon clear" {disabled} title="Move down"
                     on:click={() => moveDown($document$, i)}>
                     <i class="bx bx-down-arrow"></i>
                 </button>
-                {/if}
                 <button class="icon clear" {disabled} title="Edit section"
-                    on:click={(ev) => showPopupMenu(ev, i)}>
+                    on:click={(ev) => showPopupMenu(ev, 'edit', i)}>
                     <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
                 </button>
             </span>

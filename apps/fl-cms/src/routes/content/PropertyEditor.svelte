@@ -5,7 +5,7 @@
   import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
   import { currentClientUser } from "../../lib/stores/app.store";
   import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
-  import { confirmed } from "../../lib/utils/keyboard.helper";
+  import { confirmed, isUnique } from "../../lib/utils/ui.helper";
   import Expand from '../../lib/components/Expand.svelte';
   import { isImageUrl, isMarkdown, mergeObject } from "../../lib/models/content.helper";
   import ImageSelect from "./ImageSelect.svelte";
@@ -53,7 +53,7 @@
         if (!event.currentTarget.value) {
             // remove
             document[field].splice(index, 1);
-        } else {
+        } else if (isUnique(document[field], event.currentTarget.value)) {
             // update
             document[field][index] = event.currentTarget.value;
         }

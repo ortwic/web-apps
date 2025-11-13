@@ -1,6 +1,7 @@
 <script lang="ts">
+    import { withKey } from '../../lib/utils/ui.helper';
     import 'bytemd/dist/index.css';
-    import { nanoid } from 'nanoid';
+    import { flip } from 'svelte/animate';
     import { Editor as MarkdownEditor } from 'bytemd';
     import json from 'json5';    
     import { createEventDispatcher } from "svelte";
@@ -58,14 +59,18 @@
                 if (type) {
                     const prop = byType(property, type);
                     const value = defaultValueByType(prop!) as T;
-                    array = [...array, { type, value, id: nanoid() }];
+                    array = [...array, { type, value, __id: Date.now() }];
                     change(array as T);
                 } else {
                     addElementMenu.showPopupMenu(event);
                 }
             } else {
                 const value = defaultValueByType(uniformedArray as AnyProperty) as T;
-                array = [...array, value];
+                if (typeof value === 'object') {
+                    array = [...array, { ...value, __id: Date.now() }];
+                } else {
+                    array = [...array, value];
+                }
                 change(array as T);
             }
         }
@@ -104,7 +109,9 @@
     }
 
     function change<U>(value: U) {
-        dispatch('change', value);
+        if (value) {
+            dispatch('change', value);
+        }
     }
 
 </script>
@@ -130,12 +137,20 @@
                 on:update={({ detail }) => change(detail)}/>
         {:else if array && ambigiousArray}
             <div class="x-flex">        
-                {#each array as item, i}
-                <div class="card">
+                {#each withKey(array) as { item, key }, i (key)}
+                <div class="card" animate:flip={{ duration: 300 }}>
                     {#if typeof item === 'object' && 'type' in item && 'value' in item}
                     <svelte:self property={byType(property, item.type)} type={item.type} value={item.value} 
                         on:change={({ detail }) => updateElement(detail, i, item.type)}>
                         <div slot="commands">
+                            <button class="icon clear" {disabled} title="Move up"
+                                on:click={() => change(array?.swap(i, i - 1) && array)}>
+                                <i class="bx bx-up-arrow"></i>
+                            </button>
+                            <button class="icon clear" {disabled} title="Move down"
+                                on:click={() => change(array?.swap(i, i + 1) && array)}>
+                                <i class="bx bx-down-arrow"></i>
+                            </button>
                             <button class="icon clear" {disabled} on:click={() => removeElement(i)}>
                                 <i class="bx bx-x"></i>
                             </button>
@@ -147,11 +162,19 @@
             </div>
         {:else if array && uniformedArray}
             <div class="x-flex">
-                {#each array as item, i}
-                <div class="card">
+                {#each withKey(array) as { item, key }, i (key)}
+                <div class="card" animate:flip={{ duration: 300 }}>
                     <svelte:self property={uniformedArray} type={i} value={item} 
                         on:change={({ detail }) => updateElement(detail, i)}>
                         <div slot="commands">
+                            <button class="icon clear" {disabled} title="Move up"
+                                on:click={() => change(array?.swap(i, i - 1) && array)}>
+                                <i class="bx bx-up-arrow"></i>
+                            </button>
+                            <button class="icon clear" {disabled} title="Move down"
+                                on:click={() => change(array?.swap(i, i + 1) && array)}>
+                                <i class="bx bx-down-arrow"></i>
+                            </button>
                             <button class="icon clear" {disabled} on:click={() => removeElement(i)}>
                                 <i class="bx bx-x"></i>
                             </button>
