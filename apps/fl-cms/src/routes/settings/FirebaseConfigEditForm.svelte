@@ -57,7 +57,8 @@
         e.preventDefault();
 
         if (config?.projectId) {
-            const url = `${window.location}?projectId=${config.projectId}&apiKey=${config.apiKey}`;
+            const baseUrl = window.location.toString().split('?').at(0);
+            const url = `${baseUrl}?projectId=${config.projectId}&apiKey=${config.apiKey}`;
             navigator.clipboard.writeText(url);
             showInfo(`Copied ${url} to clipboard`);
         }
@@ -110,7 +111,7 @@
 
 <style>
     textarea {
-        width: calc(100% - 6px);
+        width: calc(100% - 2.4em);
         min-width: 24rem;
         text-wrap: nowrap;
     }

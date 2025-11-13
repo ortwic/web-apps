@@ -4,6 +4,27 @@
 
 A lean CMS for [Firebase](https://firebase.google.com/) simular to [FireCMS](https://app.firecms.co).
 
+## Features
+
+Simular to FireCMS, but much simpler and lighter. It uses its data models though. But what is the USP then?
+
+- Much simpler UI
+- Firebase settings are stored in your browser only 
+  - No connection required
+  - No user limitation
+- Handling of subcollection is much easier
+  - Create subcollection like so: `foo/bar/baz`
+  - Creates a collection `foo` with a subcollection `bar` with another nested subcollection `baz`
+- Simpler content editing
+  - Use full width of page
+  - Reorder sections easily
+  - Usage of bytemd as markdown editor
+- Storage management for your images
+
+The models are saved in your firestore directly. Therefor a predefined collection '__schema' will be created.
+
+Also the content property 'content' is a very special one. This unlocks the ability to edit the content clearly.
+
 # Getting Started
 
 ## Prerequisites

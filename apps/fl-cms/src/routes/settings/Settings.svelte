@@ -4,6 +4,7 @@
     import { colorScheme } from '@web-apps/svelte-tabulator';
     import Login from '../../lib/components/Login.svelte';
     import Logout from '../../lib/components/Logout.svelte';
+    import Expand from '../../lib/components/Expand.svelte';
     import { currentClientUser } from '../../lib/stores/app.store';
     import SelectProject from './SelectProject.svelte';
     import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
@@ -23,34 +24,51 @@
     <meta name="description" content="Settings of this app" />
 </svelte:head>
 
-<div class="text-column">
-    <div>
-        <p>
-            <button on:click={() => toggleTheme()}>
-                <i class="bx {$themeIcon}"></i> Switch Theme
-            </button>
-        </p>
 
+<section class="text-column">
+    <p class="x-flex-full">
         {#if $currentClientUser}
         <Logout user={$currentClientUser} />
         {:else}
         <Login on:login={() => push($targetUrl)} />
         {/if}
+        <button class="" title="Switch Theme" on:click={() => toggleTheme()}>
+            <i class="bx {$themeIcon}"></i> Switch theme
+        </button>
+    </p>
+        
+    <Expand>
+        <span slot="header" class="x-flex-full">
+            <h3>Project settings</h3>
+        </span>
+        <div class="content">
+            <div class="grid">
+                <span>Current project</span>
+                <SelectProject width="100%" disabled={!!$currentClientUser} />
+            </div>
 
-        <p>
-            <span>Current project</span>
-            <br/>
-            <SelectProject width="100%" disabled={!!$currentClientUser} />
-        </p>
-    </div>
+            <FirebaseConfigEditForm />
+        </div>
+    </Expand>
+</section>
 
-    <FirebaseConfigEditForm />
-</div>
+<style lang="scss">
+    h3 {
+        margin: .2em 0;
+    }
 
-<style>
-    .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+    section {
+        padding: 1em;
+    }
+
+    .content{
+        padding: 1em;
+        border: 1px solid var(--color-bg-0);
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+        }
     }
 </style>

@@ -3,7 +3,7 @@
     import { link, push, querystring } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
     import { firstValueFrom, map } from 'rxjs';
-    import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
+    import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
     import type { Properties } from '../../lib/packages/firecms_core/types/properties';
     import type { Entity, Collection } from '../../lib/models/schema.model';
@@ -188,7 +188,9 @@
 
 <Modal open={!!importJsonData} width="100%" on:close={() => (importJsonData = null)}>
     {#if importJsonData}
-        <JSONEditor mainMenuBar={false} readOnly={true} mode={Mode.text} content={{ json: importJsonData }} />
+        <div class:jse-theme-dark={$colorScheme === 'dark'}>
+            <JSONEditor mainMenuBar={false} readOnly={true} mode={Mode.text} content={{ json: importJsonData }} />
+        </div>
         <div class="x-flex-full">
             <button class="dialog" on:click={importAsJson}>
                 <i class="bx bx-check"></i> Confirm
