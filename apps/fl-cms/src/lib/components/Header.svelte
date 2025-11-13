@@ -1,18 +1,20 @@
 <script lang="ts">
     import { derived } from 'svelte/store';
-    import { link, location } from "svelte-spa-router";
+    import { link, location, querystring } from "svelte-spa-router";
     import { settingsStore } from '../stores/settings.store';
     import { getInitials } from '../utils/string.helper';
   
     const pathStartsWith = derived(location, l => l.split('/').filter(Boolean).at(0));
     const title = derived(settingsStore, s => getInitials(s.selectedProjectId));
+    const returnUrl = window.location.hash ? `?returnUrl=${window.location.hash.substring(1)}` : '';
+    const targetUrl = derived(querystring, q => q?.split('returnUrl=')[1] ?? '/');
 </script>
 
 <header>
     {#if $pathStartsWith !== 'settings' || !$settingsStore.selectedProjectId}
-        <a use:link href="/settings"><i class="bx bx-cog"></i></a>
+        <a use:link href="/settings{returnUrl}"><i class="bx bx-cog"></i></a>
     {:else}
-        <a use:link href="/manage" class="circle">
+        <a use:link href="{$targetUrl}" class="circle">
             <span class="title">{$title}</span>
         </a>
     {/if}

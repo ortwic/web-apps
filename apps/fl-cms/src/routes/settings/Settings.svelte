@@ -1,6 +1,6 @@
 <script lang="ts">
     import { derived } from 'svelte/store';
-    import { push } from 'svelte-spa-router';
+    import { push, querystring } from 'svelte-spa-router';
     import { colorScheme } from '@web-apps/svelte-tabulator';
     import Login from '../../lib/components/Login.svelte';
     import Logout from '../../lib/components/Logout.svelte';
@@ -9,6 +9,7 @@
     import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
 
     const themeIcon = derived(colorScheme, s => s === 'light' ? 'bx-moon' : 'bx-sun');
+    const targetUrl = derived(querystring, q => q?.split('=')[1] ?? '/');
 
     function toggleTheme() {
         document.documentElement.classList.remove($colorScheme);
@@ -33,7 +34,7 @@
         {#if $currentClientUser}
         <Logout user={$currentClientUser} />
         {:else}
-        <Login on:login={() => push('/manage')} />
+        <Login on:login={() => push($targetUrl)} />
         {/if}
 
         <p>
