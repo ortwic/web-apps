@@ -161,7 +161,7 @@
 </header>
 
 {#await firstValueFrom(currentSchema)}
-<p>Loading...</p>
+<i class="bx bx-loader bx-spin"></i>
 {:then schema}
 <section>
     <Table idField="id" data={documents} persistenceID={documentPath} columns={$columns}

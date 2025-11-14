@@ -3,7 +3,8 @@ import { getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "
 import type { Auth, User, UserCredential } from "firebase/auth";
 import { connectAuthEmulator, EmailAuthProvider, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut } from "firebase/auth";
 import { Firestore, connectFirestoreEmulator, getFirestore } from "firebase/firestore";
-import { showError, showInfo } from "./notification.store";
+import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
+import { showInfo } from "./notification.store";
 import type { AppSettings } from "./settings.type";
 import { EMULATOR_KEY, settingsStore } from "./settings.store";
 
@@ -11,6 +12,7 @@ export const appStore = derived(settingsStore, (settings) => new FirebaseAppAdap
 export const currentClientUser = writable<User | null>(null);
 
 const currentStores = new WeakSet<Firestore>();
+const currentStorages = new WeakSet<FirebaseStorage>();
 const currentAuths = new WeakSet<Auth>();
 const userForEmulator = {
     email: `john.doe@example.com`,
@@ -59,6 +61,21 @@ class FirebaseAppAdapter {
         connectFirestoreEmulator(store, url.hostname, +url.port || 8080);
         showInfo(`Using emulator on ${url.host}`);
         currentStores.add(store);
+    }
+
+    getStorage(): FirebaseStorage | null {
+        if (this.app) {
+            const storage = getStorage(this.app);
+            if (this.useEmulator && this.config.storageBucket && !currentStorages.has(storage)) {
+                const url = new URL(this.config.storageBucket);
+                connectStorageEmulator(storage, url.hostname, +url.port || 8188);
+                showInfo(`Using emulator on ${url.host}`);
+                currentStorages.add(storage);
+            }
+
+            return storage;
+        }
+        return null;
     }
 
     getAuth(): Auth | null {

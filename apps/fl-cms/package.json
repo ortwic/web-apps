@@ -6,7 +6,7 @@
   "packageManager": "pnpm@9.1.4",
   "scripts": {
     "dev": "vite",
-    "fse": "firebase emulators:start --only auth,firestore --project=localhost --import firestore.local --export-on-exit",
+    "fse": "firebase emulators:start --only auth,firestore,storage --project=localhost --import firestore.local --export-on-exit",
     "build": "pnpm test && vite build",
     "build:icons": "node scripts/export-icons.mjs",
     "preview": "vite preview",

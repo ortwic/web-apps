@@ -32,8 +32,14 @@
         {:else}
         <Login on:login={() => push($targetUrl)} />
         {/if}
+        <button on:click={() => push('/manage')}>
+            <i class="bx bxs-grid"></i> Manage
+        </button>
+        <button on:click={() => push('/media')}>
+            <i class="bx bx-folder-open"></i> Storage
+        </button>
         <button class="" title="Switch Theme" on:click={() => toggleTheme()}>
-            <i class="bx {$themeIcon}"></i> Switch theme
+            <i class="bx {$themeIcon}"></i> {$colorScheme === 'light' ? 'Dark' : 'Light'}
         </button>
     </p>
         

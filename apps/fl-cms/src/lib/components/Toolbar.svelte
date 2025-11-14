@@ -1,4 +1,8 @@
-<section class="toolbar x-flex-full">
+<script lang="ts">
+    export let width: string = 'auto';
+</script>
+
+<section class="toolbar x-flex-full" style:width>
     <span class="corner">
         <slot />
     </span>

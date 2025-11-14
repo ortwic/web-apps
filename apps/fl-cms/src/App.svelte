@@ -7,12 +7,15 @@
   import Snackbar from "./lib/components/Snackbar.svelte";
   import Content from "./routes/content/Content.svelte";
   import Documents from "./routes/content/Documents.svelte";
+  import Media from "./routes/media/Media.svelte";
   import Settings from "./routes/settings/Settings.svelte";
   import Schema from "./routes/manage/Schema.svelte";
 
   const routes = {
     '/': Schema,
     '/manage': Schema,
+    '/media': Media,
+    '/media/*': Media,
     '/list': Documents,
     '/content': Content,
     '/settings': Settings,
