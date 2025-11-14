@@ -22,11 +22,6 @@
         };
     }
 
-    function select(ev: Event, id: string) {
-        ev.preventDefault();
-        lastSelectedId = id;
-    }
-
 </script>
 
 <Toolbar>
@@ -39,7 +34,7 @@
         <!-- svelte-ignore a11y-interactive-supports-focus -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-missing-attribute -->
-        <a role="button" on:click={(ev) => select(ev, nav.id)} class="pointer">
+        <a role="button" on:click|preventDefault={() => lastSelectedId = nav.id} class="pointer">
             {nav.id}
         </a>
         <Modal open={lastSelectedId === nav.id} width="{nav.path.length + 4}em" on:close={() => (lastSelectedId = '')}>

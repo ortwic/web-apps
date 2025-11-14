@@ -44,20 +44,17 @@
         }
     }
 
-    async function edit(ev: Event, item: Collection) {
-        ev.preventDefault();
+    async function edit(item: Collection) {
         showEdit = true;
         current.set(item);
     }
 
-    function select(ev: Event, item: Collection) {
-        ev.preventDefault();
+    function select(item: Collection) {
         showSelect = true;
         current.set(item);
     }
 
-    async function remove(ev: Event, item: Collection) {
-        ev.preventDefault();
+    async function remove(item: Collection) {
         let message = 'Are you sure?';
         if (item.subcollections) {
             const subs = item.subcollections.map((s) => `${item.id}/${s.id}`).join('\n');
@@ -79,10 +76,10 @@
         {#each $schemas as item}
             <div class="flex-center item emphasis">
                 <div title={item.path} class="actions">
-                    <button {disabled} class="clear" on:click={(ev) => edit(ev, item)}>
+                    <button {disabled} class="clear" on:click|preventDefault={() => edit(item)}>
                         <i class="bx bx-edit"></i>
                     </button>
-                    <button {disabled} class="clear" on:click={(ev) => remove(ev, item)}>
+                    <button {disabled} class="clear" on:click|preventDefault={() => remove(item)}>
                         <i class="bx bx-trash danger"></i>
                     </button>
                 </div>
@@ -90,7 +87,7 @@
                 <!-- svelte-ignore a11y-interactive-supports-focus -->
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <a role="button" on:click={(ev) => select(ev, item)} class="flex-center pointer">
+                <a role="button" on:click|preventDefault={() => select(item)} class="flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-list-ul"></i>

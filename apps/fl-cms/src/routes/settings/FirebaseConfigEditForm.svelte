@@ -53,9 +53,7 @@
         return false;
     }
 
-    function share(e: Event) {
-        e.preventDefault();
-
+    function share() {
         if (config?.projectId) {
             const baseUrl = window.location.toString().split('?').at(0);
             const url = `${baseUrl}?projectId=${config.projectId}&apiKey=${config.apiKey}`;
@@ -64,18 +62,14 @@
         }
     }
 
-    function save(e: Event) {
-        e.preventDefault();
-        
+    function save() {
         if (config?.projectId && valid) {
             saveFirebaseConfig(config.projectId, config);
             showInfo(`Firebase config added for ${config.projectId}`);
         }
     }
 
-    function remove(e: Event) {
-        e.preventDefault();
-
+    function remove() {
         if (config?.projectId) {
             removeFirebaseConfig(config.projectId);
             textInput = '';
@@ -95,13 +89,13 @@
             Save <a href="https://firebase.google.com/docs/web/setup" target="_blank">Firebase</a> config by projectId
         </label>
         <span class="x-flex-full">
-            <button type="button" class="clear" on:click={share} disabled={!valid}>
+            <button type="button" class="clear" on:click|preventDefault={share} disabled={!valid}>
                 <i class="bx bx-share-alt"></i>
             </button>
-            <button type="button" class="clear" on:click={save} disabled={!valid}>
+            <button type="button" class="clear" on:click|preventDefault={save} disabled={!valid}>
                 <i class="bx bx-save"></i>
             </button>
-            <button type="button" class="clear" on:click={remove} disabled={!valid}>
+            <button type="button" class="clear" on:click|preventDefault={remove} disabled={!valid}>
                 <i class="bx bx-trash danger"></i>
             </button>
         </span>
