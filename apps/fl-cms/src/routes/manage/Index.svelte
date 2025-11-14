@@ -67,7 +67,7 @@
 </script>
 
 <svelte:head>
-    <title>Firebase CMS</title>
+    <title>Firebase CMS | Manage</title>
     <meta name="description" content="Custom Firebase Content Management System" />
 </svelte:head>
 

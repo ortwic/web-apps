@@ -1,5 +1,5 @@
 export type StorageItem = {
-    type: 'folder' | 'file';
+    type: 'folder' | 'file' | 'virtual';
     name: string;
     bucket: string;
     path: string;

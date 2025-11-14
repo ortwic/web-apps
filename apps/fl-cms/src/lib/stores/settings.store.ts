@@ -13,7 +13,7 @@ export const DefaultAppSettings: AppSettings = {
             authDomain: 'http://localhost:9099',
             databaseURL: 'http://localhost:8080',
             projectId: EMULATOR_KEY,
-            storageBucket: 'localhost.appspot.com',
+            storageBucket: 'http://localhost:8188',
             messagingSenderId: 'default',
             appId: 'default'
         }

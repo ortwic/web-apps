@@ -1,9 +1,10 @@
-  /**
-   * normalize path: remove duplicate slashes and trim
-   * @param path 
-   * @returns 
-   */
-  export const trimPath = (path?: string) => path?.replace(/\/+/g, '/').trim();
+/**
+ * normalize path: remove duplicate slashes and trim
+ * @param path 
+ * @returns 
+ */
+export const normalizePath = (path?: string) => path?.replace(/\/+/g, '/').trim();
+export const trimSlashes = (path?: string) => path?.replace(/^\/|\/$/g, '').trim();
 
 export function getInitials(text: string, maxLength = 2) {
     const segments = text.split(/\W|_/);

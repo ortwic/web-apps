@@ -1,21 +1,42 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import { currentStorage } from "../../lib/stores/storage/storage.service";
+    import { combineLatest, of, switchMap, tap } from "rxjs";
     import type { StorageFile, StorageItem } from "../../lib/models/storage.type";
     import Breadcrumb from "../../lib/components/Breadcrumb.svelte";
+    import Loading from "../../lib/components/Loading.svelte";
+    import Modal from "../../lib/components/Modal.svelte";
     import Toolbar from "../../lib/components/Toolbar.svelte";
+    import { currentClientUser } from "../../lib/stores/app.store";
+    import { currentStorage } from "../../lib/stores/storage/storage.service";
+    import { fromStore } from "../../lib/utils/rx.store";
+    import { confirmed } from "../../lib/utils/ui.helper";
     import ImagePreview from "./ImagePreview.svelte";
 
-    export let path = '';
+    $: disabled = !$currentClientUser;
+    
+    export let path = of('');
 
     const dispatch = createEventDispatcher();
-    let preview: StorageFile | undefined;
 
-    async function selectFolder(path: string) {
+    let preview: StorageFile | undefined;
+    let upload: HTMLInputElement;
+    let prompt: HTMLInputElement;
+    let promptVisible = false;
+    let isLoading = true;
+
+    const items = combineLatest([
+        fromStore(currentStorage), 
+        path.pipe(tap(() => isLoading = true))
+    ]).pipe(
+        switchMap(([storage, path]) => storage.listAll(path)),
+        tap(() => isLoading = false)
+    );
+
+    async function folderClicked(path: string) {
         dispatch('change', path);
     }
 
-    async function selectFile(item: StorageItem) {
+    async function fileClicked(item: StorageItem) {
         dispatch('select', await withUrl(item));
     }
     
@@ -23,54 +44,104 @@
         const url = await $currentStorage.getFileUrl(item.path);
         return { ...item, url };
     }
+
+    function showPrompt() {
+        promptVisible = true;
+        setTimeout(() => prompt?.focus(), 0);
+    }
+
+    function createFolder(event: Event & { currentTarget: EventTarget & HTMLInputElement; }) {
+        $currentStorage.createFolder($path, event.currentTarget.value);
+        promptVisible = false;
+    }
+
+    function selectFile() {
+        // ensure onchange fires for same file again
+        upload.value = '';
+        upload.click();
+    }
+
+    async function uploadFile() {
+        if (upload.files?.length) {
+            const file = upload.files[0];
+            await $currentStorage.uploadFile($path, file);
+        }
+    }
     
 </script>
 
 <section class="content-64">
     <Toolbar width="100%">
         <span class="no-wrap">
-            <button class="icon clear" title="Create folder">
+            <button {disabled} class="icon clear" title="Create folder"
+                on:click|preventDefault={showPrompt}>
                 <i class="bx bx-folder-plus"></i>
             </button>
-            <button class="icon clear" title="Upload file">
+            <button {disabled} class="icon clear" title="Upload file"
+                on:click|preventDefault={selectFile}>
                 <i class="bx bx-upload"></i>
             </button>
         </span>
         <span slot="title">
-            <Breadcrumb {path} rootLabel="Media" on:navigate={({ detail: path }) => selectFolder(path)} />
+            <Breadcrumb path={$path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
         </span>
     </Toolbar>
-    {#await $currentStorage.listAll(path)}
-    <i class="bx bx-loader bx-spin"></i>
-    {:then items}
-    <ul>
-        {#each items as item}
-        {#if item.type === 'folder'}
-        <li class="no-wrap">
-            <i class="bx bx-folder"></i> <a href="#/" on:click|preventDefault={() => selectFolder(item.path)}>{item.name}</a>
-        </li>
-        {:else}
-        <li class="no-wrap">
-            <button class="icon clear" on:click|preventDefault={async () => preview = await withUrl(item)}>
-                <i class="bx bx-search"></i>
-            </button>
-            <a href="#/" on:click|preventDefault={() => selectFile(item)}> {item.name}</a>
-        </li>
-        {/if}
-        {/each}
-    </ul>
-    {/await}
+    
+    <Loading {isLoading}>
+        <div class="grid">
+            {#each $items as item, i (item.path)}
+            {#if item.type !== 'file'}
+            <span class="no-wrap colspan">
+                <i class="bx bx-{item.type === 'virtual' ? 'folder-plus' : 'folder'}"></i> 
+                <a href="#/" on:click|preventDefault={() => folderClicked(item.path)}>{item.name}</a>
+            </span>
+            {:else}
+            <span class="no-wrap">
+                <i class="bx bx-file"></i> 
+                <a href="#/" on:click|preventDefault={() => fileClicked(item)}> {item.name}</a>
+            </span>
+            <span>
+                <button class="icon clear" on:click|preventDefault={async () => preview = await withUrl(item)}>
+                    <i class="bx bx-search"></i>
+                </button>
+                {#if import.meta.env.DEV}
+                <!-- TODO refresh view after deletion -->
+                <button class="icon clear" on:click|preventDefault={() => confirm('Delete?') && $currentStorage.deleteFile(item.path)}>
+                    <i class="bx bx-trash danger"></i>
+                </button>
+                {/if}
+            </span>
+            {/if}
+            {/each}
+        </div>
+    </Loading>
+    
 </section>
 
 <ImagePreview src={preview?.url} name={preview?.name} />
 
-<style lang="scss">
-    ul {
-        list-style: none;
-        padding: 0;
+<Modal open={promptVisible} width="12em" on:close={() => promptVisible = false}>
+    <p>
+        <label for="prompt">Enter folder name</label>
+    </p>
+    <input id="prompt" type="text" bind:this={prompt} placeholder="Folder name" 
+        on:keyup={(ev) => confirmed(ev) && createFolder(ev)}>
+</Modal>
 
-        .bx-file {
-            color: var(--color-theme-1);
+<input type="file" bind:this={upload} on:change="{uploadFile}" accept="image/*" />
+
+<style lang="scss">
+    .grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0 1rem;
+
+        .colspan {
+            grid-column: 1 / span 2;
         }
+    }
+
+    input[type="file"] {
+        display: none;
     }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { trimPath } from '../utils/string.helper';
+  import { normalizePath, trimSlashes } from '../utils/string.helper';
 
   const dispatch = createEventDispatcher();
 
@@ -8,13 +8,13 @@
   export let rootLabel: string = 'Start';
   export let separator: string = '/';
 
-  $: segments = trimPath(path)?.split('/').filter(Boolean) ?? [];
+  $: segments = normalizePath(path)?.split('/').filter(Boolean) ?? [];
 
   // build hrefs for each segment: accumulate with leading '/'
   $: hrefs = segments.map((_, i) => '/' + segments.slice(0, i + 1).map(encodeURIComponent).join('/'));
 
   function navigate(href: string) {
-      dispatch('navigate', href);
+      dispatch('navigate', trimSlashes(href));
   }
 </script>
 

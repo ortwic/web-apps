@@ -11,6 +11,7 @@
     import { prepareColumnDefinitions } from '../../lib/utils/column.helper';
     import { createDefault } from '../../lib/models/content.helper';
     import Toolbar from '../../lib/components/Toolbar.svelte';
+    import Loading from '../../lib/components/Loading.svelte';
     import Modal from '../../lib/components/Modal.svelte';
     import { showError, showInfo } from '../../lib/stores/notification.store';
     import CollectionEditor from '../manage/CollectionEditor.svelte';
@@ -163,7 +164,7 @@
 </header>
 
 {#await firstValueFrom(currentSchema)}
-<i class="bx bx-loader bx-spin"></i>
+<Loading />
 {:then schema}
 <section>
     <Table idField="id" data={documents} persistenceID={documentPath} columns={$columns}
