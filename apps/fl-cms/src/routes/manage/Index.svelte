@@ -8,7 +8,7 @@
     import { createSchemaStore } from '../../lib/stores/db/firestore.store';
     import Modal from '../../lib/components/Modal.svelte';
     import CollectionEditor from './CollectionEditor.svelte';
-    import SelectDocument from './SelectDocument.svelte';
+    import SelectList from './SelectList.svelte';
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
@@ -127,7 +127,7 @@
 
 <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
     {#if showSelect}
-    <SelectDocument item={$current} path={$currentPath} />
+    <SelectList item={$current} path={$currentPath} />
     {/if}
 </Modal>
 

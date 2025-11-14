@@ -5,19 +5,19 @@
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
   import Header from "./lib/components/Header.svelte";
   import Snackbar from "./lib/components/Snackbar.svelte";
-  import Content from "./routes/content/Content.svelte";
-  import Documents from "./routes/content/Documents.svelte";
-  import Media from "./routes/media/Media.svelte";
-  import Settings from "./routes/settings/Settings.svelte";
-  import Schema from "./routes/manage/Schema.svelte";
+  import Content from "./routes/content/Index.svelte";
+  import List from "./routes/list/Index.svelte";
+  import Media from "./routes/media/Index.svelte";
+  import Settings from "./routes/settings/Index.svelte";
+  import Manage from "./routes/manage/Index.svelte";
 
   const routes = {
-    '/': Schema,
-    '/manage': Schema,
+    '/': Manage,
+    '/manage': Manage,
+    '/list': List,
+    '/content/*': Content,
     '/media': Media,
     '/media/*': Media,
-    '/list': Documents,
-    '/content': Content,
     '/settings': Settings,
     // '*': NotFound
   };

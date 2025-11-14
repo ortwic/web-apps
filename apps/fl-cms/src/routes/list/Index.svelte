@@ -37,7 +37,7 @@
         label: '<i class="bx bx-edit"></i> Edit content',
         action: (e: MouseEvent, cell: CellComponent) => {
             const id = cell.getData()['id'];
-            push(`/content?${$querystring}/${id}`);
+            push(`/content/${$querystring}/${id}`);
         }
     };
     const deleteAction = {
@@ -156,7 +156,9 @@
         <button title="Settings" class="icon clear" on:click={() => showSettings = true}>
             <i class="bx bx-cog"></i>
         </button>
-        <span slot="title"><a use:link href="/manage">{documentPath}</a></span>
+        <span slot="title">
+            <a use:link href="/manage">{documentPath.split('/').pop()}</a>
+        </span>
     </Toolbar>
 </header>
 

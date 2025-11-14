@@ -1,6 +1,7 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
-    import { link, querystring } from 'svelte-spa-router';
+    import { derived } from 'svelte/store';
+    import { link, params } from 'svelte-spa-router';
     import json from 'json5';
     import { combineLatest, map, startWith, switchMap } from 'rxjs';
     import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
@@ -10,15 +11,15 @@
     import { currentClientUser } from '../../lib/stores/app.store';
     import { arrayToMap, defaultValueByType, mergeObject } from '../../lib/models/content.helper';
     import { getContentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
-    import { showInfo, showWarn } from '../../lib/stores/notification.store';
+    import { showInfo } from '../../lib/stores/notification.store';
     import { fromStore } from '../../lib/utils/rx.store';
     import { isUnique } from '../../lib/utils/ui.helper';
     import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
 
-    const path$ = fromStore(querystring).pipe(map((path) => {
-        const segments = path && path.split('/') || [];
+    const path$ = fromStore(params).pipe(map((p) => {
+        const segments = p?.wild && p.wild.split('/') || [];
         if (segments.length > 1) {
             if (segments.length % 2 === 0) {
                 return {
@@ -32,7 +33,7 @@
     const contentStore$ = path$.pipe(switchMap(({ path }) => fromStore(getContentStore(path))));
     const document$ =  combineLatest([contentStore$, path$]).pipe(switchMap(([store, { id }]) => store.getDocument(id)));
 
-    const currentSchema = getCurrentScheme(querystring);
+    const currentSchema = getCurrentScheme(derived(params, p => p?.wild));
     const properties = currentSchema.pipe(
         map(schema => Object.entries(schema?.properties as Properties ?? [])
             .filter(([field]) => field !== 'content')
@@ -171,7 +172,7 @@
         </PopupMenu>
     {:else}
         <Toolbar>
-            <span slot="title">Document '{$querystring}' not found</span>
+            <span slot="title">Document '{$params?.wild}' not found</span>
         </Toolbar>
     {/if}
 </section>
