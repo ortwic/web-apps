@@ -1,39 +1,30 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
-    import { derived } from 'svelte/store';
-    import { link, params } from 'svelte-spa-router';
+    import { params, push } from 'svelte-spa-router';
     import json from 'json5';
-    import { combineLatest, map, startWith, switchMap } from 'rxjs';
-    import type { AnyProperty, Properties } from '../../lib/packages/firecms_core/types/properties';
-    import Toolbar from '../../lib/components/Toolbar.svelte';
-    import PopupMenu from '../../lib/components/PopupMenu.svelte';
-    import type { Content, SectionType } from '../../lib/models/content.type';
-    import { currentClientUser } from '../../lib/stores/app.store';
-    import { arrayToMap, defaultValueByType, mergeObject } from '../../lib/models/content.helper';
-    import { getContentStore, getCurrentScheme } from '../../lib/stores/db/firestore.store';
-    import { showInfo } from '../../lib/stores/notification.store';
-    import { fromStore } from '../../lib/utils/rx.store';
-    import { isUnique } from '../../lib/utils/ui.helper';
-    import Section from './Section.svelte';
+    import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
+    import type { AnyProperty, Properties } from '../../../lib/packages/firecms_core/types/properties';
+    import Toolbar from '../../../lib/components/Toolbar.svelte';
+    import Breadcrumb from '../../../lib/components/Breadcrumb.svelte';
+    import PopupMenu from '../../../lib/components/PopupMenu.svelte';
+    import type { Content, SectionType } from '../../../lib/models/content.type';
+    import { currentClientUser } from '../../../lib/stores/app.store';
+    import { arrayToMap, defaultValueByType, mergeObject } from '../../../lib/models/content.helper';
+    import { getContentStore, getCurrentScheme } from '../../../lib/stores/db/firestore.store';
+    import { showInfo } from '../../../lib/stores/notification.store';
+    import { fromStore } from '../../../lib/utils/rx.store';
+    import { isUnique } from '../../../lib/utils/ui.helper';
+    import Section from './ContentSection.svelte';
 
     $: disabled = !$currentClientUser;
 
-    const path$ = fromStore(params).pipe(map((p) => {
-        const segments = p?.wild && p.wild.split('/') || [];
-        if (segments.length > 1) {
-            if (segments.length % 2 === 0) {
-                return {
-                    id: segments.pop(),
-                    path: segments.join('/')
-                };
-            }
-        }
-        return {};
-    }));
-    const contentStore$ = path$.pipe(switchMap(({ path }) => fromStore(getContentStore(path))));
-    const document$ =  combineLatest([contentStore$, path$]).pipe(switchMap(([store, { id }]) => store.getDocument(id)));
+    export let path = of('');
+    export let id = of('');
 
-    const currentSchema = getCurrentScheme(derived(params, p => p?.wild));
+    const contentStore$ = path.pipe(switchMap((path) => fromStore(getContentStore(path))));
+    const document$ =  combineLatest([contentStore$, id]).pipe(switchMap(([store, id]) => store.getDocument(id)));
+
+    const currentSchema = getCurrentScheme(path);
     const properties = currentSchema.pipe(
         map(schema => Object.entries(schema?.properties as Properties ?? [])
             .filter(([field]) => field !== 'content')
@@ -112,10 +103,12 @@
 <section class="content-64">
     {#if $document$}
         <Toolbar>
-            <span slot="title"><a use:link href="/manage">{$document$.id}</a></span>
+            <span slot="title">
+                <Breadcrumb path={`${$path}/${$id}`} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            </span>
         </Toolbar>
 
-        <Section open={$document$.content.length < 1} value={$document$} title="Details of {$currentSchema?.name}"
+        <Section open={!$document$.content?.length} value={$document$} title="Details of {$currentSchema?.name}"
             property={{ dataType: 'map', properties: $properties }} type="details"
             on:change={({ detail }) => updateProperty($document$, detail)}>
             <span slot="commands">
@@ -126,7 +119,7 @@
             </span>
         </Section>
         
-        {#each $document$.content as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
+        {#each $document$.content ?? [] as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
         <Section {value} {type} property={$contentTypes[type]} {disabled}
             on:change={({ detail }) => updateSection($document$, detail, i)}>

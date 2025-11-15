@@ -1,12 +1,12 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { BehaviorSubject } from "rxjs";
-    import type { AnyProperty, StringProperty } from "../../lib/packages/firecms_core/types/properties";
-    import type { StorageFile } from "../../lib/models/storage.type";
-    import Modal from "../../lib/components/Modal.svelte";
-    import MediaBrowser from "../media/MediaBrowser.svelte";
-    import Toolbar from "../../lib/components/Toolbar.svelte";
-    import { confirmed } from "../../lib/utils/ui.helper";
+    import type { AnyProperty, StringProperty } from "../../../lib/packages/firecms_core/types/properties";
+    import type { StorageFile } from "../../../lib/models/storage.type";
+    import Modal from "../../../lib/components/Modal.svelte";
+    import MediaBrowser from "../../media/MediaBrowser.svelte";
+    import Toolbar from "../../../lib/components/Toolbar.svelte";
+    import { confirmed } from "../../../lib/utils/ui.helper";
 
     export let prop: AnyProperty;
     export let imageUrl: string;

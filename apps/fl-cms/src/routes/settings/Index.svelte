@@ -32,8 +32,8 @@
         {:else}
         <Login on:login={() => push($targetUrl)} />
         {/if}
-        <button on:click={() => push('/manage')}>
-            <i class="bx bxs-grid"></i> Manage
+        <button on:click={() => push('/doc')}>
+            <i class="bx bxs-grid"></i> Index
         </button>
         <button on:click={() => push('/media')}>
             <i class="bx bx-folder-open"></i> Storage

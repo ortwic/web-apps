@@ -129,11 +129,11 @@ function aggregate(prop: AnyProperty, value: object): string {
     } else if (typeof value === 'string') {
         return isMarkdown(prop) 
             ? marked(value, { mangle: false, headerIds: false }) 
-            : `<span title="${prop.name}" class="no-wrap">${value}</span>`;
+            : `<span title="${prop?.name}" class="no-wrap">${value}</span>`;
     } else if (value && typeof value === 'object') {
         return Object.entries(value)
             .reduce((acc, [k, v]) => {
-                const p = (prop as MapProperty).properties?.[k];
+                const p = (prop as MapProperty)?.properties?.[k];
                 acc.push(aggregate(p as AnyProperty, v));
                 return acc;
             }, [] as string[])

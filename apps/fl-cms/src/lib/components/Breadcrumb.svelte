@@ -5,13 +5,14 @@
   const dispatch = createEventDispatcher();
 
   export let path: string = '';
-  export let rootLabel: string = 'Start';
+  export let rootLabel: string = 'Index';
+  export let rootPath: string = '';
   export let separator: string = '/';
 
   $: segments = normalizePath(path)?.split('/').filter(Boolean) ?? [];
 
   // build hrefs for each segment: accumulate with leading '/'
-  $: hrefs = segments.map((_, i) => '/' + segments.slice(0, i + 1).map(encodeURIComponent).join('/'));
+  $: hrefs = segments.map((_, i) => `${rootPath}/${segments.slice(0, i + 1).map(encodeURIComponent).join('/')}`);
 
   function navigate(href: string) {
       dispatch('navigate', trimSlashes(href));

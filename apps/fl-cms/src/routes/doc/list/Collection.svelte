@@ -1,21 +1,23 @@
 <script lang="ts">
     import json from 'json5';
-    import { link, push, querystring } from 'svelte-spa-router';
+    import { push } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
-    import { firstValueFrom, map } from 'rxjs';
+    import { firstValueFrom, map, of } from 'rxjs';
     import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
-    import type { Properties } from '../../lib/packages/firecms_core/types/properties';
-    import type { Entity, Collection } from '../../lib/models/schema.model';
-    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../lib/stores/db/firestore.store';
-    import { prepareColumnDefinitions } from '../../lib/utils/column.helper';
-    import { createDefault } from '../../lib/models/content.helper';
-    import Toolbar from '../../lib/components/Toolbar.svelte';
-    import Loading from '../../lib/components/Loading.svelte';
-    import Modal from '../../lib/components/Modal.svelte';
-    import { showError, showInfo } from '../../lib/stores/notification.store';
-    import CollectionEditor from '../manage/CollectionEditor.svelte';
-    import '../../styles/tabulator.css';
+    import type { Entity, Collection } from '../../../lib/models/schema.model';
+    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../../lib/stores/db/firestore.store';
+    import { prepareColumnDefinitions } from '../../../lib/utils/column.helper';
+    import { createDefault } from '../../../lib/models/content.helper';
+    import Toolbar from '../../../lib/components/Toolbar.svelte';
+    import Breadcrumb from '../../../lib/components/Breadcrumb.svelte';
+    import Loading from '../../../lib/components/Loading.svelte';
+    import Modal from '../../../lib/components/Modal.svelte';
+    import { showError, showInfo } from '../../../lib/stores/notification.store';
+    import CollectionEditor from '../../index/CollectionEditor.svelte';
+    import '../../../styles/tabulator.css';
+    
+    export let path = of('');
     
     let showAddEntry = false;
     let newEntryId: string;
@@ -23,22 +25,24 @@
     let uploadInput: HTMLInputElement;
     let importJsonData: Entity[] | null;
 
-    const documentPath = $querystring!;
-    const currentSchema = getCurrentScheme(querystring);
-    const contentStore = createDocumentStore(documentPath);
+    const currentSchema = getCurrentScheme(path);
+    const contentStore = createDocumentStore(path);
     const documents = $contentStore;
     const columns = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
         updateHandler: update, 
-        actions: getActions(s) 
+        actions: [
+            editAction, 
+            deleteAction
+        ]
     })));
     const editAction = {
-        label: '<i class="bx bx-edit"></i> Edit content',
+        label: '<i class="bx bx-edit"></i> Edit details',
         action: (e: MouseEvent, cell: CellComponent) => {
             const id = cell.getData()['id'];
-            push(`/content/${$querystring}/${id}`);
+            push(`/doc/${$path}/${id}`);
         }
     };
     const deleteAction = {
@@ -52,22 +56,6 @@
         }
     };
 
-    function getActions(schema: Collection | null) {
-        const actions = [deleteAction];
-        if (hasContentDefinition(schema)) {
-            actions.unshift(editAction);
-        }
-        return actions;
-    }
-
-    function hasContentDefinition(schema: Collection | null): boolean {
-        const props = schema?.properties as Properties;
-        if (props) {
-            return props['content']?.dataType === 'array';
-        }
-        return false;
-    }
-
     function addEntry(schema: Collection | null) {
         const document = createDefault<Entity>(schema);
         document.id = newEntryId;
@@ -78,7 +66,7 @@
 
     function update<T extends Entity>(doc: T) {
         try {
-            if (documentPath !== undefined) {
+            if ($path !== undefined) {
                 return $contentStore.setDocuments(doc)
                     .then(() => showInfo(`Updated document ${JSON.stringify(doc)}`));
             }
@@ -128,7 +116,7 @@
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${documentPath}.json`; 
+            link.download = `${$path}.json`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -137,11 +125,6 @@
         }
     }
 </script>
-
-<svelte:head>
-    <title>{documentPath}</title>
-    <meta name="description" content="Custom Firebase Content Management System" />
-</svelte:head>
 
 <header>
     <Toolbar>
@@ -158,7 +141,7 @@
             <i class="bx bx-cog"></i>
         </button>
         <span slot="title">
-            <a use:link href="/manage">{documentPath.split('/').pop()}</a>
+            <Breadcrumb path={$path} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
@@ -167,7 +150,7 @@
 <Loading />
 {:then schema}
 <section>
-    <Table idField="id" data={documents} persistenceID={documentPath} columns={$columns}
+    <Table idField="id" data={documents} persistenceID={$path} columns={$columns}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
 </section>
 

@@ -2,12 +2,12 @@
   import { Editor as MarkdownEditor } from "bytemd";
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
-  import type { AnyProperty } from "../../lib/packages/firecms_core/types/properties";
-  import { currentClientUser } from "../../lib/stores/app.store";
-  import { timestampToIsoDate } from "../../lib/stores/db/firestore.store";
-  import { confirmed, isUnique } from "../../lib/utils/ui.helper";
-  import Expand from '../../lib/components/Expand.svelte';
-  import { isImageUrl, isMarkdown, mergeObject } from "../../lib/models/content.helper";
+  import type { AnyProperty } from "../../../lib/packages/firecms_core/types/properties";
+  import { currentClientUser } from "../../../lib/stores/app.store";
+  import { timestampToIsoDate } from "../../../lib/stores/db/firestore.store";
+  import { confirmed, isUnique } from "../../../lib/utils/ui.helper";
+  import Expand from '../../../lib/components/Expand.svelte';
+  import { isImageUrl, isMarkdown, mergeObject } from "../../../lib/models/content.helper";
   import ImageSelect from "./ImageSelect.svelte";
   
   export let document: DocumentData;

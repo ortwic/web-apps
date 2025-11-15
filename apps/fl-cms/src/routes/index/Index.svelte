@@ -94,7 +94,7 @@
                     </span>
                 </a>
                 {:else}
-                <a use:link href="/list?{item.path}" class="flex-center">
+                <a use:link href="/doc/{item.path}" class="flex-center">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>

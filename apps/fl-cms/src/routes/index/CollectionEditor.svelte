@@ -21,6 +21,8 @@
     // Calculation of popup within a dialog element fails, so use static position as a workaround
     const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
     const schemaStore = createSchemaStore({ merge: false });
+    const contentStore = createDocumentStore(item.path, { merge: false });
+    const documents = $contentStore;
 
     async function saveCollection() {
         try {
@@ -51,8 +53,7 @@
             return "map";
         };
         
-        const store = get(createDocumentStore(item.path, { merge: false }));
-        const inferredProps = await buildEntityPropertiesFromData(get(store), getType);
+        const inferredProps = await buildEntityPropertiesFromData(get(documents), getType);
         properties = { 
             ...item.properties, 
             ...inferredProps 

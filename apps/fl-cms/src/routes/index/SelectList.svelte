@@ -45,7 +45,7 @@
     </li>
     {:else}
     <li>
-        <a use:link href='/list?{nav.path}'>
+        <a use:link href='/doc/{nav.path}'>
             {nav.id}
         </a>
     </li>

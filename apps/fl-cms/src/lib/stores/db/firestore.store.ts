@@ -2,7 +2,7 @@ import type { Readable } from 'svelte/store';
 import type { Firestore, SetOptions } from 'firebase/firestore';
 import { derived } from 'svelte/store';
 import { Timestamp } from 'firebase/firestore';
-import { combineLatest, Observable, switchMap } from 'rxjs';
+import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { appStore } from '../app.store';
 import { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
@@ -18,11 +18,9 @@ export function createSchemaStore(options?: SetOptions): Readable<SchemaStore> {
     );
 }
 
-export function getCurrentScheme(path: Readable<string | undefined>): Observable<Collection | null> {
-    return combineLatest([
-        fromStore(createSchemaStore()), 
-        fromStore(path)
-    ]).pipe(switchMap(([store, path]) => store.getCollection(path)));
+export function getCurrentScheme(path: Observable<string | undefined>): Observable<Collection | null> {
+    return combineLatest([fromStore(createSchemaStore()), path])
+        .pipe(switchMap(([store, path]) => store.getCollection(path)));
 }
 
 export function getContentStore(path?: string, options?: SetOptions) {
@@ -31,9 +29,10 @@ export function getContentStore(path?: string, options?: SetOptions) {
     );
 }
 
-export function createDocumentStore<T extends Entity>(path?: string, options?: SetOptions) {
-    return derived<Readable<Firestore | null>, DocumentStore<T>>(currentFirestore, (store, set) =>
-        set(new DocumentStore(store, path, options))
+export function createDocumentStore<T extends Entity>(path: Observable<string> | string, options?: SetOptions): Observable<DocumentStore<T>> {
+    const path$ = typeof path === 'string' ? of(path) : path;
+    return combineLatest([fromStore(currentFirestore), path$]).pipe(
+        map(([store, path]) => new DocumentStore<T>(store, path, options))
     );
 }
 
