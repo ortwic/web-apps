@@ -84,7 +84,8 @@
             {:else}
                 <label for="{field}">{prop.name ?? field}</label>
                 {#if isImageUrl(prop)}
-                <ImageSelect imageUrl={document[field]} {prop} />
+                <ImageSelect imageUrl={document[field]} {prop} {disabled}
+                    on:selected={({ detail }) => update(detail?.url, field)} />
                 {:else if prop.dataType === 'string'}
                 <input type="text" {disabled} id="{field}" 
                     value="{document[field] ?? ''}" 

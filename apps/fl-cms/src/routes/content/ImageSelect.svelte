@@ -1,60 +1,86 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
+    import { BehaviorSubject } from "rxjs";
     import type { AnyProperty, StringProperty } from "../../lib/packages/firecms_core/types/properties";
+    import type { StorageFile } from "../../lib/models/storage.type";
     import Modal from "../../lib/components/Modal.svelte";
+    import MediaBrowser from "../media/MediaBrowser.svelte";
+    import Toolbar from "../../lib/components/Toolbar.svelte";
+    import { confirmed } from "../../lib/utils/ui.helper";
 
     export let prop: AnyProperty;
     export let imageUrl: string;
+    export let disabled = false;
+
+    const dispatch = createEventDispatcher();
     let open = false;
 
     const storage = (prop as StringProperty).storage;
+    const urlSubject = new BehaviorSubject(`${storage?.storagePath}`);
+    const url$ = urlSubject.asObservable();
 
-    function relativeUrl() {
-        try {
-            const url = new URL(imageUrl);
-            const file = url.pathname.split('/').pop();
-            return file && decodeURIComponent(file) || imageUrl;
-        } catch (error) {
-            console.warn(error);
+    function showDialog() {
+        if (!disabled) {
+            open = true;
         }
-        return storage?.storagePath;
+    }
+
+    function select(item?: StorageFile) {
+        imageUrl = item ? item.url : '';
+        dispatch('selected', item ?? { url: '' });
     }
 </script>
 
+<button {disabled} on:click={showDialog}>
 {#if imageUrl}
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<img src="{imageUrl}" class="preview" alt="{prop.name}" 
-    on:click={() => open = true} on:keypress={() => open = true}
-/>
+<img src="{imageUrl}" class="preview" alt="{prop.name}" />
 {:else}
-<button on:click={() => open = true}>None</button>
+<span>None</span>
 {/if}
+</button>
 
 <Modal {open} on:close={() => open = false}>
-    <h2>Edit {prop.name}</h2>
-    <div class="grid">
-        <label for="storage">Storage path</label>
-        <input id="storage" disabled value={storage?.storagePath} />
-        <label for="rel">Relative path</label>
-        <input id="rel" value={relativeUrl()} />
-        <label for="path">Absolute path</label>
-        <textarea id="path">{imageUrl}</textarea>
+    <div class="x-grid">
+        {#if imageUrl}
+        <img src="{imageUrl}" class="preview" alt="{prop.name}" />
+        {:else}
+        <button class="preview">None</button>
+        {/if}
+        <span class="y-grid">
+            <Toolbar width="100%">
+                <button class="icon clear" title="Remove" on:click={() => select()}>
+                    <i class="bx bx-trash danger"></i>
+                </button>
+                <span slot="title">Select image from library</span>
+            </Toolbar>
+            <textarea title="Image URL" on:keyup={(ev) => confirmed(ev) && select()}>{imageUrl}</textarea>
+        </span>
+        <div class="colspan">
+            <MediaBrowser path={url$} 
+                on:fileSelect={({ detail: item }) => select(item)}
+                on:folderChange={({ detail: url }) => urlSubject.next(url)} />
+        </div>
     </div>
 </Modal>
 
-<style>
-    img {
-        cursor: pointer;
-        transition: all .25 ease-in-out;
+<style lang="scss">
+    .preview {
+        min-width: 12em;
     }
 
-    img:hover {
-        outline: 2px solid var(--color-theme-1);
-    }
-
-    .grid {
+    .x-grid {
         display: grid;
         grid-template-columns: auto 1fr;
         gap: 1rem;
 
+        .colspan {
+            grid-column: 1 / span 2;
+        }
+    }
+
+    .y-grid {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 1rem;
     }
 </style>

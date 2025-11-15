@@ -16,7 +16,7 @@
 </svelte:head>
 
 <MediaBrowser {path}
-    on:change={({ detail }) => push(`/media/${detail}`)} 
-    on:select={({ detail }) => preview = detail}/>
+    on:folderChange={({ detail }) => push(`/media/${detail}`)} 
+    on:fileSelect={({ detail }) => preview = detail}/>
 
 <ImagePreview src={preview?.url} name={preview?.name} />

@@ -115,7 +115,7 @@
             <span slot="title"><a use:link href="/manage">{$document$.id}</a></span>
         </Toolbar>
 
-        <Section open={false} value={$document$} title="Details of {$currentSchema?.name}"
+        <Section open={$document$.content.length < 1} value={$document$} title="Details of {$currentSchema?.name}"
             property={{ dataType: 'map', properties: $properties }} type="details"
             on:change={({ detail }) => updateProperty($document$, detail)}>
             <span slot="commands">

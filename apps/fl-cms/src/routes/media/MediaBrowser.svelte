@@ -33,12 +33,12 @@
     );
 
     async function folderClicked(path: string) {
-        dispatch('change', path);
+        dispatch('folderChange', path);
         $currentStorage.reset();
     }
 
     async function fileClicked(item: StorageItem) {
-        dispatch('select', await withUrl(item));
+        dispatch('fileSelect', await withUrl(item));
     }
     
     async function withUrl(item: StorageItem): Promise<StorageFile> {
