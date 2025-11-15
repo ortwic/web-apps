@@ -34,6 +34,7 @@
 
     async function folderClicked(path: string) {
         dispatch('change', path);
+        $currentStorage.reset();
     }
 
     async function fileClicked(item: StorageItem) {
