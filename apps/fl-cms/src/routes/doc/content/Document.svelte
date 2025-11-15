@@ -53,8 +53,10 @@
     }
 
     async function updateProperty(document: Content, obj: Record<string, unknown>) {
-        Object.entries(obj).forEach(([field, value]) => document[field] = value);
-        await $contentStore$.setDocuments(document);
+        if (obj && document) {
+            Object.entries(obj).forEach(([field, value]) => document[field] = value);
+            await $contentStore$.setDocuments(document);
+        }
     }
 
     function insertSection(type: string, document: Content) {

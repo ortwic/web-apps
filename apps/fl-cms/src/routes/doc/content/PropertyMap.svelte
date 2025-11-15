@@ -85,22 +85,36 @@
             {:else}
                 <label for="{field}">{prop.name ?? field}</label>
                 {#if isImageUrl(prop)}
-                <ImageSelect imageUrl={document[field]} {prop} disabled="{disabled || !prop.editable}" 
+                <ImageSelect imageUrl={document[field]} {prop} disabled="{disabled || prop.editable === false}" 
                     on:selected={({ detail }) => update(detail?.url, field)} />
+                {:else if prop.dataType === 'string' && prop.enumValues?.length}
+                <select id="{field}" disabled="{disabled || prop.editable === false}" 
+                    value="{document[field] ?? ''}" 
+                    on:change={(ev) => update(ev, field)}>
+                    {#if Array.isArray(prop.enumValues)}
+                        {#each prop.enumValues as value}
+                        <option value="{value.id}">{value.label}</option>
+                        {/each}
+                    {:else}
+                        {#each Object.keys(prop.enumValues) as key, i}
+                        <option value="{key}">{JSON.stringify(prop.enumValues[i])}</option>
+                        {/each}
+                    {/if}
+                </select>
                 {:else if prop.dataType === 'string'}
-                <input type="text" id="{field}" disabled="{disabled || !prop.editable}" 
+                <input type="text" id="{field}" disabled="{disabled || prop.editable === false}" 
                     value="{document[field] ?? ''}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'boolean'}
-                <input type="checkbox" id="{field}" disabled="{disabled || !prop.editable}" 
+                <input type="checkbox" id="{field}" disabled="{disabled || prop.editable === false}" 
                     checked="{document[field] ?? false}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'number'}
-                <input type="number" id="{field}" disabled="{disabled || !prop.editable}" 
+                <input type="number" id="{field}" disabled="{disabled || prop.editable === false}" 
                     value="{document[field] ?? ''}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'date'}
-                <input type="datetime-local" id="{field}" disabled="{disabled || !prop.editable}" 
+                <input type="datetime-local" id="{field}" disabled="{disabled || prop.editable === false}" 
                     value="{isoToLocal(field)}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'array'}
