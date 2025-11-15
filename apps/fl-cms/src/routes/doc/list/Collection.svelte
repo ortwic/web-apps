@@ -1,8 +1,8 @@
 <script lang="ts">
     import json from 'json5';
-    import { push } from 'svelte-spa-router';
+    import { push, params } from 'svelte-spa-router';
     import { JSONEditor, Mode } from 'svelte-jsoneditor';
-    import { firstValueFrom, map, of } from 'rxjs';
+    import { firstValueFrom, from, map, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
     import type { Entity, Collection } from '../../../lib/models/schema.model';
@@ -14,6 +14,7 @@
     import Loading from '../../../lib/components/Loading.svelte';
     import Modal from '../../../lib/components/Modal.svelte';
     import { showError, showInfo } from '../../../lib/stores/notification.store';
+    import { toStore } from '../../../lib/utils/rx.store';
     import CollectionEditor from '../../index/CollectionEditor.svelte';
     import '../../../styles/tabulator.css';
     
@@ -27,34 +28,34 @@
 
     const currentSchema = getCurrentScheme(path);
     const contentStore = createDocumentStore(path);
-    const documents = $contentStore;
-    const columns = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
+    const documents$ = contentStore.pipe(switchMap(s => from(s.getDocuments<Entity>())));
+    const columns$ = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
         updateHandler: update, 
         actions: [
-            editAction, 
-            deleteAction
+            {
+                label: '<i class="bx bx-edit"></i> Edit details',
+                action: (e: MouseEvent, cell: CellComponent) => {
+                    const id = cell.getData()['id'];
+                    push(`/doc/${$path}/${id}`);
+                }
+            }, 
+            {
+                label: '<i class="bx bx-trash danger"></i> Delete entry',
+                action: (e: MouseEvent, cell: CellComponent) => {
+                    if (confirm('Are you sure?')) {
+                        const id = cell.getData()['id'];
+                        $contentStore.removeDocuments(id)
+                            .then(() => showInfo(`Entity ${id} was removed!`));
+                    }
+                }
+            }
         ]
     })));
-    const editAction = {
-        label: '<i class="bx bx-edit"></i> Edit details',
-        action: (e: MouseEvent, cell: CellComponent) => {
-            const id = cell.getData()['id'];
-            push(`/doc/${$path}/${id}`);
-        }
-    };
-    const deleteAction = {
-        label: '<i class="bx bx-trash danger"></i> Delete entry',
-        action: (e: MouseEvent, cell: CellComponent) => {
-            if (confirm('Are you sure?')) {
-                const id = cell.getData()['id'];
-                $contentStore.removeDocuments(id)
-                    .then(() => showInfo(`Entity ${id} was removed!`));
-            }
-        }
-    };
+    
+    $: columns = $columns$;
 
     function addEntry(schema: Collection | null) {
         const document = createDefault<Entity>(schema);
@@ -111,7 +112,7 @@
 
     function exportAsJson() {
         try {
-            const jsonStr = JSON.stringify($documents, (k, v) => timestampToIsoDate(v), 2); 
+            const jsonStr = JSON.stringify($documents$, (k, v) => timestampToIsoDate(v), 2); 
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -141,7 +142,7 @@
             <i class="bx bx-cog"></i>
         </button>
         <span slot="title">
-            <Breadcrumb path={$path} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb {path} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
@@ -150,8 +151,11 @@
 <Loading />
 {:then schema}
 <section>
-    <Table idField="id" data={documents} persistenceID={$path} columns={$columns}
+    <!-- on path change columns must be invalidated to keep them in sync -->
+    {#key columns}
+    <Table idField="id" data={toStore(documents$)} persistenceID={$path} {columns}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
+    {/key}
 </section>
 
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>

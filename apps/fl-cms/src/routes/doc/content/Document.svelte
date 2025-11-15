@@ -18,6 +18,7 @@
 
     $: disabled = !$currentClientUser;
 
+    export let fullPath = of('');
     export let path = of('');
     export let id = of('');
 
@@ -104,7 +105,7 @@
     {#if $document$}
         <Toolbar>
             <span slot="title">
-                <Breadcrumb path={`${$path}/${$id}`} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
+                <Breadcrumb path={fullPath} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
             </span>
         </Toolbar>
 

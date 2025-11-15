@@ -1,11 +1,11 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
-import type { CollectionReference, DocumentData, Firestore, QueryConstraint, SetOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, writeBatch, query } from 'firebase/firestore';
+import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, SetOptions, SnapshotOptions } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, getDocs } from 'firebase/firestore';
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import type { Entity } from '../../models/schema.model';
-import { showError, showWarn } from '../notification.store';
+import { showError } from '../notification.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -21,6 +21,9 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
 
 const defaultSetOptions: SetOptions = {
     merge: true
+};
+const snapshotOptions: SnapshotOptions = {
+    serverTimestamps: 'none'
 };
 
 export class DocumentStore<T extends Entity> implements Readable<T[]> {
@@ -49,13 +52,32 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         return this.documents.subscribe(run, invalidate);
     }
 
-    public getDocuments<T>(...constraints: QueryConstraint[]): Observable<T[]> {
+    public getDocumentStream<T extends DocumentData>(...constraints: QueryConstraint[]): Observable<T[]> {
         if (this.store && this.path) {
-            const items = collection(this.store, this.path) as CollectionReference<T>;
-            const q = query<T, DocumentData>(items, ...constraints);
-            return collectionData<T>(q, this.options).pipe(startWith([]));
+            const query = this.createQuery<T>(...constraints);
+            return collectionData<T>(query, this.options).pipe(startWith([]));
         }
         return of([]);
+    }
+
+    public async getDocuments<T extends DocumentData>(...constraints: QueryConstraint[]): Promise<T[]> {
+        if (this.store && this.path) {
+            const query = this.createQuery<T>(...constraints);
+            return getDocs<T, DocumentData>(query).then((snapshot) => {
+                const result: T[] = [];
+                snapshot.forEach((doc) => result.push({
+                    id: doc.id,
+                    ...doc.data(snapshotOptions)
+                }));
+                return result;
+            });
+        }
+        return [];
+    }
+    
+    private createQuery<T extends DocumentData>(...constraints: QueryConstraint[]): Query<T> {
+        const items = collection(this.store, this.path) as CollectionReference<T>;
+        return query<T>(items, ...constraints);
     }
     
     public getDocument(id?: string): Observable<T | null> {

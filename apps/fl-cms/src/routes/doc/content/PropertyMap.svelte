@@ -63,9 +63,10 @@
 
 </script>
 
-{#if typeof properties === 'object'}
+{#if document && typeof properties === 'object'}
 <ul>
     {#each Object.entries(properties) as [field, prop]}
+    {#if document[field]}
     <li title="{prop.dataType}">
         <div class="grid">
             {#if prop.dataType === 'map'}
@@ -84,35 +85,35 @@
             {:else}
                 <label for="{field}">{prop.name ?? field}</label>
                 {#if isImageUrl(prop)}
-                <ImageSelect imageUrl={document[field]} {prop} {disabled}
+                <ImageSelect imageUrl={document[field]} {prop} disabled="{disabled || !prop.editable}" 
                     on:selected={({ detail }) => update(detail?.url, field)} />
                 {:else if prop.dataType === 'string'}
-                <input type="text" {disabled} id="{field}" 
+                <input type="text" id="{field}" disabled="{disabled || !prop.editable}" 
                     value="{document[field] ?? ''}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'boolean'}
-                <input type="checkbox" {disabled} id="{field}" 
+                <input type="checkbox" id="{field}" disabled="{disabled || !prop.editable}" 
                     checked="{document[field] ?? false}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'number'}
-                <input type="number" {disabled} id="{field}" 
+                <input type="number" id="{field}" disabled="{disabled || !prop.editable}" 
                     value="{document[field] ?? ''}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'date'}
-                <input type="datetime-local" {disabled} id="{field}" 
+                <input type="datetime-local" id="{field}" disabled="{disabled || !prop.editable}" 
                     value="{isoToLocal(field)}" 
                     on:input={(ev) => updateInput(ev, field)} />
                 {:else if prop.dataType === 'array'}
                 <div class="y-flex">
                     {#if Array.isArray(document[field])}
                         {#each document[field] as item, i}
-                        <input type="text" {disabled} id="{field}" value="{item}" 
+                        <input type="text" id="{field}" value="{item}" 
                             title="Delete text to remove entry"
                             on:keyup={(ev) => confirmed(ev) && updateEntry(ev, field, i)}
                             on:blur={(ev) => updateEntry(ev, field, i)} />
                         {/each}
                     
-                        <input type="text" {disabled} id="{field}" placeholder="Add new item"
+                        <input type="text" id="{field}" placeholder="Add new item"
                             on:keyup={(ev) => confirmed(ev) && addEntry(ev, field)} />
                     {/if}                
                 </div>
@@ -124,10 +125,13 @@
             {/if}
         </div>
     </li>
+    {/if}
     {/each}
 </ul>
+{:else if (!document)}
+    <h2 class="emphasis no-wrap">Missing data node</h2>
 {:else}
-    <h2 class="emphasis">error parsing properties</h2>
+    <h2 class="emphasis no-wrap">Unsupported data structure</h2>
     {#if properties}
     <pre>{JSON.stringify(properties, null, 2)}</pre>
     {/if}

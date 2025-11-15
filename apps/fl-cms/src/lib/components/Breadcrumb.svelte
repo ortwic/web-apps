@@ -1,15 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { of } from 'rxjs';
   import { normalizePath, trimSlashes } from '../utils/string.helper';
 
   const dispatch = createEventDispatcher();
 
-  export let path: string = '';
+  export let path = of('');
   export let rootLabel: string = 'Index';
   export let rootPath: string = '';
   export let separator: string = '/';
 
-  $: segments = normalizePath(path)?.split('/').filter(Boolean) ?? [];
+  $: segments = normalizePath($path)?.split('/').filter(Boolean) ?? [];
 
   // build hrefs for each segment: accumulate with leading '/'
   $: hrefs = segments.map((_, i) => `${rootPath}/${segments.slice(0, i + 1).map(encodeURIComponent).join('/')}`);
