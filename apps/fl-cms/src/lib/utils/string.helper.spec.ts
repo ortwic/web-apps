@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getInitials, normalizePath } from './string.helper';
+import { getInitials, isRelativeUrl, normalizePath } from './string.helper';
 
 describe('test getInitials() helper func', () => {
     it('should return initials', () => {
@@ -15,6 +15,25 @@ describe('test getInitials() helper func', () => {
         const ra = getInitials('Random');
         expect(ra).equals('RA');
     });
+});
+
+describe('isRelativeUrl', () => {
+  it('should return true for relative URLs', () => {
+    expect(isRelativeUrl('/path/to/file')).toBe(true);
+    expect(isRelativeUrl('./path/to/file')).toBe(true);
+    expect(isRelativeUrl('../path/to/file')).toBe(true);
+  });
+
+  it('should return false for absolute URLs', () => {
+    expect(isRelativeUrl('http://example.com')).toBe(false);
+    expect(isRelativeUrl('https://example.com')).toBe(false);
+    expect(isRelativeUrl('data:image/png;base64,iVBORw0KGg...')).toBe(false);
+  });
+
+  it('should return false for null or undefined values', () => {
+    expect(isRelativeUrl(null)).toBe(false);
+    expect(isRelativeUrl(undefined)).toBe(false);
+  });
 });
 
 describe('normalizePath', () => {

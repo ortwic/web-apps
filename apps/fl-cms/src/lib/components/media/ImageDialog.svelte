@@ -8,7 +8,7 @@
     import MediaBrowser from "./MediaBrowser.svelte";
 
     export let path: string | undefined;
-    export let imageUrl: string;
+    export let value = '';
     export let name = '';
     export let open = false;
 
@@ -19,8 +19,8 @@
 
 <Modal {open} on:close={() => dispatch('close')}>
     <div class="x-grid">
-        {#if imageUrl}
-        <img src="{imageUrl}" class="preview" alt="{name}" />
+        {#if value}
+        <img src="{value}" class="preview" alt="{name}" />
         {:else}
         <button class="preview">None</button>
         {/if}
@@ -31,7 +31,7 @@
                 </button>
                 <span slot="title">Select image from library</span>
             </Toolbar>
-            <textarea title="Image URL" on:keyup={(ev) => confirmed(ev) && dispatch('remove')}>{imageUrl}</textarea>
+            <textarea title="Image URL" on:keyup={(ev) => confirmed(ev) && dispatch('remove')}>{value}</textarea>
         </span>
         <div class="colspan">
             <MediaBrowser path={url$} 

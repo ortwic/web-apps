@@ -1,13 +1,12 @@
 <script lang="ts">
-    import 'bytemd/dist/index.css';
     import { flip } from 'svelte/animate';
-    import { Editor as MarkdownEditor } from 'bytemd';
     import json from 'json5';    
     import { createEventDispatcher } from "svelte";
     import { JSONEditor, Mode, type Content } from "svelte-jsoneditor";
     import { colorScheme } from "@web-apps/svelte-tabulator";
     import type { AnyProperty } from '../../packages/firecms_core/types/properties';
     import Expand from '../ui/Expand.svelte';
+    import MarkdownEditor from '../ui/MarkdownEditor.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import { showError } from "../../stores/notification.store";
     import { arrayToMap, defaultValueByType, isArrayProperty, isMapProperty, isMarkdown, mergeObject } from "../../models/content.helper";
@@ -129,9 +128,10 @@
         </div>
     </span>
     <div class="section" class:jse-theme-dark={$colorScheme === 'dark'}>
-        {#if typeof value === 'string' && isMarkdown(property)}
-            <MarkdownEditor {value} placeholder={type} 
-                on:change={({ detail }) => change(detail['value'])} />
+        {#if typeof value === 'string' &&  isMarkdown(property)}
+        <MarkdownEditor {disabled} {value} placeholder={type} 
+        on:change={({ detail }) => change(detail)} />
+        <!-- mediaPath={`${property.storage?.storagePath}`} storeUrl={property.storage?.storeUrl} -->
         {:else if typeof value === 'object' && !array}
             <PropertyMap document={value} properties={getProperties(property)} 
                 on:update={({ detail }) => change(detail)}/>

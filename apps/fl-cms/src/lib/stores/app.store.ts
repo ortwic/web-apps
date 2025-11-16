@@ -23,14 +23,12 @@ const userForEmulator = {
 class FirebaseAppAdapter {
     private app: FirebaseApp | null;
     private config: FirebaseOptions;
-    private authDomain: string;
     readonly useEmulator: boolean;
 
     constructor(settings: AppSettings) {
         this.config = settings.firebaseConfigs[settings.selectedProjectId];
         this.useEmulator = settings.selectedProjectId === EMULATOR_KEY;
         this.app = this.getClientApp(this.config);
-        this.authDomain = this.config.authDomain || 'http://localhost:9099';
     }
 
     get validConfig(): boolean {
@@ -84,7 +82,10 @@ class FirebaseAppAdapter {
             if (!currentAuths.has(auth)) {
                 onAuthStateChanged(auth, currentClientUser.set);
                 if (this.useEmulator) {
-                    connectAuthEmulator(auth, this.authDomain, { disableWarnings: true });
+                    if (!this.config.authDomain) {
+                        this.config.authDomain = 'http://localhost:9099';
+                    }
+                    connectAuthEmulator(auth, this.config.authDomain, { disableWarnings: true });
                 }
                 currentAuths.add(auth);
             }
@@ -121,7 +122,7 @@ class FirebaseAppAdapter {
     }
 
     private async seedAuthEmulator() {
-        const res = await fetch(`${this.authDomain}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=${this.config.apiKey}`, {
+        const res = await fetch(`${this.config.authDomain}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=${this.config.apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userForEmulator)

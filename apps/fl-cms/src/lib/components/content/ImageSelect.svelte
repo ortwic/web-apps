@@ -5,7 +5,7 @@
     import ImageDialog from "../media/ImageDialog.svelte";
 
     export let storage = {} as StorageConfig;
-    export let src: string;
+    export let value: string;
     export let disabled = false;
     export let alt = '';
 
@@ -20,24 +20,24 @@
 
     function select(item?: StorageFile) {
         if (item) {
-            src = item.url;
+            value = item.url;
             dispatch('changed', storage.storeUrl ? item.url : item.path);
         } else {
-            src = '';
+            value = '';
             dispatch('changed', '');
         }
     }
 </script>
 
 <button {disabled} on:click={showDialog}>
-{#if src}
-<img {src} {alt} class="preview" />
+{#if value}
+<img src={value} {alt} class="preview" />
 {:else}
 <span>None</span>
 {/if}
 </button>
 
-<ImageDialog {open} path={`${storage?.storagePath}`} imageUrl={src} on:close={() => open = false}
+<ImageDialog {open} path={`${storage?.storagePath}`} {value} on:close={() => open = false}
     on:select={({ detail: item }) => select(item)} on:remove={() => select()}/>
 
 <style lang="scss">
