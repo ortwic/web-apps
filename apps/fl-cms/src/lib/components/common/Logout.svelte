@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { User } from "firebase/auth";
-    import { appStore } from "../stores/app.store";
+    import { appStore } from "../../stores/app.store";
 
     export let user: User | null;
 

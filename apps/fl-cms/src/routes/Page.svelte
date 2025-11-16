@@ -1,9 +1,9 @@
 <script lang="ts">
   import { params, push } from "svelte-spa-router";
   import { map } from "rxjs";
-  import { fromStore } from "../../lib/utils/rx.store";
-  import List from "./list/Collection.svelte";
-  import Content from "./content/Document.svelte";
+  import { fromStore } from "../lib/utils/rx.store";
+  import List from "../lib/components/content/Collection.svelte";
+  import Content from "../lib/components/content/Document.svelte";
 
   type PathInfo = {
     type: 'Collection' | 'Document';

@@ -1,10 +1,10 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
     import { derived } from "svelte/store";
-    import type { Collection } from "../../lib/models/schema.model";
-    import Modal from "../../lib/components/Modal.svelte";
-    import Toolbar from "../../lib/components/Toolbar.svelte";
-    import { createDocumentStore } from "../../lib/stores/db/firestore.store";
+    import type { Collection } from "../../models/schema.model";
+    import Modal from "../ui/Modal.svelte";
+    import Toolbar from "../ui/Toolbar.svelte";
+    import { createDocumentStore } from "../../stores/db/firestore.store";
 
     export let item: Collection;
     export let path: string;
@@ -45,7 +45,7 @@
     </li>
     {:else}
     <li>
-        <a use:link href='/doc/{nav.path}'>
+        <a use:link href='/page/{nav.path}'>
             {nav.id}
         </a>
     </li>

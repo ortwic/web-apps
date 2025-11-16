@@ -4,8 +4,8 @@
     import { derived } from 'svelte/store';
     import { querystring } from 'svelte-spa-router';
     import type { FirebaseOptions } from 'firebase/app';
-    import { removeFirebaseConfig, saveFirebaseConfig, settingsStore } from '../../lib/stores/settings.store';
-    import { showError, showInfo } from '../../lib/stores/notification.store';
+    import { removeFirebaseConfig, saveFirebaseConfig, settingsStore } from '../../stores/settings.store';
+    import { showError, showInfo } from '../../stores/notification.store';
 
     const currentFirebaseConfig = derived(settingsStore, (settings) => settings.firebaseConfigs[settings.selectedProjectId]);
     

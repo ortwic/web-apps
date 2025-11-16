@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import { appStore } from '../stores/app.store';
+    import { appStore } from '../../stores/app.store';
 
     const dispatcher = createEventDispatcher();
 

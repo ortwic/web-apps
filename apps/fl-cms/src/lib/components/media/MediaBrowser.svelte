@@ -1,22 +1,23 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { combineLatest, of, switchMap, tap } from "rxjs";
-    import type { StorageFile, StorageItem } from "../../lib/models/storage.type";
-    import Breadcrumb from "../../lib/components/Breadcrumb.svelte";
-    import Loading from "../../lib/components/Loading.svelte";
-    import Modal from "../../lib/components/Modal.svelte";
-    import Toolbar from "../../lib/components/Toolbar.svelte";
-    import { currentClientUser } from "../../lib/stores/app.store";
-    import { currentStorage } from "../../lib/stores/storage/storage.service";
-    import { fromStore } from "../../lib/utils/rx.store";
-    import { confirmed } from "../../lib/utils/ui.helper";
+    import type { StorageFile, StorageItem } from "../../models/storage.type";
+    import { currentClientUser } from "../../stores/app.store";
+    import { currentStorage } from "../../stores/storage/storage.service";
+    import { fromStore } from "../../utils/rx.store";
+    import { confirmed } from "../../utils/ui.helper";
+    import Breadcrumb from "../ui/Breadcrumb.svelte";
+    import Loading from "../ui/Loading.svelte";
+    import Modal from "../ui/Modal.svelte";
+    import Toolbar from "../ui/Toolbar.svelte";
     import ImagePreview from "./ImagePreview.svelte";
 
     $: disabled = !$currentClientUser;
     
     export let path = of('');
 
-    const dispatch = createEventDispatcher();
+    type EventArgs = { folderChange: string; fileSelect: StorageFile; };
+    const dispatch = createEventDispatcher<EventArgs>();
 
     let preview: StorageFile | undefined;
     let upload: HTMLInputElement;

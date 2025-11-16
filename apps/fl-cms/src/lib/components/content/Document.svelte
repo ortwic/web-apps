@@ -3,18 +3,18 @@
     import { params, push } from 'svelte-spa-router';
     import json from 'json5';
     import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
-    import type { AnyProperty, Properties } from '../../../lib/packages/firecms_core/types/properties';
-    import Toolbar from '../../../lib/components/Toolbar.svelte';
-    import Breadcrumb from '../../../lib/components/Breadcrumb.svelte';
-    import PopupMenu from '../../../lib/components/PopupMenu.svelte';
-    import type { Content, SectionType } from '../../../lib/models/content.type';
-    import { currentClientUser } from '../../../lib/stores/app.store';
-    import { arrayToMap, defaultValueByType, mergeObject } from '../../../lib/models/content.helper';
-    import { getContentStore, getCurrentScheme } from '../../../lib/stores/db/firestore.store';
-    import { showInfo } from '../../../lib/stores/notification.store';
-    import { fromStore } from '../../../lib/utils/rx.store';
-    import { isUnique } from '../../../lib/utils/ui.helper';
-    import Section from './ContentSection.svelte';
+    import type { AnyProperty, Properties } from '../../packages/firecms_core/types/properties';
+    import Toolbar from '../ui/Toolbar.svelte';
+    import Breadcrumb from '../ui/Breadcrumb.svelte';
+    import PopupMenu from '../ui/PopupMenu.svelte';
+    import type { Content, SectionType } from '../../models/content.type';
+    import { currentClientUser } from '../../stores/app.store';
+    import { arrayToMap, defaultValueByType, mergeObject } from '../../models/content.helper';
+    import { getContentStore, getCurrentScheme } from '../../stores/db/firestore.store';
+    import { showInfo } from '../../stores/notification.store';
+    import { fromStore } from '../../utils/rx.store';
+    import { isUnique } from '../../utils/ui.helper';
+    import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
 
@@ -65,6 +65,10 @@
             value: defaultValueByType($contentTypes[type]),
             __id: Date.now()
         };
+        if (!document.content) {
+            document.content = [];
+        }
+
         if (currentIndex !== undefined && isUnique(document.content, item)
             && document.content.insert(item, currentIndex + 1)) {
             $contentStore$.setDocuments(document);
@@ -107,7 +111,7 @@
     {#if $document$}
         <Toolbar>
             <span slot="title">
-                <Breadcrumb path={fullPath} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
+                <Breadcrumb path={fullPath} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
             </span>
         </Toolbar>
 

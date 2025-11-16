@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { saveSelectedProjectId, settingsStore } from '../../lib/stores/settings.store';
+    import { saveSelectedProjectId, settingsStore } from '../../stores/settings.store';
 
     export let disabled = false;
     export let width = '6rem';

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Modal from "../../lib/components/Modal.svelte";
+    import Modal from "../ui/Modal.svelte";
 
     export let src: string | undefined;
     export let name = '';

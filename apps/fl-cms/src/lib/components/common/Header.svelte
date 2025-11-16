@@ -1,8 +1,8 @@
 <script lang="ts">
     import { derived } from 'svelte/store';
     import { link, location, querystring } from "svelte-spa-router";
-    import { settingsStore } from '../stores/settings.store';
-    import { getInitials } from '../utils/string.helper';
+    import { settingsStore } from '../../stores/settings.store';
+    import { getInitials } from '../../utils/string.helper';
   
     const pathStartsWith = derived(location, l => l.split('/').filter(Boolean).at(0));
     const title = derived(settingsStore, s => getInitials(s.selectedProjectId));

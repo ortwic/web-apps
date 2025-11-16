@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { withKey } from '../../../lib/utils/ui.helper';
     import 'bytemd/dist/index.css';
     import { flip } from 'svelte/animate';
     import { Editor as MarkdownEditor } from 'bytemd';
@@ -7,11 +6,12 @@
     import { createEventDispatcher } from "svelte";
     import { JSONEditor, Mode, type Content } from "svelte-jsoneditor";
     import { colorScheme } from "@web-apps/svelte-tabulator";
-    import type { AnyProperty } from '../../../lib/packages/firecms_core/types/properties';
-    import Expand from '../../../lib/components/Expand.svelte';
-    import PopupMenu from '../../../lib/components/PopupMenu.svelte';
-    import { showError } from "../../../lib/stores/notification.store";
-    import { arrayToMap, defaultValueByType, isArrayProperty, isMapProperty, isMarkdown, mergeObject } from "../../../lib/models/content.helper";
+    import type { AnyProperty } from '../../packages/firecms_core/types/properties';
+    import Expand from '../ui/Expand.svelte';
+    import PopupMenu from '../ui/PopupMenu.svelte';
+    import { showError } from "../../stores/notification.store";
+    import { arrayToMap, defaultValueByType, isArrayProperty, isMapProperty, isMarkdown, mergeObject } from "../../models/content.helper";
+    import { withKey } from '../../utils/ui.helper';
     import PropertyMap from "./PropertyMap.svelte";
 
     const dispatch = createEventDispatcher();

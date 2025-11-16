@@ -3,17 +3,17 @@
   import { onMount } from 'svelte';
   import Router, { push } from "svelte-spa-router";
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
-  import Header from "./lib/components/Header.svelte";
-  import Snackbar from "./lib/components/Snackbar.svelte";
-  import Document from "./routes/doc/Index.svelte";
-  import Media from "./routes/media/Index.svelte";
-  import Settings from "./routes/settings/Index.svelte";
-  import Index from "./routes/index/Index.svelte";
+  import Header from "./lib/components/common/Header.svelte";
+  import Snackbar from "./lib/components/common/Snackbar.svelte";
+  import Document from "./routes/Page.svelte";
+  import Media from "./routes/Media.svelte";
+  import Settings from "./routes/Settings.svelte";
+  import Index from "./routes/Index.svelte";
 
   const routes = {
     '/': Index,
-    '/doc': Index,
-    '/doc/*': Document,
+    '/page': Index,
+    '/page/*': Document,
     '/media': Media,
     '/media/*': Media,
     '/settings': Settings,

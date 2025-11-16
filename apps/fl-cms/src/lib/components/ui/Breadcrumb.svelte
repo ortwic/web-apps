@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { of } from 'rxjs';
-  import { normalizePath, trimSlashes } from '../utils/string.helper';
+  import { normalizePath, trimSlashes } from '../../utils/string.helper';
 
   const dispatch = createEventDispatcher();
 

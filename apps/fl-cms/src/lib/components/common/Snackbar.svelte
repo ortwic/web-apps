@@ -1,6 +1,6 @@
 <script lang="ts">
     import { fade } from 'svelte/transition';
-    import { messageStack } from '../../lib/stores/notification.store';
+    import { messageStack } from '../../stores/notification.store';
 </script>
 
 <section>

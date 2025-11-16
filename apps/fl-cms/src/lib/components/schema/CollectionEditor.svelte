@@ -4,13 +4,13 @@
     import { type Content, JSONEditor, Mode } from 'svelte-jsoneditor'
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import { colorScheme } from '@web-apps/svelte-tabulator';
-    import type { Properties } from '../../lib/packages/firecms_core/types/properties';
-    import { templates } from '../../lib/data/predefinedCollections';
-    import type { Collection } from '../../lib/models/schema.model';
-    import { createSchemaStore, createDocumentStore } from '../../lib/stores/db/firestore.store';
-    import { showError, showInfo } from '../../lib/stores/notification.store';
-    import PopupMenu from '../../lib/components/PopupMenu.svelte';
-    import Toolbar from '../../lib/components/Toolbar.svelte';
+    import type { Properties } from '../../packages/firecms_core/types/properties';
+    import { templates } from '../../data/predefinedCollections';
+    import type { Collection } from '../../models/schema.model';
+    import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
+    import { showError, showInfo } from '../../stores/notification.store';
+    import PopupMenu from '../ui/PopupMenu.svelte';
+    import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
 
     export let item: Collection;
@@ -34,7 +34,7 @@
     }
         
     async function appendInferredPropsFromData() {
-        const { buildEntityPropertiesFromData } = await import('../../lib/packages/schema_inference');
+        const { buildEntityPropertiesFromData } = await import('../../packages/schema_inference');
         const getType = (value: any) => {
             if (typeof value === "number")
                 return "number";

@@ -2,12 +2,12 @@
     import { derived } from 'svelte/store';
     import { push, querystring } from 'svelte-spa-router';
     import { colorScheme } from '@web-apps/svelte-tabulator';
-    import Login from '../../lib/components/Login.svelte';
-    import Logout from '../../lib/components/Logout.svelte';
-    import Expand from '../../lib/components/Expand.svelte';
-    import { currentClientUser } from '../../lib/stores/app.store';
-    import SelectProject from './SelectProject.svelte';
-    import FirebaseConfigEditForm from './FirebaseConfigEditForm.svelte';
+    import Login from '../lib/components/common/Login.svelte';
+    import Logout from '../lib/components/common/Logout.svelte';
+    import Expand from '../lib/components/ui/Expand.svelte';
+    import { currentClientUser } from '../lib/stores/app.store';
+    import SelectProject from '../lib/components/settings/SelectProject.svelte';
+    import FirebaseConfigEditForm from '../lib/components/settings/FirebaseConfigEditForm.svelte';
 
     const themeIcon = derived(colorScheme, s => s === 'light' ? 'bx-moon' : 'bx-sun');
     const targetUrl = derived(querystring, q => q?.split('=')[1] ?? '/');

@@ -5,17 +5,17 @@
     import { firstValueFrom, from, map, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
-    import type { Entity, Collection } from '../../../lib/models/schema.model';
-    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../../lib/stores/db/firestore.store';
-    import { prepareColumnDefinitions } from '../../../lib/utils/column.helper';
-    import { createDefault } from '../../../lib/models/content.helper';
-    import Toolbar from '../../../lib/components/Toolbar.svelte';
-    import Breadcrumb from '../../../lib/components/Breadcrumb.svelte';
-    import Loading from '../../../lib/components/Loading.svelte';
-    import Modal from '../../../lib/components/Modal.svelte';
-    import { showError, showInfo } from '../../../lib/stores/notification.store';
-    import { toStore } from '../../../lib/utils/rx.store';
-    import CollectionEditor from '../../index/CollectionEditor.svelte';
+    import type { Entity, Collection } from '../../models/schema.model';
+    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../stores/db/firestore.store';
+    import { prepareColumnDefinitions } from '../../utils/column.helper';
+    import { createDefault } from '../../models/content.helper';
+    import Toolbar from '../ui/Toolbar.svelte';
+    import Breadcrumb from '../ui/Breadcrumb.svelte';
+    import Loading from '../ui/Loading.svelte';
+    import Modal from '../ui/Modal.svelte';
+    import { showError, showInfo } from '../../stores/notification.store';
+    import { toStore } from '../../utils/rx.store';
+    import CollectionEditor from '../schema/CollectionEditor.svelte';
     import '../../../styles/tabulator.css';
     
     export let path = of('');
@@ -39,7 +39,7 @@
                 label: '<i class="bx bx-edit"></i> Edit details',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     const id = cell.getData()['id'];
-                    push(`/doc/${$path}/${id}`);
+                    push(`/page/${$path}/${id}`);
                 }
             }, 
             {
@@ -142,7 +142,7 @@
             <i class="bx bx-cog"></i>
         </button>
         <span slot="title">
-            <Breadcrumb {path} rootPath="/doc" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb {path} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>

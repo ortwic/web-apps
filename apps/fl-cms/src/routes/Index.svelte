@@ -2,13 +2,13 @@
     import { onMount } from 'svelte';
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
-    import type { Collection } from '../../lib/models/schema.model';
-    import { showError, showWarn } from '../../lib/stores/notification.store';
-    import { currentClientUser } from '../../lib/stores/app.store';
-    import { createSchemaStore } from '../../lib/stores/db/firestore.store';
-    import Modal from '../../lib/components/Modal.svelte';
-    import CollectionEditor from './CollectionEditor.svelte';
-    import SelectList from './SelectList.svelte';
+    import type { Collection } from '../lib/models/schema.model';
+    import { showError, showWarn } from '../lib/stores/notification.store';
+    import { currentClientUser } from '../lib/stores/app.store';
+    import { createSchemaStore } from '../lib/stores/db/firestore.store';
+    import Modal from '../lib/components/ui/Modal.svelte';
+    import CollectionEditor from '../lib/components/schema/CollectionEditor.svelte';
+    import SelectCollection from '../lib/components/schema/SelectCollection.svelte';
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
@@ -67,7 +67,7 @@
 </script>
 
 <svelte:head>
-    <title>Firebase CMS | Manage</title>
+    <title>Firebase CMS | Index</title>
     <meta name="description" content="Custom Firebase Content Management System" />
 </svelte:head>
 
@@ -94,7 +94,7 @@
                     </span>
                 </a>
                 {:else}
-                <a use:link href="/doc/{item.path}" class="flex-center">
+                <a use:link href="/page/{item.path}" class="flex-center">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>
@@ -127,7 +127,7 @@
 
 <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
     {#if showSelect}
-    <SelectList item={$current} path={$currentPath} />
+    <SelectCollection item={$current} path={$currentPath} />
     {/if}
 </Modal>
 
