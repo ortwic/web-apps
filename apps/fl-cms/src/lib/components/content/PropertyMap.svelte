@@ -1,14 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
-  import type { AnyProperty } from "../../packages/firecms_core/types/properties";
+  import type { AnyProperty, ArrayProperty } from "../../packages/firecms_core/types/properties";
   import { isImageUrl, mergeObject } from "../../models/content.helper";
   import { currentClientUser } from "../../stores/app.store";
   import { timestampToIsoDate } from "../../stores/db/firestore.store";
-  import { confirmed, isUnique } from "../../utils/ui.helper";
   import Expand from '../ui/Expand.svelte';
   import MarkdownEditor from "../ui/MarkdownEditor.svelte";
   import ImageSelect from "./ImageSelect.svelte";
+  import TagCloud from "../ui/TagCloud.svelte";
+  import Input from "../ui/Input.svelte";
   
   export let document: DocumentData;
   export let properties: Record<string, AnyProperty>;
@@ -26,6 +27,14 @@
     }
   }
 
+  function useTagCloud(field: string): boolean {
+    const prop = properties[field] as ArrayProperty;
+    if (Array.isArray(document[field]) && properties[field].dataType === 'array') {
+        return (prop?.of as AnyProperty)?.dataType === 'string';
+    }
+    return false;
+  }
+
   function update<T>(value: T, field: string) {
     dispatch('update', { [field]: value });
   }
@@ -40,33 +49,12 @@
     }
   }
 
-  function addEntry(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string) {
-    if (Array.isArray(document[field])) {
-        document[field].push(event.currentTarget.value);
-        update(document[field], field);
-        event.currentTarget.value = '';
-    }
-  }
-  
-  function updateEntry(event: Event & { currentTarget: EventTarget & HTMLInputElement; }, field: string, index: number) {
-    if (Array.isArray(document[field])) {
-        if (!event.currentTarget.value) {
-            // remove
-            document[field].splice(index, 1);
-        } else if (isUnique(document[field], event.currentTarget.value)) {
-            // update
-            document[field][index] = event.currentTarget.value;
-        }
-        update(document[field], field);
-    }
-  }
-
 </script>
 
 {#if document && typeof properties === 'object'}
 <ul>
     {#each Object.entries(properties) as [field, prop]}
-    {#if document[field]}
+    {#if document[field] !== undefined}
     <li title="{prop.dataType}">
         <div class="grid">
             {#if prop.dataType === 'map'}
@@ -102,36 +90,20 @@
                         {/each}
                     {/if}
                 </select>
-                {:else if prop.dataType === 'string'}
-                <input type="text" id="{field}" disabled="{disabled || prop.editable === false}" 
-                    value="{document[field] ?? ''}" 
-                    on:input={(ev) => updateInput(ev, field)} />
+                {:else if useTagCloud(field)}
+                <TagCloud labels="{document[field]}" on:change={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'boolean'}
                 <input type="checkbox" id="{field}" disabled="{disabled || prop.editable === false}" 
-                    checked="{document[field] ?? false}" 
-                    on:input={(ev) => updateInput(ev, field)} />
+                    checked="{document[field] ?? false}" on:input={(ev) => updateInput(ev, field)} />
+                {:else if prop.dataType === 'string'}
+                <Input type="text" id="{field}" disabled="{disabled || prop.editable === false}" 
+                    value="{document[field] ?? ''}" on:changed={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'number'}
-                <input type="number" id="{field}" disabled="{disabled || prop.editable === false}" 
-                    value="{document[field] ?? ''}" 
-                    on:input={(ev) => updateInput(ev, field)} />
+                <Input type="number" id="{field}" disabled="{disabled || prop.editable === false}" 
+                    value="{document[field] ?? ''}" on:changed={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'date'}
-                <input type="datetime-local" id="{field}" disabled="{disabled || prop.editable === false}" 
-                    value="{isoToLocal(field)}" 
-                    on:input={(ev) => updateInput(ev, field)} />
-                {:else if prop.dataType === 'array'}
-                <div class="y-flex">
-                    {#if Array.isArray(document[field])}
-                        {#each document[field] as item, i}
-                        <input type="text" id="{field}" value="{item}" 
-                            title="Delete text to remove entry"
-                            on:keyup={(ev) => confirmed(ev) && updateEntry(ev, field, i)}
-                            on:blur={(ev) => updateEntry(ev, field, i)} />
-                        {/each}
-                    
-                        <input type="text" id="{field}" placeholder="Add new item"
-                            on:keyup={(ev) => confirmed(ev) && addEntry(ev, field)} />
-                    {/if}                
-                </div>
+                <Input type="datetime-local" id="{field}" disabled="{disabled || prop.editable === false}" 
+                    value="{isoToLocal(field)}" on:changed={({ detail }) => update(detail, field)} />
                 {:else}
                 <span>
                     <pre id="{field}" class="colspan">{JSON.stringify(document[field], null, 2)}</pre>

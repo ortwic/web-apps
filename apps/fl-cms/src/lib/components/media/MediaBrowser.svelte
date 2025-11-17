@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, tick } from "svelte";
     import { combineLatest, of, switchMap, tap } from "rxjs";
     import type { StorageFile, StorageItem } from "../../models/storage.type";
     import { currentClientUser } from "../../stores/app.store";
@@ -46,9 +46,11 @@
         return { ...item, url };
     }
 
-    function showPrompt() {
+    async function showPrompt() {
         promptVisible = true;
-        setTimeout(() => prompt?.focus(), 0);
+
+        await tick();
+        prompt?.focus();
     }
 
     function createFolder(event: Event & { currentTarget: EventTarget & HTMLInputElement; }) {
