@@ -1,10 +1,10 @@
 import json from 'json5';
 import type { FirebaseOptions } from "firebase/app";
-import { derived, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { AppSettings } from './settings.type';
 
 export const CONFIG_KEY = 'firelighter-settings';
-export const EMULATOR_KEY = 'localhost';
+export const EMULATOR_KEY = 'emulator';
 export const DefaultAppSettings: AppSettings = {
     selectedProjectId: '',
     firebaseConfigs: {
@@ -44,6 +44,10 @@ export function removeFirebaseConfig(projectId: string): AppSettings {
 export function loadSettings(): AppSettings {
     const value = localStorage.getItem(CONFIG_KEY);
     return value && json.parse<AppSettings>(value) || DefaultAppSettings;
+}
+
+export function anySettings(): boolean {
+    return localStorage.getItem(CONFIG_KEY) !== null;
 }
 
 function saveSettings(settings: AppSettings): AppSettings {

@@ -9,6 +9,7 @@
   import Media from "./routes/Media.svelte";
   import Settings from "./routes/Settings.svelte";
   import Index from "./routes/Index.svelte";
+  import NotFound from "./routes/NotFound.svelte";
 
   const routes = {
     '/': Index,
@@ -17,7 +18,7 @@
     '/media': Media,
     '/media/*': Media,
     '/settings': Settings,
-    // '*': NotFound
+    '*': NotFound
   };
 
   // ensure settings are loaded on client side only
@@ -41,7 +42,12 @@
   <Router {routes}/>
 </main>
 
-<footer></footer>
+<footer>
+     <div class="image-caption" style="text-align: right;">&copy; 
+        <a href="https://github.com/ortwic/web-apps/tree/main/apps/fl-cms" target="_blank" rel="noopener noreferrer">OCSoft42</a> 
+        &mdash; MIT License 
+    </div>
+</footer>
 <Snackbar />
 
 <style>

@@ -3,13 +3,16 @@
 
     export let open = false;
     export let width = "auto";
+    export let closable = true;
 
     const dispatcher = createEventDispatcher();
 
     let modal: HTMLDialogElement;
 
     function closeModal() {
-        dispatcher('close');
+        if (closable) {
+            dispatcher('close');
+        }
     }
 
     function handleEscapeKey(event: KeyboardEvent) {
@@ -28,11 +31,13 @@
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <dialog bind:this={modal} style:width={width} on:click={closeModal} on:keydown={handleEscapeKey}>
     {#if open}
+    {#if closable}
     <div class="header x-flex-full">
         <button class="clear" on:click={closeModal}>
             <i class="bx bx-x clear"></i>
         </button>
     </div>
+    {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="content" on:click={(ev) => ev.stopImmediatePropagation()}>

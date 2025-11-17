@@ -7,6 +7,8 @@
     import { removeFirebaseConfig, saveFirebaseConfig, settingsStore } from '../../stores/settings.store';
     import { showError, showInfo } from '../../stores/notification.store';
 
+    export let disabled = false;
+
     const currentFirebaseConfig = derived(settingsStore, (settings) => settings.firebaseConfigs[settings.selectedProjectId]);
     
     const placeholder = `const firebaseConfig = {
@@ -89,18 +91,18 @@
             Save <a href="https://firebase.google.com/docs/web/setup" target="_blank">Firebase</a> config by projectId
         </label>
         <span class="x-flex-full">
-            <button type="button" class="clear" on:click|preventDefault={share} disabled={!valid}>
+            <button type="button" class="clear" on:click|preventDefault={share} disabled={!valid || disabled}>
                 <i class="bx bx-share-alt"></i>
             </button>
-            <button type="button" class="clear" on:click|preventDefault={save} disabled={!valid}>
+            <button type="button" class="clear" on:click|preventDefault={save} disabled={!valid || disabled}>
                 <i class="bx bx-save"></i>
             </button>
-            <button type="button" class="clear" on:click|preventDefault={remove} disabled={!valid}>
-                <i class="bx bx-trash danger"></i>
+            <button type="button" class="clear" on:click|preventDefault={remove} disabled={!valid || disabled}>
+                <i class="bx bx-trash"></i>
             </button>
         </span>
     </div>
-    <textarea id="firebaseConfig" bind:value={textInput} {placeholder} rows="10"></textarea>
+    <textarea id="firebaseConfig" {disabled} bind:value={textInput} {placeholder} rows="10"></textarea>
 </form>
 
 <style>

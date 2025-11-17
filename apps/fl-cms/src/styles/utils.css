@@ -26,10 +26,6 @@
     border: 1px solid var(--color-bg-1);
 }
 
-.danger {
-    color: brown !important;
-}
-
 .w-100 {
     width: 100%;
 }
@@ -97,8 +93,16 @@
     background-color: var(--color-bg-2);
 }
 
-@media (prefers-color-scheme: light) {
-    .danger {
-        color: red !important;
-    }
+.highlight {
+    color: var(--color-text-hl);
+    background-color: var(--color-hl);
+    font-weight: bold;
+    padding: .1em;
+    border-radius: .2em;
+}
+
+.important {
+    border: 3px solid var(--color-hl);
+    border-radius: .4em;
+    font-weight: 600;
 }

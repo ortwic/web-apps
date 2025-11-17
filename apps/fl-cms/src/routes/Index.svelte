@@ -12,6 +12,8 @@
 
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
+
+    console.log($schemas)
     $: disabled = !$currentClientUser;
 
     let showEdit = false, showSelect = false;
@@ -80,7 +82,7 @@
                         <i class="bx bx-edit"></i>
                     </button>
                     <button {disabled} class="clear" on:click|preventDefault={() => remove(item)}>
-                        <i class="bx bx-trash danger"></i>
+                        <i class="bx bx-trash"></i>
                     </button>
                 </div>
                 {#if item.parent}

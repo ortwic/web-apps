@@ -155,7 +155,7 @@
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small popup-menu no-wrap y-flex">
                 <button class="btn" {disabled} on:click={() => removeSection($document$)}>
-                    <span class="emphasis"><i class="bx bx-trash danger"></i> remove</span>
+                    <span class="emphasis"><i class="bx bx-trash"></i> remove</span>
                 </button>
             </div>
         </PopupMenu>

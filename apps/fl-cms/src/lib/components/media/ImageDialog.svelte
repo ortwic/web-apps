@@ -27,7 +27,7 @@
         <span class="y-grid">
             <Toolbar width="100%">
                 <button class="icon clear" title="Remove" on:click={() => dispatch('remove')}>
-                    <i class="bx bx-trash danger"></i>
+                    <i class="bx bx-trash"></i>
                 </button>
                 <span slot="title">Select image from library</span>
             </Toolbar>

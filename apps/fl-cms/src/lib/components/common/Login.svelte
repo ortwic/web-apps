@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { appStore } from '../../stores/app.store';
+    import { EMULATOR_KEY } from '../../stores/settings.store';
 
     const dispatcher = createEventDispatcher();
 
@@ -14,7 +15,7 @@
     <i class="bx bx-lg bx-log-in"></i> 
     <span> 
         {#if $appStore.useEmulator}
-        Login to emulator
+        Login to {EMULATOR_KEY}
         {:else}
         Login with Google
         {/if}

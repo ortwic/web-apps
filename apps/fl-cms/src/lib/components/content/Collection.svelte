@@ -43,7 +43,7 @@
                 }
             }, 
             {
-                label: '<i class="bx bx-trash danger"></i> Delete entry',
+                label: '<i class="bx bx-trash"></i> Delete entry',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     if (confirm('Are you sure?')) {
                         const id = cell.getData()['id'];

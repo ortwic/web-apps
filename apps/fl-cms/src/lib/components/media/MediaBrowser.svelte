@@ -106,7 +106,7 @@
                     <i class="bx bx-search"></i>
                 </button>
                 <button class="icon clear" on:click|preventDefault={() => confirm('Delete?') && $currentStorage.deleteFile(item.path)}>
-                    <i class="bx bx-trash danger"></i>
+                    <i class="bx bx-trash"></i>
                 </button>
             </span>
             {/if}

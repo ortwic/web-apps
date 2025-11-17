@@ -12,7 +12,9 @@
     --color-bg-3: #00000060;
     --color-theme-1: #80c0ff;
     --color-theme-2: #6080ff;
+    --color-hl: #d0ff00;
     --color-text: #dedede;
+    --color-text-hl: black;
     --color-text-disabled: #a0a0a0;
     --column-width: 42rem;
     --column-margin-top: 4rem;
@@ -29,7 +31,9 @@
     :root:not(.dark):not(.light), .light {
         --color-theme-1: #008eff;
         --color-theme-2: #4075a6;
+        --color-hl: #A71908;
         --color-text: #213547;
+        --color-text-hl: white;
         --color-text-disabled: #4d6983;
         --color-bg-0: #cad8e4;
         --color-bg-1: #cedce8;
@@ -37,6 +41,10 @@
         --color-bg-3: #ffffff;
 
         color-scheme: light;
+    }
+    
+    .bx-trash {
+        color: red !important;
     }
 }
   
@@ -131,6 +139,7 @@ textarea:placeholder-shown,
     font-style: italic;
 }
 
+a[role='button'],
 button {
     cursor: pointer;
     padding: 0.6em 1.2em;
@@ -140,10 +149,15 @@ button {
     font-weight: 500;
     font-family: inherit;
     transition: all .25s ease-in-out;
+    text-decoration: none;
 }
+
+a[role='button']:not([disabled]):hover,
 button:not([disabled]):hover {
     border-color: var(--color-theme-1);
+    text-decoration: none;
 }
+
 input:focus,
 textarea:focus,
 select:focus,
@@ -180,11 +194,19 @@ button.clear:focus:not(:focus-visible) {
     outline: none;
 }
 
+svg {
+  fill: var(--logo-color);
+}
+
 i.bx {
     border-radius: 50%;
     padding: 0.2rem;
     color: var(--color-theme-2);
     transition: all .25s ease-in-out;
+}
+
+.bx-trash {
+    color: brown !important;
 }
 
 i:not(.clear).bx {
@@ -207,6 +229,12 @@ button:not([disabled]):hover > i.bx {
 img.preview {
     max-width: 12em;
     object-fit: contain;
+}
+
+.image-caption {
+    font-size: small;
+    font-style: italic;
+    color: var(--color-text-disabled);
 }
 
 .label {
