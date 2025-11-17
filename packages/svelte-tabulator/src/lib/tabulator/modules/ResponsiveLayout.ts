@@ -1,7 +1,7 @@
-import type { CellComponent, Tabulator } from 'tabulator-tables';
-import Module from 'tabulator-tables/src/js/core/Module';
+import type { CellComponent, ColumnComponent, RowComponent, Tabulator } from 'tabulator-tables';
+import { Module } from 'tabulator-tables';
 
-type Formatter = (data: CollapsedCellData[]) => HTMLElement;
+type Formatter = (data: CollapsedCellData[]) => HTMLElement | undefined;
 
 export interface CollapsedCellData {
     index: number;
@@ -14,15 +14,18 @@ export interface CollapsedCellData {
 export default class ResponsiveLayout extends Module{
     static moduleName = 'responsiveLayout';
 
-    private columns = [];
-    private hiddenColumns = [];
-    private mode: boolean | 'hide' | 'collapse';
+    private columns: ColumnComponent[] = [];
+    private hiddenColumns: any[] = [];
+    private mode: boolean | 'hide' | 'collapse' = false;
     private index = 0;
     private collapseFormatter: Formatter = () => (undefined);
     private collapseStartOpen = true;
-    private collapseHandleColumn: { show: () => void; hide: () => void; };
+    private collapseHandleColumn: { show: () => void; hide: () => void; } = {
+        show: () => {},
+        hide: () => {}
+    };
 
-    constructor(private table: Tabulator){
+    constructor(table: Tabulator){
         super(table);
 
         super.registerTableOption('responsiveLayout', false); //responsive layout flags
@@ -36,9 +39,9 @@ export default class ResponsiveLayout extends Module{
     //generate responsive columns list
     initialize(){
         if(this.table.options.responsiveLayout){
-            super.subscribe('column-layout', this.initializeColumn.bind(this));
-            super.subscribe('column-show', this.updateColumnVisibility.bind(this));
-            super.subscribe('column-hide', this.updateColumnVisibility.bind(this));
+            super.subscribe('column-layout', (...args) => this.initializeColumn.bind(this, ...args));
+            super.subscribe('column-show', (...args) => this.updateColumnVisibility.bind(this, ...args));
+            super.subscribe('column-hide', (...args) => this.updateColumnVisibility.bind(this, ...args));
             super.subscribe('columns-loaded', this.initializeResponsivity.bind(this));
             super.subscribe('column-moved', this.initializeResponsivity.bind(this));
             super.subscribe('column-add', this.initializeResponsivity.bind(this));
@@ -47,15 +50,16 @@ export default class ResponsiveLayout extends Module{
             super.subscribe('table-redrawing', this.tableRedraw.bind(this));
 
             if(this.table.options.responsiveLayout === 'collapse'){
-                super.subscribe('row-data-changed', this.generateCollapsedRowContent.bind(this));
-                super.subscribe('row-init', this.initializeRow.bind(this));
-                super.subscribe('row-layout', this.layoutRow.bind(this));
+                super.subscribe('row-data-changed', (...args) => this.generateCollapsedRowContent.bind(this, ...args));
+                super.subscribe('row-init', (...args) => this.initializeRow.bind(this, ...args));
+                super.subscribe('row-layout', (...args) => this.layoutRow.bind(this, ...args));
             }
         }
     }
 
-    tableRedraw = (force) => {
-        if(['fitColumns', 'fitDataStretch'].indexOf(super.layoutMode()) === -1){
+    tableRedraw = (force: any) => {
+        const layoutMode = this.table.modules.layout.getMode();
+        if(['fitColumns', 'fitDataStretch'].indexOf(layoutMode) === -1){
             if(!force){
                 this.update();
             }
@@ -63,21 +67,21 @@ export default class ResponsiveLayout extends Module{
     };
 
     initializeResponsivity(){
-        this.mode = this.table.options.responsiveLayout;
+        this.mode = this.table.options.responsiveLayout ?? false;
         this.collapseFormatter = this.table.options.responsiveLayoutCollapseFormatter || this.defaultFormatter;
-        this.collapseStartOpen = this.table.options.responsiveLayoutCollapseStartOpen;
+        this.collapseStartOpen = this.table.options.responsiveLayoutCollapseStartOpen || true;
         this.hiddenColumns = [];
 
         //determine level of responsivity for each column
         const columns = this.table.columnManager.columnsByIndex
-            .filter(c => c.modules.responsive?.order && c.modules.responsive.visible)
-            .map((column, i) => {
+            .filter((c: { modules: { responsive: { order: any; visible: any; }; }; }) => c.modules.responsive?.order && c.modules.responsive.visible)
+            .map((column: { modules: { responsive: { index: any; }; }; }, i: any) => {
                 column.modules.responsive.index = i;
                 return column;
             });
 
         if (this.mode === 'collapse') {
-            this.hiddenColumns = columns.filter(c => !c?.visible);
+            this.hiddenColumns = columns.filter((c: { visible: any; }) => !c?.visible);
         }
 
         this.columns = this.sortListByResponsivity(columns);
@@ -87,7 +91,7 @@ export default class ResponsiveLayout extends Module{
         }
 
         //assign collapse column
-        this.collapseHandleColumn = this.table.columnManager.columns.find(c => c.definition.formatter == 'responsiveCollapse');
+        this.collapseHandleColumn = this.table.columnManager.columns.find((c: { definition: { formatter: string; }; }) => c.definition.formatter == 'responsiveCollapse');
         if(this.collapseHandleColumn){
             if(this.hiddenColumns.length){
                 this.collapseHandleColumn.show();
@@ -97,15 +101,15 @@ export default class ResponsiveLayout extends Module{
         }
     }
 
-    sortListByResponsivity = (columns) => {
-        return columns.reverse().sort((a, b) => {
+    sortListByResponsivity = (columns: any[]): any[] => {
+        return columns.reverse().sort((a: { modules: { responsive: { order: number; index: number; }; }; }, b: { modules: { responsive: { order: number; index: number; }; }; }) => {
             const diff = b.modules.responsive.order - a.modules.responsive.order;
             return diff || (b.modules.responsive.index - a.modules.responsive.index);
         });
     };
 
     //define layout information
-    initializeColumn(column){
+    initializeColumn(column: { getDefinition: () => any; modules: { responsive: { order: any; visible: boolean; }; }; }){
         const def = column.getDefinition();
 
         column.modules.responsive = {
@@ -114,7 +118,7 @@ export default class ResponsiveLayout extends Module{
         };
     }
 
-    initializeRow(row){
+    initializeRow(row: { type: string; modules: { responsiveLayout: { element: HTMLDivElement; open: boolean; }; }; }){
         if(row.type !== 'calc'){
             const collapseEl = document.createElement('div');
             collapseEl.classList.add('tabulator-responsive-collapse');
@@ -130,7 +134,7 @@ export default class ResponsiveLayout extends Module{
         }
     }
 
-    layoutRow(row){
+    layoutRow(row: { getElement: () => any; modules: { responsiveLayout: { element: any; }; }; }){
         const rowEl = row.getElement();
 
         if(row.modules.responsiveLayout){
@@ -140,14 +144,14 @@ export default class ResponsiveLayout extends Module{
     }
 
     //update column visibility
-    updateColumnVisibility(column, responsiveToggle){
+    updateColumnVisibility(column: { modules: { responsive: { visible: any; }; }; visible: any; }, responsiveToggle: any){
         if(!responsiveToggle && column.modules.responsive){
             column.modules.responsive.visible = column.visible;
             this.initializeResponsivity();
         }
     }
 
-    hideColumn(column){
+    hideColumn(column: any){
         const colCount = this.hiddenColumns.length;
 
         column.hide(false, true);
@@ -162,7 +166,7 @@ export default class ResponsiveLayout extends Module{
         }
     }
 
-    showColumn(column){
+    showColumn(column: any){
         column.show(false, true);
         //set column width to prevent calculation loops on uninitialized columns
         column.setWidth(column.getWidth());
@@ -232,10 +236,10 @@ export default class ResponsiveLayout extends Module{
 
     generateCollapsedContent = () => {
         this.table.rowManager.getDisplayRows()
-            .forEach((row) => this.generateCollapsedRowContent(row));
+            .forEach((row: any) => this.generateCollapsedRowContent(row));
     };
 
-    generateCollapsedRowContent = (row) => {
+    generateCollapsedRowContent = (row: { modules: { responsiveLayout: { element: any; }; }; }) => {
         if(row.modules.responsiveLayout && this.mode === 'collapse'){
             const collapseEl = row.modules.responsiveLayout.element;
 
@@ -256,9 +260,11 @@ export default class ResponsiveLayout extends Module{
         }
     };
 
-    generateCollapsedRowData = (row): CollapsedCellData[] => {
+    langBind = this.table.modules.localize;
+
+    generateCollapsedRowData = (row: any): CollapsedCellData[] => {
         const data = row.getData();
-        const output = [];
+        const output: CollapsedCellData[] = [];
 
         // console.log(this.hiddenColumns.map(c => ({ t: c.field, r: c.modules.responsive.order })));
 
@@ -276,7 +282,7 @@ export default class ResponsiveLayout extends Module{
                     // element = element.cloneNode(true);
                     
                     if (title) {
-                        super.langBind('columns|' + field, (text) => title = text || title);
+                        this.langBind('columns|' + field, (text: any) => title = text || title);
                     }
 
                     element.title = column.definition.title;
@@ -302,7 +308,7 @@ export default class ResponsiveLayout extends Module{
         return output.sort((a, b) => a.index - b.index);
     };
 
-    defaultFormatter(data: CollapsedCellData[]): HTMLElement{
+    defaultFormatter(data: CollapsedCellData[]): HTMLElement | undefined {
         const list = document.createElement('div');
         list.classList.add('flex');
         let lastIndex = -1;

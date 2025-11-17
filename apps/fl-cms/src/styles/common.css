@@ -1,0 +1,248 @@
+:root {
+    --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+        Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: monospace;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    --color-bg-0: #303030;
+    --color-bg-1: #242424;
+    --color-bg-2: #1a1a1a;
+    --color-bg-3: #00000060;
+    --color-theme-1: #80c0ff;
+    --color-theme-2: #6080ff;
+    --color-hl: #d0ff00;
+    --color-text: #dedede;
+    --color-text-hl: black;
+    --color-text-disabled: #a0a0a0;
+    --column-width: 42rem;
+    --column-margin-top: 4rem;
+  
+    color-scheme: dark;
+    color: var(--color-text);
+    background-color: var(--bg-color);
+  
+    font-family: var(--font-body);
+    color: var(--color-text);
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not(.dark):not(.light), .light {
+        --color-theme-1: #008eff;
+        --color-theme-2: #4075a6;
+        --color-hl: #A71908;
+        --color-text: #213547;
+        --color-text-hl: white;
+        --color-text-disabled: #4d6983;
+        --color-bg-0: #cad8e4;
+        --color-bg-1: #cedce8;
+        --color-bg-2: #f9f9f9;
+        --color-bg-3: #ffffff;
+
+        color-scheme: light;
+    }
+    
+    .bx-trash {
+        color: red !important;
+    }
+}
+  
+body {
+    min-height: 100vh;
+    margin: 0;
+    background-attachment: fixed;
+    background-color: var(--color-bg-1);
+    background-size: 100vw 100vh;
+    background-image: radial-gradient(
+        50% 50% at 50% 50%,
+        var(--color-bg-3) 0%,
+        var(--color-bg-2) 100%
+    ),
+    linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
+}
+
+h1,
+h2,
+p {
+    font-weight: 400;
+}
+
+a {
+    color: var(--color-theme-1);
+    text-decoration: inherit;
+    transition: all .25s ease-in-out;
+}
+
+a:hover {
+    color: var(--color-theme-2);
+    text-decoration: underline;
+}
+
+h1 {
+    font-size: 2rem;
+    line-height: 1.1;
+}
+
+h2 {
+    font-size: 1.2rem;
+}
+
+pre {
+    font-size: 16px;
+    font-family: var(--font-mono);
+    background-color: var(--color-bg-3);
+    border-radius: 3px;
+    padding: 0.5em;
+    overflow-x: auto;
+    color: var(--color-text);
+}
+
+input,
+select,
+textarea,
+button {
+    color: var(--color-text);
+    background-color: var(--color-bg-2);
+}
+
+input,
+select,
+button,
+a[role='button'] {
+    font-size: inherit;
+    font-family: inherit;
+}
+
+input,
+select,
+textarea,
+.input {
+    border-radius: 4px;
+    border: 1px solid var(--color-bg-0);
+    padding: 0.6em 1.2em;
+    transition: all .25s ease-in-out;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.input:focus,
+.input:has(*:focus) {
+    border-color: var(--color-theme-1);
+}
+
+input:placeholder-shown,
+textarea:placeholder-shown,
+.input:placeholder-shown {
+    color: var(--color-text-disabled);
+    font-style: italic;
+}
+
+a[role='button'],
+button {
+    cursor: pointer;
+    padding: 0.6em 1.2em;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all .25s ease-in-out;
+    text-decoration: none;
+}
+
+a[role='button']:not([disabled]):hover,
+button:not([disabled]):hover {
+    border-color: var(--color-theme-1);
+    text-decoration: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+button:focus-visible {
+    outline: 4px auto var(--color-theme-1);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+    cursor: not-allowed;
+    color: var(--color-text-disabled);
+    background-color: var(--color-bg-2);
+}
+
+button.clear {
+    background-color: transparent;
+    border: 0;
+    box-shadow: unset;
+}
+
+button.icon {
+    padding: .2rem;
+}
+
+button.clear:hover > span {
+    color: var(--color-theme-2);
+    border-bottom: 1px solid var(--color-theme-2);
+}
+
+button.clear:focus:not(:focus-visible) {
+    outline: none;
+}
+
+svg {
+  fill: var(--logo-color);
+}
+
+i.bx {
+    border-radius: 50%;
+    padding: 0.2rem;
+    color: var(--color-theme-2);
+    transition: all .25s ease-in-out;
+}
+
+.bx-trash {
+    color: brown !important;
+}
+
+i:not(.clear).bx {
+    border: 1px solid var(--color-bg-1);
+    background-color: var(--color-bg-3);
+}
+
+button[disabled], 
+button[disabled] > i.bx {
+    color: var(--color-bg-0) !important;
+    cursor: default;
+}
+
+a:not([disabled]):hover > i.bx,
+button:not([disabled]):hover > i.bx {
+    color: var(--color-theme-1);
+    border-color: var(--color-theme-1);
+}
+
+img.preview {
+    max-width: 12em;
+    object-fit: contain;
+}
+
+.image-caption {
+    font-size: small;
+    font-style: italic;
+    color: var(--color-text-disabled);
+}
+
+.label {
+    border: 1px solid var(--color-bg-0);
+    background-color: var(--color-bg-2);
+    box-shadow: 2px 2px 4px #80808060;
+    margin: .4rem .2rem;
+    padding: .2rem .6rem;
+    border-radius: 1rem;
+    font-size: smaller;
+}

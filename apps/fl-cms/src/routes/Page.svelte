@@ -1,0 +1,49 @@
+<script lang="ts">
+  import { params, push } from "svelte-spa-router";
+  import { map } from "rxjs";
+  import { fromStore } from "../lib/utils/rx.store";
+  import List from "../lib/components/content/Collection.svelte";
+  import Content from "../lib/components/content/Document.svelte";
+
+  type PathInfo = {
+    type: 'Collection' | 'Document';
+    fullPath: string;
+    path: string;
+    id?: string;
+  };
+
+  const pathInfo = fromStore(params)
+    .pipe(map((p) => parsePath(p?.wild)));
+
+  function parsePath(wild: string | undefined): PathInfo | undefined {
+    const segments = wild?.split('/') || [];
+    if (wild && segments.length > 0) {
+      if (segments.length % 2 !== 0) {
+        return {
+          type: 'Collection',
+          fullPath: wild,
+          path: wild
+        }
+      }
+      return {
+        type: 'Document',
+        fullPath: wild,
+        id: segments.pop(),
+        path: segments.join('/')
+      };
+    }
+  }
+</script>
+
+<svelte:head>
+    <title>Firebase CMS | {$pathInfo?.type}</title>
+</svelte:head>
+
+{#if $pathInfo?.type === 'Collection'}
+  <List path={pathInfo.pipe(map(p => p?.path ?? ''))} />
+{:else if $pathInfo?.type === 'Document'}
+  <Content fullPath={pathInfo.pipe(map(p => p?.fullPath ?? ''))}
+           path={pathInfo.pipe(map(p => p?.path ?? ''))} 
+           id={pathInfo.pipe(map(p => p?.id ?? ''))} 
+  />
+{/if}

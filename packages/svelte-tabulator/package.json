@@ -1,9 +1,11 @@
 {
   "name": "@web-apps/svelte-tabulator",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "private": true,
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "exports": {
@@ -34,7 +36,7 @@
     "rxjs": "^7.8.1",
     "svelte": "^4.2.18",
     "svelte-check": "^3.8.4",
-    "tabulator-tables": "^6.2.1",
+    "tabulator-tables": "^6.3.1",
     "tslib": "^2.6.3",
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
@@ -44,6 +46,6 @@
     "luxon": "^3.4.4",
     "rxjs": "^7.8.1",
     "svelte": "^4.2.18",
-    "tabulator-tables": "^6.2.1"
+    "tabulator-tables": "^6.3.1"
   }
 }

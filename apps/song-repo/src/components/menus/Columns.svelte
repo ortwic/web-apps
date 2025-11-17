@@ -1,7 +1,7 @@
 <script lang="ts">
     import { t } from "svelte-i18n";
     import { derived } from "svelte/store";
-    import type { ColumnDefinition, SortDirection, Sorter } from "tabulator-tables";
+    import type { ColumnDefinition, SortDirection, Sorter } from "@web-apps/svelte-tabulator";
     import { tableView as view } from "@web-apps/svelte-tabulator";
     import Switch from "../ui/elements/Switch.svelte";
     import PopupMenu from "../ui/PopupMenu.svelte";
