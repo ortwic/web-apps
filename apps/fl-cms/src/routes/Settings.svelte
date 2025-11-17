@@ -36,7 +36,7 @@
             <i class="bx bxs-grid"></i> Index
         </button>
         <button on:click={() => push('/media')}>
-            <i class="bx bx-folder-open"></i> Storage
+            <i class="bx bx-folder-open"></i> Media
         </button>
         <button class="" title="Switch Theme" on:click={() => toggleTheme()}>
             <i class="bx {$themeIcon}"></i> {$colorScheme === 'light' ? 'Dark' : 'Light'}

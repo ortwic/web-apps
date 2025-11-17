@@ -1,10 +1,10 @@
 import type { FirebaseStorage, StorageReference } from "firebase/storage";
 import { ref, listAll, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
+import { BehaviorSubject, catchError, from, map, Observable, of, Subscription } from "rxjs";
 import { derived } from "svelte/store";
 import { appStore } from "../app.store";
 import type { StorageItem } from "../../models/storage.type";
 import { showError } from "../notification.store";
-import { BehaviorSubject, combineLatest, from, map, Observable, of, tap } from "rxjs";
 
 export const currentStorage = derived(appStore, (app) => new StorageService(app.getStorage()));
 
@@ -22,7 +22,10 @@ function toStorageItem(ref: StorageReference | null, type: 'folder' | 'file'): S
 }
 
 export class StorageService {
-    private readonly newItems = new BehaviorSubject<StorageItem[]>([]);
+    private readonly itemSubject = new BehaviorSubject<StorageItem[]>([]);
+    private currentFolder = '';
+    private currentSub: Subscription | null = null;
+    readonly items$ = this.itemSubject.asObservable();
 
     constructor(private storage: FirebaseStorage | null) {
     }
@@ -30,30 +33,28 @@ export class StorageService {
     listAll(path: string): Observable<StorageItem[]> {
         const desc = <T extends StorageItem>(a: T, b: T) => b.type.localeCompare(a.type);
         if (this.storage) {
-            try {
-                return combineLatest([
-                    from(listAll(ref(this.storage, path))),
-                    this.newItems
-                ]).pipe(
-                    map(([result, items]) => ([
-                        ...items.filter(i => i.parent?.path === path),
-                        ...result.prefixes.map(i => toStorageItem(i, 'folder')),
-                        ...result.items
-                            .filter(i => i.name !== dummyFile.name)
-                            .map(i => toStorageItem(i, 'file'))
-                    ])),
-                    map((items) => items.toSorted(desc))
-                );
-            } catch (error: any) {
-                console.error(error);
-                showError(error.message);
-            }
+            this.currentFolder = path;
+            this.currentSub?.unsubscribe();
+            
+            this.currentSub = from(listAll(ref(this.storage, path))).pipe(
+                map((result) => ([
+                    ...result.prefixes.map(i => toStorageItem(i, 'folder')),
+                    ...result.items
+                        .filter(i => i.name !== dummyFile.name)
+                        .map(i => toStorageItem(i, 'file'))
+                ])),
+                map((items) => items.toSorted(desc)),
+                catchError((err) => {
+                    showError(err.message);
+                    return of([]);
+                })
+            ).subscribe(items => this.itemSubject.next(items));
         }
-        return of([]);
+        return this.items$;
     }
 
-    reset() {
-        this.newItems.next([]);
+    private reload() {
+        return this.listAll(this.currentFolder);
     }
 
     async getFileUrl(path: string): Promise<string> {
@@ -76,7 +77,7 @@ export class StorageService {
                     parent: { path, type: 'folder' } as StorageItem, 
                     bucket: snapshot.ref.bucket
                 };
-                this.newItems.next([...this.newItems.value, folder]);
+                this.reload();
             } catch (error: any) {
                 showError(error.message);
             }
@@ -89,7 +90,7 @@ export class StorageService {
             try {
                 const snapshot = await uploadBytes(fileRef, file);
                 const item = toStorageItem(snapshot.ref, 'file');
-                this.newItems.next([...this.newItems.value, item]);
+                this.reload();
                 return item;
             } catch (error: any) {
                 showError(error.message);
@@ -103,6 +104,7 @@ export class StorageService {
             const fileRef = ref(this.storage, path);
             try {
                 await deleteObject(fileRef);
+                this.reload();
             } catch (error: any) {
                 showError(error.message);
             }

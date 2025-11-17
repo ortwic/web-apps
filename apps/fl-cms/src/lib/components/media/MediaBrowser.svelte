@@ -25,7 +25,7 @@
     let promptVisible = false;
     let isLoading = true;
 
-    const items = combineLatest([
+    const items$ = combineLatest([
         fromStore(currentStorage), 
         path.pipe(tap(() => isLoading = true))
     ]).pipe(
@@ -35,7 +35,6 @@
 
     async function folderClicked(path: string) {
         dispatch('folderChange', path);
-        $currentStorage.reset();
     }
 
     async function fileClicked(item: StorageItem) {
@@ -91,7 +90,7 @@
     
     <Loading {isLoading}>
         <div class="grid">
-            {#each $items as item, i (item.path)}
+            {#each $items$ as item (item.path)}
             {#if item.type !== 'file'}
             <span class="no-wrap colspan">
                 <i class="bx bx-{item.type === 'virtual' ? 'folder-plus' : 'folder'}"></i> 
@@ -106,12 +105,9 @@
                 <button class="icon clear" on:click|preventDefault={async () => preview = await withUrl(item)}>
                     <i class="bx bx-search"></i>
                 </button>
-                {#if import.meta.env.DEV}
-                <!-- TODO refresh view after deletion -->
                 <button class="icon clear" on:click|preventDefault={() => confirm('Delete?') && $currentStorage.deleteFile(item.path)}>
                     <i class="bx bx-trash danger"></i>
                 </button>
-                {/if}
             </span>
             {/if}
             {/each}
