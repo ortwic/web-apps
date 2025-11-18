@@ -6,10 +6,10 @@
     "firelighter-cms": {
       "hosting": {
         "beta": [
-          "firelighter-beta"
+          "firelighter-cms"
         ],
         "prod": [
-          "firelighter-cms"
+          "fl-cms"
         ]
       }
     }
