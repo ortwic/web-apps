@@ -63,7 +63,9 @@ class FirebaseAppAdapter {
 
     getStorage(): FirebaseStorage | null {
         if (this.app) {
-            const storage = getStorage(this.app);
+            // define storage bucket, otherwise emulator will crash bc of invalid url "match /b/{bucket}/o" in storage.rules
+            const bucket = this.useEmulator ? EMULATOR_KEY : undefined;
+            const storage = getStorage(this.app, bucket);
             if (this.useEmulator && this.config.storageBucket && !currentStorages.has(storage)) {
                 const url = new URL(this.config.storageBucket);
                 connectStorageEmulator(storage, url.hostname, +url.port || 8188);

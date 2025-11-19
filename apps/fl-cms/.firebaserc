@@ -11,12 +11,17 @@
         "prod": [
           "fl-cms"
         ]
+      },
+      "storage": {
+        "emulator": [
+          "firebase/storage.rules"
+        ]
       }
     },
     "emulator": {
       "storage": {
         "emulator": [
-          "storage.rules"
+          "firebase/storage.rules"
         ]
       }
     }

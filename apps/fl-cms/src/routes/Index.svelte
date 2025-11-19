@@ -131,14 +131,13 @@
     {/if}
 </Modal>
 
-<style>
-    section {
-        display: flex;
-        flex-direction: column;
-        justify-content: top;
-        align-items: center;
-        flex: 0.6;
-    }
+<style lang="scss">
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    flex: 0.6;
 
     div.grid {
         display: grid;
@@ -146,39 +145,40 @@
         gap: 1rem;
         width: 100%;
         margin: 1rem 0;
-    }
 
-    div.item {
-        background-color: var(--color-bg-2);
-        color: var(--color-text);
-        border-radius: 0.5rem;
-        border: 1px solid gray;
-        padding: 1rem;
-    }
+        div.item {
+            background-color: var(--color-bg-2);
+            color: var(--color-text);
+            border-radius: 0.5rem;
+            border: 1px solid gray;
+            padding: 1rem;
 
-    div.item > input {
-        padding: .5rem;
-        text-align: center;
-    }
+            & > input {
+                padding: .5rem;
+                text-align: center;
+            }
 
-    div.actions {
-        display: flex;
-        justify-content: space-between;
-        margin-left: auto;
-        gap: 0;
-    }
+            div.actions {
+                display: flex;
+                justify-content: space-between;
+                margin-left: auto;
+                gap: 0;
+            
+                & > button {
+                    padding: 0.2rem;
+                }
+            }
 
-    div.actions > button {
-        padding: 0.2rem;
-    }
+            a[role="button"] {
+                width: 98%;
+                border: 0;
 
-    a[role="button"] {
-        width: 98%;
-        border: 0;
+                &:not([disabled]):hover {
+                    border: 0;
+                    text-decoration: underline;
+                }
+            }
+        }
     }
-
-    a[role="button"]:not([disabled]):hover {
-        border: 0;
-        text-decoration: underline;
-    }
+}
 </style>

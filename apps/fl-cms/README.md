@@ -43,7 +43,7 @@ First of all the UI is much simpler. You can create subcollections just like
 -   🖥️ **Clean UI with simple support for nested sub-collections**
 -   ✏️ **Simple, uncluttered content editing simular to WordPress**
 -   💾 **Backup or migrate your data from JSON**
--   🏝️ **Integrated storage management for your images**
+-   🏝️ **Integrated [storage management](./docs/images/fl-cms_media.png) for your images**
 -   📁 **Metadata stored directly in your Firestore** (`__schema`)
 -   📱 **PWA support** --- can be installed on desktop/mobile
 -   🛠️ **Built with Svelte 4 (SPA)**
@@ -132,7 +132,6 @@ Work with [collections](./docs/images/fl-cms_list.png), [documents](./docs/image
 
 - [ ] No advanced role/permission system
 - [ ] Best for small to medium-sized projects
-- [ ] [Media browser](./docs/images/fl-cms_media.png) with emulated storage not working
 - [ ] Missing implementations
     - [ ] No field-level validation rules and no other "special" property settings from FireCMS
     - [ ] Missing image URL resolution in list view
