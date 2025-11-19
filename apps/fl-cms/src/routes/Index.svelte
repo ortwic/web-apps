@@ -13,7 +13,6 @@
     const schemaStore = createSchemaStore();
     const schemas = $schemaStore;
 
-    console.log($schemas)
     $: disabled = !$currentClientUser;
 
     let showEdit = false, showSelect = false;
@@ -75,7 +74,7 @@
 
 <section class="content-64">
     <div class="grid">
-        {#each $schemas as item}
+        {#each $schemas as item, i}
             <div class="flex-center item emphasis">
                 <div title={item.path} class="actions">
                     <button {disabled} class="clear" on:click|preventDefault={() => edit(item)}>
@@ -86,17 +85,16 @@
                     </button>
                 </div>
                 {#if item.parent}
-                <!-- svelte-ignore a11y-interactive-supports-focus -->
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <a role="button" on:click|preventDefault={() => select(item)} class="flex-center pointer">
+                <a role="button" href="/page/{item.path}" tabindex={i}
+                    on:click|preventDefault={() => select(item)} class="link flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-list-ul"></i>
                     </span>
                 </a>
                 {:else}
-                <a use:link href="/page/{item.path}" class="flex-center">
+                <a role="button" use:link href="/page/{item.path}" class="flex-center" tabindex={i}>
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>
@@ -172,5 +170,15 @@
 
     div.actions > button {
         padding: 0.2rem;
+    }
+
+    a[role="button"] {
+        width: 98%;
+        border: 0;
+    }
+
+    a[role="button"]:not([disabled]):hover {
+        border: 0;
+        text-decoration: underline;
     }
 </style>
