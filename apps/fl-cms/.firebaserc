@@ -12,6 +12,13 @@
           "fl-cms"
         ]
       }
+    },
+    "emulator": {
+      "storage": {
+        "emulator": [
+          "storage.rules"
+        ]
+      }
     }
   },
   "etags": {}
