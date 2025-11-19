@@ -8,8 +8,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          'utils': ['rxjs', 'rxfire', 'luxon', 'nanoid', 'object-hash', 'json5'],
           'firebase': ['firebase/app', 'firebase/auth', 'firebase/analytics'],
           'firestore': ['firebase/firestore'],
+          'tabulator': ['@web-apps/svelte-tabulator'],
+          'jsoneditor': ['svelte-jsoneditor'],
+          'bytemd': ['bytemd'],
         },
       },
     },
