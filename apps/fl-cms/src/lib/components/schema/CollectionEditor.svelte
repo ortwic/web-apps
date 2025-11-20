@@ -1,17 +1,15 @@
 <script lang="ts">
-    import json from 'json5';
     import { get } from 'svelte/store';
-    import { type Content, JSONEditor, Mode } from 'svelte-jsoneditor'
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
-    import { colorScheme } from '@web-apps/svelte-tabulator';
     import type { Properties } from '../../packages/firecms_core/types/properties';
-    import { templates } from '../../data/predefinedCollections';
+    import { templates } from '../../schema/predefinedCollections';
     import type { Collection } from '../../models/schema.model';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
+    import JSONEditor from './JSONEditor.svelte';
 
     export let item: Collection;
     let showJsonView = true;
@@ -66,19 +64,9 @@
         item.properties = properties;
     }
 
-    function setProperties(content: Content) {
-        item.properties = parseProperties(content);
-    }
-
-    function parseProperties(content: Content): Properties {
-        if ('text' in content) {
-            try {            
-                return json.parse<Properties>(content.text);
-            } catch (error) {
-                showError(`Invalid JSON: ${error}`);
-            }
-        }
-        return {};
+    function setProperties<T>(content: T) {
+        console.log({ content })
+        item.properties = content as Properties;
     }
 
     function toggleEditView() {
@@ -96,18 +84,19 @@
     <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={appendInferredPropsFromData}>
         <i class="bx bxs-magic-wand"></i>
     </button>
+    <!-- Feature not yet fully implemented -->
+    {#if import.meta.env.DEV}
     <button title="Toggle code view" class="icon clear" on:click={toggleEditView}>
         <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
     </button>
+    {/if}
     <span slot="title">{item.path}</span>
 </Toolbar>
 
 {#if showJsonView}
-<div class:jse-theme-dark={$colorScheme === 'dark'}>    
-    <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: properties }} onChange={setProperties} />
-</div>
+<JSONEditor value={properties} on:changed={({ detail }) => setProperties(detail)} />
 {:else}
-    <CollectionEditorTable properties={properties} />
+<CollectionEditorTable properties={properties} />
 {/if}
 
 <PopupMenu bind:this={templateMenu}>

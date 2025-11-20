@@ -1,7 +1,6 @@
 <script lang="ts">
     import json from 'json5';
-    import { push, params } from 'svelte-spa-router';
-    import { JSONEditor, Mode } from 'svelte-jsoneditor';
+    import { push } from 'svelte-spa-router';
     import { firstValueFrom, from, map, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
@@ -16,6 +15,7 @@
     import { showError, showInfo } from '../../stores/notification.store';
     import { toStore } from '../../utils/rx.store';
     import CollectionEditor from '../schema/CollectionEditor.svelte';
+    import JSONEditor from '../schema/JSONEditor.svelte';
     import '../../../styles/tabulator.css';
     
     export let path = of('');
@@ -178,9 +178,7 @@
 
 <Modal open={!!importJsonData} width="100%" on:close={() => (importJsonData = null)}>
     {#if importJsonData}
-        <div class:jse-theme-dark={$colorScheme === 'dark'}>
-            <JSONEditor mainMenuBar={false} readOnly={true} mode={Mode.text} content={{ json: importJsonData }} />
-        </div>
+        <JSONEditor value={importJsonData} />
         <div class="x-flex-full">
             <button class="dialog" on:click={importAsJson}>
                 <i class="bx bx-check"></i> Confirm
