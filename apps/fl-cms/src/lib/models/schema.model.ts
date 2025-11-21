@@ -16,3 +16,8 @@ export type Entity = {
     id: string;
     title?: string;
 } & DocumentData;
+
+export type JSONValidationError = {
+    syntax?: string;
+    schema: string[];
+}

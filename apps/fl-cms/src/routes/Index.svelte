@@ -119,7 +119,7 @@
     </div>
 </section>
 
-<Modal open={showEdit} width="100%" on:close={() => (showEdit = false)}>
+<Modal open={showEdit} width="100%" height="auto" on:close={() => (showEdit = false)}>
     {#if showEdit}
     <CollectionEditor item={$current} />
     {/if}

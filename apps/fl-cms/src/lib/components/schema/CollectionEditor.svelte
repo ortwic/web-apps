@@ -3,9 +3,10 @@
     import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties';
     import { templates } from '../../schema/predefinedCollections';
-    import type { Collection } from '../../models/schema.model';
+    import type { Collection, JSONValidationError } from '../../models/schema.model';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
+    import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
@@ -15,6 +16,7 @@
     let showJsonView = true;
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
+    let messages: string[] = [];
 
     // Calculation of popup within a dialog element fails, so use static position as a workaround
     const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
@@ -64,9 +66,12 @@
         item.properties = properties;
     }
 
-    function setProperties<T>(content: T) {
-        console.log({ content })
-        item.properties = content as Properties;
+    function setProperties<T>(propsOrBuilder: T) {
+        item.properties = propsOrBuilder as Properties;
+    }
+
+    function prepareValidation(errors: JSONValidationError) {
+        messages = errors.syntax !== undefined ? [errors.syntax] : errors.schema ?? [];
     }
 
     function toggleEditView() {
@@ -94,7 +99,18 @@
 </Toolbar>
 
 {#if showJsonView}
-<JSONEditor value={properties} on:changed={({ detail }) => setProperties(detail)} />
+<div class="editor">
+    <div class="input">
+        <JSONEditor value={properties} on:changed={({ detail }) => setProperties(detail)} on:validated={({ detail }) => prepareValidation(detail)} />
+    </div>
+    <div class="validation">
+        <Expand>
+            <span slot="header" class="emphasis">Validation</span>
+            <textarea readonly>{messages.join('\n')}</textarea>
+        </Expand>
+    </div>
+</div>
+
 {:else}
 <CollectionEditorTable properties={properties} />
 {/if}
@@ -109,3 +125,30 @@
         {/each}
     </div>
 </PopupMenu>
+
+<style lang="scss">
+    .editor {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: .2em;
+        height: calc(100% - 3.8rem);
+
+        .input {
+            min-height: 12em;
+            height: 100%;
+            overflow: auto;
+            padding: 0;
+        }
+
+        .validation {
+            max-height: 30%;
+            width: 100%;
+
+            textarea {
+                width: calc(100% - 2.6em);
+                min-height: 12em;
+            }
+        }
+    }
+</style>

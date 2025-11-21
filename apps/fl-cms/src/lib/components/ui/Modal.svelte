@@ -3,6 +3,7 @@
 
     export let open = false;
     export let width = "auto";
+    export let height = "";
     export let closable = true;
 
     const dispatcher = createEventDispatcher();
@@ -29,7 +30,7 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={modal} style:width={width} on:click={closeModal} on:keydown={handleEscapeKey}>
+<dialog bind:this={modal} style:width={width} style:height={height} on:click={closeModal} on:keydown={handleEscapeKey}>
     {#if open}
     {#if closable}
     <div class="header x-flex-full">
@@ -93,6 +94,7 @@
         display: flex;
         flex-direction: column;
         padding: 1rem;
+        height: 100%;
         overflow: auto;
         transition: all 0.3s allow-discrete;
     }

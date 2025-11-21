@@ -25,6 +25,7 @@
     let showSettings = false;
     let uploadInput: HTMLInputElement;
     let importJsonData: Entity[] | null;
+    let invalidJsonMessage: string | undefined;
 
     const currentSchema = getCurrentScheme(path);
     const contentStore = createDocumentStore(path);
@@ -178,34 +179,32 @@
 
 <Modal open={!!importJsonData} width="100%" on:close={() => (importJsonData = null)}>
     {#if importJsonData}
-        <JSONEditor value={importJsonData} />
-        <div class="x-flex-full">
-            <button class="dialog" on:click={importAsJson}>
-                <i class="bx bx-check"></i> Confirm
-            </button>
-            <button class="dialog" on:click={() => (importJsonData = null)}>
-                <i class="bx bx-x"></i> Discard
-            </button>
-        </div>
+    <Toolbar>
+        <span slot="title">Import JSON</span>
+        {#if invalidJsonMessage}
+        <span>{invalidJsonMessage}</span>
+        {:else}
+        <button on:click={importAsJson}>
+            <i class="bx bx-check"></i> Confirm
+        </button>
         {/if}
+    </Toolbar>
+    <div class="input">
+        <JSONEditor value={importJsonData} on:validated={({ detail }) => invalidJsonMessage = detail.syntax} />
+    </div>
+    {/if}
 </Modal>
 
 <input type="file" bind:this={uploadInput} on:change="{showImportDialog}" accept="application/json" />
 
 <style>
-    /* header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-    } */
-
     input[type="file"] {
         display: none;
     }
 
-    button.dialog {
-        margin-top: .4rem;
-        min-width: 33%;
+    .input {
+        padding: 0;
+        height: calc(100% - 3.8rem);
+        overflow: auto;
     }
 </style>
