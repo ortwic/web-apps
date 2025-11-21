@@ -2,7 +2,7 @@ import { marked } from "marked";
 import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
 import type { ColumnDefinition, CellComponent, Editor } from "@web-apps/svelte-tabulator";
 import type { Collection } from "../models/schema.model";
-import type { AnyProperty, MapProperty } from "../packages/firecms_core/types/properties";
+import type { AnyProperty, MapProperty } from "../packages/firecms_core/types/properties.simple";
 import type { ColumnOptions } from "../models/column.model";
 import { isImageUrl, isMarkdown } from "../models/content.helper";
 
@@ -73,7 +73,7 @@ function getCustomDefinitionByType<T>(field: string, prop: AnyProperty, options:
             return timestamp();
         
         case 'array':
-            if ((<AnyProperty>prop.of)?.dataType === 'string') {
+            if (prop.of?.dataType === 'string') {
                 return {
                     ...label(),
                     ...editor('input'),

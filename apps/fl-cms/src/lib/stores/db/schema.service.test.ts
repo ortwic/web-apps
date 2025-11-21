@@ -4,7 +4,7 @@ import { collection, doc, setDoc, type Firestore } from "firebase/firestore";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { SchemaStore } from './schema.service';
 import { setupTestEnvironment } from "../../../tests/firebase.setup";
-import type { Properties } from '../../packages/firecms_core/types/properties';
+import type { Properties } from '../../packages/firecms_core/types/properties.simple';
 import { DocumentStore } from './document.service';
 import type { Collection } from '../../models/schema.model';
 import { schemeNestedSub, schemeRoot, schemeSub } from '../../../tests/seed.data';

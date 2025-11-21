@@ -1,8 +1,8 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
     import { createEventDispatcher } from "svelte";
-    import type { AnyProperty } from '../../packages/firecms_core/types/properties';
-    import JSONEditor from '../schema/JSONEditor.svelte';
+    import type { AnyProperty } from '../../packages/firecms_core/types/properties.simple';
+    import JSONEditor from '../ui/JSONEditor.svelte';
     import Expand from '../ui/Expand.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';

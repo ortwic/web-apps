@@ -15,7 +15,7 @@
     import { showError, showInfo } from '../../stores/notification.store';
     import { toStore } from '../../utils/rx.store';
     import CollectionEditor from '../schema/CollectionEditor.svelte';
-    import JSONEditor from '../schema/JSONEditor.svelte';
+    import JSONEditor from '../ui/JSONEditor.svelte';
     import '../../../styles/tabulator.css';
     
     export let path = of('');
@@ -190,7 +190,7 @@
         {/if}
     </Toolbar>
     <div class="input">
-        <JSONEditor value={importJsonData} on:validated={({ detail }) => invalidJsonMessage = detail.syntax} />
+        <JSONEditor value={importJsonData} on:error={({ detail }) => invalidJsonMessage = detail} />
     </div>
     {/if}
 </Modal>

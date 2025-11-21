@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
-  import type { AnyProperty, ArrayProperty } from "../../packages/firecms_core/types/properties";
+  import type { AnyProperty, ArrayProperty } from "../../packages/firecms_core/types/properties.simple";
   import { isImageUrl, mergeObject } from "../../models/content.helper";
   import { currentClientUser } from "../../stores/app.store";
   import { timestampToIsoDate } from "../../stores/db/firestore.store";
@@ -30,7 +30,7 @@
   function useTagCloud(field: string): boolean {
     const prop = properties[field] as ArrayProperty;
     if (Array.isArray(document[field]) && properties[field].dataType === 'array') {
-        return (prop?.of as AnyProperty)?.dataType === 'string';
+        return prop?.of?.dataType === 'string';
     }
     return false;
   }

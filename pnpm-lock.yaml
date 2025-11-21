@@ -80,6 +80,9 @@ importers:
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
+      better-ajv-errors:
+        specifier: ^2.0.2
+        version: 2.0.2(ajv@8.17.1)
       bytemd:
         specifier: ^1.22.0
         version: 1.22.0
@@ -1945,6 +1948,10 @@ packages:
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
     engines: {node: '>=12.22'}
 
+  '@humanwhocodes/momoa@2.0.4':
+    resolution: {integrity: sha512-RE815I4arJFtt+FVeU1Tgp9/Xvecacji8w/V6XtXsWWH/wz/eNkNbhb+ny/+PlVZjV0rxQpRSQKNKE3lcktHEA==}
+    engines: {node: '>=10.10.0'}
+
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
@@ -3237,6 +3244,12 @@ packages:
 
   best-effort-json-parser@1.2.1:
     resolution: {integrity: sha512-UICSLibQdzS1f+PBsi3u2YE3SsdXcWicHUg3IMvfuaePS2AYnZJdJeKhGv5OM8/mqJwPt79aDrEJ1oa84tELvw==}
+
+  better-ajv-errors@2.0.2:
+    resolution: {integrity: sha512-1cLrJXEq46n0hjV8dDYwg9LKYjDb3KbeW7nZTv4kvfoDD9c2DXHIE31nxM+Y/cIfXMggLUfmxbm6h/JoM/yotA==}
+    engines: {node: '>= 18.20.6'}
+    peerDependencies:
+      ajv: 4.11.8 - 8
 
   bignumber.js@9.1.2:
     resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
@@ -9088,6 +9101,8 @@ snapshots:
 
   '@humanwhocodes/module-importer@1.0.1': {}
 
+  '@humanwhocodes/momoa@2.0.4': {}
+
   '@humanwhocodes/object-schema@2.0.3': {}
 
   '@img/colour@1.0.0': {}
@@ -10674,6 +10689,15 @@ snapshots:
   base64-js@1.5.1: {}
 
   best-effort-json-parser@1.2.1: {}
+
+  better-ajv-errors@2.0.2(ajv@8.17.1):
+    dependencies:
+      '@babel/code-frame': 7.27.1
+      '@humanwhocodes/momoa': 2.0.4
+      ajv: 8.17.1
+      chalk: 4.1.2
+      jsonpointer: 5.0.1
+      leven: 3.1.0
 
   bignumber.js@9.1.2: {}
 

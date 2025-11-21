@@ -1,28 +1,32 @@
 <script lang="ts">
     import { get } from 'svelte/store';
-    import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
-    import type { Properties } from '../../packages/firecms_core/types/properties';
-    import { templates } from '../../schema/predefinedCollections';
-    import type { Collection, JSONValidationError } from '../../models/schema.model';
+    import { Timestamp } from 'firebase/firestore';
+    import type { Properties } from '../../packages/firecms_core/types/properties.simple';
+    import { autocomplete} from '../../schema/codemirror.extensions';
+    import { templates } from '../../schema/predefined-collections';
+    import { createValidator } from '../../schema/schema-validation';
+    import type { Collection } from '../../models/schema.model';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
-    import JSONEditor from './JSONEditor.svelte';
+    import JSONEditor from '../ui/JSONEditor.svelte';
+    import schema from '../../schema/generated/property-record.schema.json';
 
     export let item: Collection;
     let showJsonView = true;
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
-    let messages: string[] = [];
+    let validationMessages: string[] = [];
 
     // Calculation of popup within a dialog element fails, so use static position as a workaround
     const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
     const schemaStore = createSchemaStore({ merge: false });
     const contentStore = createDocumentStore(item.path, { merge: false });
     const documents = $contentStore;
+    const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {
         try {
@@ -46,10 +50,6 @@
                 return "array";
             else if (value instanceof Timestamp)
                 return "date";
-            else if (value instanceof GeoPoint)
-                return "geopoint";
-            else if (value instanceof DocumentReference)
-                return "reference";
             return "map";
         };
         
@@ -66,12 +66,13 @@
         item.properties = properties;
     }
 
-    function setProperties<T>(propsOrBuilder: T) {
-        item.properties = propsOrBuilder as Properties;
-    }
-
-    function prepareValidation(errors: JSONValidationError) {
-        messages = errors.syntax !== undefined ? [errors.syntax] : errors.schema ?? [];
+    function setProperties<T>(props: T) {
+        if (validate(props)) {
+            item.properties = props as Properties;
+            validationMessages = [];
+        } else if (validate.errors) {
+            validationMessages = validationErrors(props);
+        }
     }
 
     function toggleEditView() {
@@ -95,18 +96,20 @@
         <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
     </button>
     {/if}
-    <span slot="title">{item.path}</span>
+    <span slot="title">{item.path} - json5</span>
 </Toolbar>
 
 {#if showJsonView}
 <div class="editor">
     <div class="input">
-        <JSONEditor value={properties} on:changed={({ detail }) => setProperties(detail)} on:validated={({ detail }) => prepareValidation(detail)} />
+        <JSONEditor value={properties} extensions={autocomplete(schema)}
+            on:changed={({ detail }) => setProperties(detail)} 
+            on:error={({ detail }) => validationMessages = [detail]} />
     </div>
     <div class="validation">
         <Expand>
-            <span slot="header" class="emphasis">Validation</span>
-            <textarea readonly>{messages.join('\n')}</textarea>
+            <span slot="header" class="emphasis">Validation output</span>
+            <textarea readonly>{validationMessages.join('\n')}</textarea>
         </Expand>
     </div>
 </div>
@@ -146,8 +149,10 @@
             width: 100%;
 
             textarea {
+                white-space: pre;
+                overflow-wrap: normal;
                 width: calc(100% - 2.6em);
-                min-height: 12em;
+                min-height: 8em;
             }
         }
     }

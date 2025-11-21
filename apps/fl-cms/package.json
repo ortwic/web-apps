@@ -18,7 +18,7 @@
     "test:browser": "firebase emulators:exec --only firestore:8088 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
     "test:debug": "firebase emulators:exec --only firestore:8088 'pnpm vitest --testTimeout 0'",
     "test:once": "firebase emulators:exec --only firestore:8088 'pnpm vitest run'",
-    "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.ts -t AnyProperty -o src/lib/schema/generated/any-property.schema.json"
+    "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.simple.ts -t PropertyRecord -o src/lib/schema/generated/property-record.schema.json"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "^6.19.1",
@@ -41,6 +41,7 @@
     "@vitest/browser": "^3.1.4",
     "@web-apps/svelte-tabulator": "workspace:^",
     "ajv": "^8.17.1",
+    "better-ajv-errors": "^2.0.2",
     "bytemd": "^1.22.0",
     "codemirror": "^6.0.2",
     "codemirror-json-schema": "^0.8.1",

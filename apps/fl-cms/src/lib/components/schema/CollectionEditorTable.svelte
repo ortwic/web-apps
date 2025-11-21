@@ -1,6 +1,6 @@
 <script lang="ts">
     import { slide } from 'svelte/transition';
-    import type { Properties } from '../../packages/firecms_core/types/properties';
+    import type { Properties } from '../../packages/firecms_core/types/properties.simple';
 
     export let properties: Properties = {};
     const dataTypeValues = [

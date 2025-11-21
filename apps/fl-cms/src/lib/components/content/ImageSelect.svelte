@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import type { StorageConfig } from "../../packages/firecms_core/types/properties";
+    import type { StorageConfig } from "../../packages/firecms_core/types/properties.simple";
     import type { StorageFile } from "../../models/storage.type";
     import ImageDialog from "../media/ImageDialog.svelte";
 
