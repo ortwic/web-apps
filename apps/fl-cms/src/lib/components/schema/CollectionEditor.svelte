@@ -2,7 +2,6 @@
     import { get } from 'svelte/store';
     import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
-    import { autocomplete} from '../../schema/codemirror.extensions';
     import { templates } from '../../schema/predefined-collections';
     import { createValidator } from '../../schema/schema-validation';
     import type { Collection } from '../../models/schema.model';
@@ -102,7 +101,7 @@
 {#if showJsonView}
 <div class="editor">
     <div class="input">
-        <JSONEditor value={properties} extensions={autocomplete(schema)}
+        <JSONEditor value={properties}
             on:changed={({ detail }) => setProperties(detail)} 
             on:error={({ detail }) => validationMessages = [detail]} />
     </div>
