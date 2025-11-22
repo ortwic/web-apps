@@ -2,7 +2,7 @@
     import json from 'json5';
     import { push } from 'svelte-spa-router';
     import { firstValueFrom, from, map, of, switchMap } from 'rxjs';
-    import { Table, appendColumnSelectorMenu, colorScheme } from '@web-apps/svelte-tabulator';
+    import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
     import type { Entity, Collection } from '../../models/schema.model';
     import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../stores/db/firestore.store';
