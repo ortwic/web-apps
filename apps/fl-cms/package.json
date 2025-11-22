@@ -18,7 +18,7 @@
     "test:browser": "firebase emulators:exec --only firestore:8088 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
     "test:debug": "firebase emulators:exec --only firestore:8088 'pnpm vitest --testTimeout 0'",
     "test:once": "firebase emulators:exec --only firestore:8088 'pnpm vitest run'",
-    "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.simple.ts -t PropertyRecord -o src/lib/schema/generated/property-record.schema.json"
+    "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.explicit.ts -t PropertyRecord -o src/lib/schema/generated/property-record.schema.json"
   },
   "devDependencies": {
     "@codemirror/commands": "^6.10.0",
