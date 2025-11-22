@@ -1,10 +1,13 @@
 <script lang="ts">
+    import { of } from 'rxjs';
     import { get } from 'svelte/store';
+    import { push } from 'svelte-spa-router';
     import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
     import { templates } from '../../schema/predefined-collections';
     import { createValidator } from '../../schema/schema-validation';
     import type { Collection } from '../../models/schema.model';
+    import { currentClientUser } from '../../stores/app.store';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import Expand from '../ui/Expand.svelte';
@@ -12,13 +15,17 @@
     import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
     import JSONEditor from '../ui/JSONEditor.svelte';
+    import Breadcrumb from '../ui/Breadcrumb.svelte';
     import schema from '../../schema/generated/property-record.schema.json';
 
     export let item: Collection;
+    let dirty = false;
     let showJsonView = true;
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
     let validationMessages: string[] = [];
+
+    $: disabled = !$currentClientUser;
 
     // Calculation of popup within a dialog element fails, so use static position as a workaround
     const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
@@ -31,6 +38,7 @@
         try {
             await $schemaStore.updateProperties(item);
             showInfo(`${item.path} saved`);
+            dirty = false;
         } catch (error) {
             showError(`${error}`);
         }
@@ -63,12 +71,14 @@
     function loadTemplate(key: string) {
         properties = templates[key].properties;
         item.properties = properties;
+        dirty = true;
     }
 
     function setProperties<T>(props: T) {
         if (validate(props)) {
             item.properties = props as Properties;
             validationMessages = [];
+            dirty = true;
         } else if (validate.errors) {
             validationMessages = validationErrors(props);
         }
@@ -80,8 +90,8 @@
 </script>
 
 <Toolbar>
-    <button title="Save properties" class="icon clear" on:click={saveCollection}>
-        <i class="bx bx-save"></i>
+    <button {disabled} title="Save properties" class="icon clear" on:click={saveCollection}>
+        <i class:dirty class="bx bx-save"></i>
     </button>
     <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(staticTemplatePopupPosition)}>
         <i class="bx bxs-box"></i>
@@ -95,22 +105,23 @@
         <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
     </button>
     {/if}
-    <span slot="title">{item.path} - json5</span>
+    <span slot="title">
+        <Breadcrumb path={of(item.path)} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
+    </span>
 </Toolbar>
 
 {#if showJsonView}
-<div class="editor">
-    <div class="input">
-        <JSONEditor value={properties}
-            on:changed={({ detail }) => setProperties(detail)} 
-            on:error={({ detail }) => validationMessages = [detail]} />
-    </div>
-    <div class="validation">
-        <Expand>
-            <span slot="header" class="emphasis">Validation output</span>
-            <textarea readonly>{validationMessages.join('\n')}</textarea>
-        </Expand>
-    </div>
+<div class="input">
+    <JSONEditor value={properties}
+        on:changed={({ detail }) => setProperties(detail)} 
+        on:error={({ detail }) => validationMessages = [detail]} />
+</div>
+
+<div class="validation">
+    <Expand>
+        <span slot="header" class="emphasis">Validation output</span>
+        <textarea readonly>{validationMessages.join('\n')}</textarea>
+    </Expand>
 </div>
 
 {:else}
@@ -129,30 +140,29 @@
 </PopupMenu>
 
 <style lang="scss">
-    .editor {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: .2em;
-        height: calc(100% - 3.8rem);
+    .dirty {
+        color: var(--color-hl);
+    }
 
-        .input {
+    .input {
+        min-height: 12em;
+    }
+
+    .validation {
+        position: sticky;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-height: 30%;
+        background-color: var(--color-bg-2);
+        border: 1px solid var(--color-bg-0);
+
+        textarea {
+            white-space: pre;
+            overflow-wrap: normal;
+            width: calc(100% - 2.6em);
             min-height: 12em;
             height: 100%;
-            overflow: auto;
-            padding: 0;
-        }
-
-        .validation {
-            max-height: 30%;
-            width: 100%;
-
-            textarea {
-                white-space: pre;
-                overflow-wrap: normal;
-                width: calc(100% - 2.6em);
-                min-height: 8em;
-            }
         }
     }
 </style>

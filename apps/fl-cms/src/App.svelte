@@ -5,6 +5,7 @@
   import { loadSettings, settingsStore } from "./lib/stores/settings.store";
   import Header from "./lib/components/common/Header.svelte";
   import Snackbar from "./lib/components/common/Snackbar.svelte";
+  import Config from "./routes/Config.svelte";
   import Document from "./routes/Page.svelte";
   import Media from "./routes/Media.svelte";
   import Settings from "./routes/Settings.svelte";
@@ -13,6 +14,7 @@
 
   const routes = {
     '/': Index,
+    '/config/*': Config,
     '/page': Index,
     '/page/*': Document,
     '/media': Media,

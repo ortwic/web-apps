@@ -181,6 +181,7 @@ button.clear {
     box-shadow: unset;
 }
 
+a[role='button'].icon,
 button.icon {
     padding: .2rem;
 }
