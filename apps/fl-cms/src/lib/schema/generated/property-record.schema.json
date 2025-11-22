@@ -1,0 +1,566 @@
+{
+  "$ref": "#/definitions/PropertyRecord",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ArrayProperty": {
+      "additionalProperties": false,
+      "description": "Array property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "array",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "expanded": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "of": {
+          "$ref": "#/definitions/Property"
+        },
+        "oneOf": {
+          "additionalProperties": false,
+          "properties": {
+            "properties": {
+              "additionalProperties": {
+                "$ref": "#/definitions/Property"
+              },
+              "type": "object"
+            },
+            "propertiesOrder": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "typeField": {
+              "type": "string"
+            },
+            "valueField": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "properties"
+          ],
+          "type": "object"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "BooleanProperty": {
+      "additionalProperties": false,
+      "description": "Boolean property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "boolean",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "DateProperty": {
+      "additionalProperties": false,
+      "description": "Date property",
+      "properties": {
+        "autoValue": {
+          "enum": [
+            "on_create",
+            "on_update"
+          ],
+          "type": "string"
+        },
+        "clearable": {
+          "type": "boolean"
+        },
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "date",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "date",
+            "date_time"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "EnumValueConfig": {
+      "additionalProperties": false,
+      "description": "Enum values support",
+      "properties": {
+        "disabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "type": "object"
+    },
+    "EnumValues": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/definitions/EnumValueConfig"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/definitions/EnumValueConfig"
+              }
+            ]
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "MapProperty": {
+      "additionalProperties": false,
+      "description": "Map property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "map",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "expanded": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "keyValue": {
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "pickOnlySomeKeys": {
+          "type": "boolean"
+        },
+        "previewProperties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "properties": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Property"
+          },
+          "type": "object"
+        },
+        "propertiesOrder": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "spreadChildren": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "NumberProperty": {
+      "additionalProperties": false,
+      "description": "Number property",
+      "properties": {
+        "clearable": {
+          "type": "boolean"
+        },
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "number",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "enumValues": {
+          "$ref": "#/definitions/EnumValues"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "PreviewType": {
+      "description": "Preview types",
+      "enum": [
+        "image",
+        "video",
+        "audio",
+        "file"
+      ],
+      "type": "string"
+    },
+    "Property": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/StringProperty"
+        },
+        {
+          "$ref": "#/definitions/NumberProperty"
+        },
+        {
+          "$ref": "#/definitions/BooleanProperty"
+        },
+        {
+          "$ref": "#/definitions/DateProperty"
+        },
+        {
+          "$ref": "#/definitions/ArrayProperty"
+        },
+        {
+          "$ref": "#/definitions/MapProperty"
+        }
+      ],
+      "description": "Union type for all properties"
+    },
+    "PropertyRecord": {
+      "additionalProperties": {
+        "$ref": "#/definitions/Property"
+      },
+      "description": "Required as hook for ts-json-schema-generator only",
+      "type": "object"
+    },
+    "PropertyValidation": {
+      "additionalProperties": false,
+      "description": "Validation rules for any property",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "requiredMessage": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "boolean"
+        },
+        "uniqueInArray": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "StorageConfig": {
+      "additionalProperties": false,
+      "description": "Storage config",
+      "properties": {
+        "acceptedFiles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "maxSize": {
+          "type": "number"
+        },
+        "metadata": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "storagePath": {
+          "type": "string"
+        },
+        "storeUrl": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "storagePath"
+      ],
+      "type": "object"
+    },
+    "StringProperty": {
+      "additionalProperties": false,
+      "description": "String property",
+      "properties": {
+        "clearable": {
+          "type": "boolean"
+        },
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "string",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "boolean"
+        },
+        "enumValues": {
+          "$ref": "#/definitions/EnumValues"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "markdown": {
+          "type": "boolean"
+        },
+        "multiline": {
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "previewAsTag": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "storage": {
+          "$ref": "#/definitions/StorageConfig"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/PreviewType"
+            }
+          ]
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    }
+  }
+}

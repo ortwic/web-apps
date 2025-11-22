@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Entity, EntityStatus, EntityValues } from "./entities";
-import type { EntityCallbacks } from "./entity_callbacks";
-import type { EnumValues, PropertiesOrBuilders } from "./properties";
+import type { EnumValues, Properties as PropertiesOrBuilders } from "./properties.simple";
 
 /**
  * This interface represents a view that includes a collection of entities.
@@ -138,13 +137,6 @@ export interface EntityCollection<M extends Record<string, any> = any> {
      * the side dialog of an entity.
      */
     subcollections?: EntityCollection<any>[];
-
-    /**
-     * This interface defines all the callbacks that can be used when an entity
-     * is being created, updated or deleted.
-     * Useful for adding your own logic or blocking the execution of the operation.
-     */
-    callbacks?: EntityCallbacks<M>;
 
     /**
      * You can define additional actions that can be performed on the entities

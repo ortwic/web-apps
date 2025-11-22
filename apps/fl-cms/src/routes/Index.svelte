@@ -7,7 +7,6 @@
     import { currentClientUser } from '../lib/stores/app.store';
     import { createSchemaStore } from '../lib/stores/db/firestore.store';
     import Modal from '../lib/components/ui/Modal.svelte';
-    import CollectionEditor from '../lib/components/schema/CollectionEditor.svelte';
     import SelectCollection from '../lib/components/schema/SelectCollection.svelte';
 
     const schemaStore = createSchemaStore();
@@ -15,7 +14,7 @@
 
     $: disabled = !$currentClientUser;
 
-    let showEdit = false, showSelect = false;
+    let showSelect = false;
     let current = writable<Collection>();
     let currentPath = derived(current, (item) => item && item.pathSegments && item.pathSegments[0] || '');
     let pathInput: HTMLInputElement;
@@ -45,11 +44,6 @@
         }
     }
 
-    async function edit(item: Collection) {
-        showEdit = true;
-        current.set(item);
-    }
-
     function select(item: Collection) {
         showSelect = true;
         current.set(item);
@@ -76,25 +70,27 @@
     <div class="grid">
         {#each $schemas as item, i}
             <div class="flex-center item emphasis">
-                <div title={item.path} class="actions">
-                    <button {disabled} class="clear" on:click|preventDefault={() => edit(item)}>
+                <div class="actions">
+                    <a role="button" class="icon clear" href="#/config/{item.path}" title="config {item.path}" 
+                        use:link={`/config/${item.path}`} on:click|preventDefault={() => {}}>
                         <i class="bx bx-edit"></i>
-                    </button>
-                    <button {disabled} class="clear" on:click|preventDefault={() => remove(item)}>
+                    </a>
+                    <button {disabled} class="clear" title="delete {item.path}" 
+                        on:click|preventDefault={() => remove(item)}>
                         <i class="bx bx-trash"></i>
                     </button>
                 </div>
                 {#if item.parent}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <a role="button" href="/page/{item.path}" tabindex={i}
-                    on:click|preventDefault={() => select(item)} class="link flex-center pointer">
+                <a role="button" href="/page/{item.path}" tabindex={i} title="select {item.path}" 
+                    on:click|preventDefault={() => select(item)} class="nav link flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-list-ul"></i>
                     </span>
                 </a>
                 {:else}
-                <a role="button" use:link href="/page/{item.path}" class="flex-center" tabindex={i}>
+                <a role="button" use:link href="/page/{item.path}" class="nav flex-center" tabindex={i}>
                     <h2>{item.path}</h2>
                     <span>
                         <i class="bx bx-lg bx-right-arrow-alt"></i>
@@ -109,7 +105,7 @@
                 type="text" pattern="[\w\/]+"
                 on:keydown={(e) => e.key === 'Enter' && add()}
                 bind:this={pathInput}
-                placeholder="Collection"
+                placeholder="New collection"
             />
             <br/>
             <button {disabled} class="clear" on:click={add}>
@@ -118,12 +114,6 @@
         </div>
     </div>
 </section>
-
-<Modal open={showEdit} width="100%" on:close={() => (showEdit = false)}>
-    {#if showEdit}
-    <CollectionEditor item={$current} />
-    {/if}
-</Modal>
 
 <Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
     {#if showSelect}
@@ -151,7 +141,12 @@ section {
             color: var(--color-text);
             border-radius: 0.5rem;
             border: 1px solid gray;
+            transition: border .25s ease-in-out;
             padding: 1rem;
+
+            &:hover:has(a.nav), &:has(a.nav:hover) {
+                border: 1px solid var(--color-theme-2);
+            }
 
             & > input {
                 padding: .5rem;
@@ -175,7 +170,6 @@ section {
 
                 &:not([disabled]):hover {
                     border: 0;
-                    text-decoration: underline;
                 }
             }
         }

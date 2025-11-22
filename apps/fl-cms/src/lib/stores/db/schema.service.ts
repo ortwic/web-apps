@@ -33,19 +33,29 @@ export class SchemaStore implements Readable<Collection[]> {
     }
 
     async getCollectionAsync(path?: string): Promise<Collection | null> {
-        return await firstValueFrom(this.getCollection(path));
+        return await firstValueFrom(this.getCollectionFromFullPath(path));
     }
 
-    getCollection(path?: string): Observable<Collection | null> {
+    /**
+     * get collection by full path
+     * @param path the full path including documentIds
+     * @returns the collection or corelated subcollection
+     */
+    getCollectionFromFullPath(path?: string): Observable<Collection | null> {
         if (path) {
             const evenOnly = <T>(_: T, i: number) => i % 2 === 0;
             const schemaPath = path.split('/').filter(evenOnly);
-            return this.getCollectionInternal(...schemaPath);
+            return this.getCollectionFromSchemaPath(...schemaPath);
         }
         return of(null);
     }
 
-    getCollectionInternal(...pathSegments: string[]): Observable<Collection | null> {
+    /**
+     * get collection by schema path
+     * @param path the schema path without documentIds
+     * @returns the collection or corelated subcollection
+     */
+    getCollectionFromSchemaPath(...schemaPathSegments: string[]): Observable<Collection | null> {
         function lastNode(document: Collection | null, segments: string[]): Collection | null {
             const id = segments.shift();
             if (id && document?.subcollections) {
@@ -55,9 +65,9 @@ export class SchemaStore implements Readable<Collection[]> {
             return document;
         }
 
-        return this.store.getDocument(pathSegments.shift())
+        return this.store.getDocument(schemaPathSegments.shift())
             // pass copy of array, otherwise oberservable would fire multiple times
-            .pipe(map(d => lastNode(d, [...pathSegments])));
+            .pipe(map(d => lastNode(d, [...schemaPathSegments])));
     }
 
     async createCollections(path: string): Promise<void> {
@@ -105,7 +115,7 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         const segments = target.path.split('/');
-        const root = await firstValueFrom(this.getCollectionInternal(segments[0]));
+        const root = await firstValueFrom(this.getCollectionFromSchemaPath(segments[0]));
         if (root) {
             setProperties(root);
             await this.store.setDocuments(root);
@@ -130,7 +140,7 @@ export class SchemaStore implements Readable<Collection[]> {
         };
 
         if (segments.length > 1) {
-            const root = await firstValueFrom(this.getCollectionInternal(segments.shift()!));
+            const root = await firstValueFrom(this.getCollectionFromSchemaPath(segments.shift()!));
             if(root && removeSubcollection(root)) {
                 return this.store.setDocuments(root);
             }

@@ -1,33 +1,44 @@
 <script lang="ts">
-    import json from 'json5';
+    import { of } from 'rxjs';
     import { get } from 'svelte/store';
-    import { type Content, JSONEditor, Mode } from 'svelte-jsoneditor'
-    import { Timestamp, DocumentReference, GeoPoint } from 'firebase/firestore';
-    import { colorScheme } from '@web-apps/svelte-tabulator';
-    import type { Properties } from '../../packages/firecms_core/types/properties';
-    import { templates } from '../../data/predefinedCollections';
+    import { push } from 'svelte-spa-router';
+    import { Timestamp } from 'firebase/firestore';
+    import type { Properties } from '../../packages/firecms_core/types/properties.simple';
+    import { templates } from '../../schema/predefined-collections';
+    import { createValidator } from '../../schema/schema-validation';
     import type { Collection } from '../../models/schema.model';
+    import { currentClientUser } from '../../stores/app.store';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
+    import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import CollectionEditorTable from './CollectionEditorTable.svelte';
+    import JSONEditor from '../ui/JSONEditor.svelte';
+    import Breadcrumb from '../ui/Breadcrumb.svelte';
+    import schema from '../../schema/generated/property-record.schema.json';
 
     export let item: Collection;
+    let dirty = false;
     let showJsonView = true;
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
+    let validationMessages: string[] = [];
+
+    $: disabled = !$currentClientUser;
 
     // Calculation of popup within a dialog element fails, so use static position as a workaround
     const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
     const schemaStore = createSchemaStore({ merge: false });
     const contentStore = createDocumentStore(item.path, { merge: false });
     const documents = $contentStore;
+    const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {
         try {
             await $schemaStore.updateProperties(item);
             showInfo(`${item.path} saved`);
+            dirty = false;
         } catch (error) {
             showError(`${error}`);
         }
@@ -46,10 +57,6 @@
                 return "array";
             else if (value instanceof Timestamp)
                 return "date";
-            else if (value instanceof GeoPoint)
-                return "geopoint";
-            else if (value instanceof DocumentReference)
-                return "reference";
             return "map";
         };
         
@@ -64,21 +71,17 @@
     function loadTemplate(key: string) {
         properties = templates[key].properties;
         item.properties = properties;
+        dirty = true;
     }
 
-    function setProperties(content: Content) {
-        item.properties = parseProperties(content);
-    }
-
-    function parseProperties(content: Content): Properties {
-        if ('text' in content) {
-            try {            
-                return json.parse<Properties>(content.text);
-            } catch (error) {
-                showError(`Invalid JSON: ${error}`);
-            }
+    function setProperties<T>(props: T) {
+        if (validate(props)) {
+            item.properties = props as Properties;
+            validationMessages = [];
+            dirty = true;
+        } else if (validate.errors) {
+            validationMessages = validationErrors(props);
         }
-        return {};
     }
 
     function toggleEditView() {
@@ -87,8 +90,8 @@
 </script>
 
 <Toolbar>
-    <button title="Save properties" class="icon clear" on:click={saveCollection}>
-        <i class="bx bx-save"></i>
+    <button {disabled} title="Save properties" class="icon clear" on:click={saveCollection}>
+        <i class:dirty class="bx bx-save"></i>
     </button>
     <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(staticTemplatePopupPosition)}>
         <i class="bx bxs-box"></i>
@@ -96,18 +99,33 @@
     <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={appendInferredPropsFromData}>
         <i class="bx bxs-magic-wand"></i>
     </button>
+    <!-- Feature not yet fully implemented -->
+    {#if import.meta.env.DEV}
     <button title="Toggle code view" class="icon clear" on:click={toggleEditView}>
         <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
     </button>
-    <span slot="title">{item.path}</span>
+    {/if}
+    <span slot="title">
+        <Breadcrumb path={of(item.path)} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
+    </span>
 </Toolbar>
 
 {#if showJsonView}
-<div class:jse-theme-dark={$colorScheme === 'dark'}>    
-    <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: properties }} onChange={setProperties} />
+<div class="input">
+    <JSONEditor value={properties}
+        on:changed={({ detail }) => setProperties(detail)} 
+        on:error={({ detail }) => validationMessages = [detail]} />
 </div>
+
+<div class="validation">
+    <Expand>
+        <span slot="header" class="emphasis">Validation output</span>
+        <textarea readonly>{validationMessages.join('\n')}</textarea>
+    </Expand>
+</div>
+
 {:else}
-    <CollectionEditorTable properties={properties} />
+<CollectionEditorTable properties={properties} />
 {/if}
 
 <PopupMenu bind:this={templateMenu}>
@@ -120,3 +138,31 @@
         {/each}
     </div>
 </PopupMenu>
+
+<style lang="scss">
+    .dirty {
+        color: var(--color-hl);
+    }
+
+    .input {
+        min-height: 12em;
+    }
+
+    .validation {
+        position: sticky;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-height: 30%;
+        background-color: var(--color-bg-2);
+        border: 1px solid var(--color-bg-0);
+
+        textarea {
+            white-space: pre;
+            overflow-wrap: normal;
+            width: calc(100% - 2.6em);
+            min-height: 12em;
+            height: 100%;
+        }
+    }
+</style>

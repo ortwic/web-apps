@@ -1,11 +1,10 @@
 <script lang="ts">
+    import { createEventDispatcher } from 'svelte';
+    import collapse from 'svelte-collapse';
 
-    import { createEventDispatcher } from 'svelte'
-    import collapse from 'svelte-collapse'
-
-    export let open = true
-    export let duration = 0.2
-    export let easing = 'ease'
+    export let open = true;
+    export let duration = 0.2;
+    export let easing = 'ease';
 
     const dispatch = createEventDispatcher()
 
@@ -17,7 +16,6 @@
 </script> 
 
 <div class='card' class:open aria-expanded={open}>
-
     <span class="small card-header grid">
         <button type="button" class="clear" on:click={handleToggle}>
             <i class="bx bx-{open ? 'down' : 'right'}-arrow"></i>

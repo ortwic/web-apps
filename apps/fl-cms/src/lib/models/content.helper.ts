@@ -1,5 +1,5 @@
 import type { Collection } from "./schema.model";
-import type { AnyProperty, ArrayProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties";
+import type { AnyProperty, ArrayProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties.simple";
 import type { ValueType } from "./content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {

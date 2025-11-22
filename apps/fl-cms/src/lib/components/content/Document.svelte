@@ -3,7 +3,7 @@
     import { params, push } from 'svelte-spa-router';
     import json from 'json5';
     import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
-    import type { AnyProperty, Properties } from '../../packages/firecms_core/types/properties';
+    import type { AnyProperty, Properties } from '../../packages/firecms_core/types/properties.simple';
     import Toolbar from '../ui/Toolbar.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';

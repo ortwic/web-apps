@@ -12,7 +12,13 @@ export default defineConfig({
           'firebase': ['firebase/app', 'firebase/auth', 'firebase/analytics'],
           'firestore': ['firebase/firestore'],
           'tabulator': ['@web-apps/svelte-tabulator'],
-          'jsoneditor': ['svelte-jsoneditor'],
+          'codemirror': [
+            'codemirror',
+            '@codemirror/view',
+            '@codemirror/state',
+            '@codemirror/lang-json',
+            '@codemirror/theme-one-dark'
+          ],
           'bytemd': ['bytemd'],
         },
       },

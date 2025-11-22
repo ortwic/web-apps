@@ -1,16 +1,13 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
-    import json from 'json5';    
     import { createEventDispatcher } from "svelte";
-    import { JSONEditor, Mode, type Content } from "svelte-jsoneditor";
-    import { colorScheme } from "@web-apps/svelte-tabulator";
-    import type { AnyProperty } from '../../packages/firecms_core/types/properties';
+    import type { AnyProperty } from '../../packages/firecms_core/types/properties.simple';
+    import JSONEditor from '../ui/JSONEditor.svelte';
     import Expand from '../ui/Expand.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
-    import { showError } from "../../stores/notification.store";
-    import { arrayToMap, defaultValueByType, isArrayProperty, isMapProperty, isMarkdown, mergeObject } from "../../models/content.helper";
     import { withKey } from '../../utils/ui.helper';
+    import { arrayToMap, defaultValueByType, isArrayProperty, isMapProperty, isMarkdown, mergeObject } from "../../models/content.helper";
     import PropertyMap from "./PropertyMap.svelte";
 
     const dispatch = createEventDispatcher();
@@ -96,17 +93,6 @@
         }
     }
 
-    function updateJson(content: Content) {
-        if ('text' in content) {
-            try {   
-                const value = json.parse(content.text);
-                change(value);
-            } catch (error) {
-                showError(`Invalid JSON: ${error}`);
-            }
-        }
-    }
-
     function change<U>(value: U) {
         if (value) {
             dispatch('change', value);
@@ -127,7 +113,7 @@
             <slot name="commands"></slot>
         </div>
     </span>
-    <div class="section" class:jse-theme-dark={$colorScheme === 'dark'}>
+    <div class="section">
         {#if typeof value === 'string' &&  isMarkdown(property)}
         <MarkdownEditor {disabled} {value} placeholder={type} 
         on:change={({ detail }) => change(detail)} />
@@ -185,8 +171,7 @@
             </div>
         {:else}
             <h2 class="emphasis center">WYSIWYG yet not implemented</h2>
-            <JSONEditor mainMenuBar={false} mode={Mode.text} content={{ json: value }} 
-                onChange={(content) => updateJson(content)} />
+            <JSONEditor {value} on:changed={({ detail }) => change(detail)} />
         {/if}
     </div>
 </Expand>

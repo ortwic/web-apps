@@ -20,7 +20,7 @@ export function createSchemaStore(options?: SetOptions): Readable<SchemaStore> {
 
 export function getCurrentScheme(path: Observable<string | undefined>): Observable<Collection | null> {
     return combineLatest([fromStore(createSchemaStore()), path])
-        .pipe(switchMap(([store, path]) => store.getCollection(path)));
+        .pipe(switchMap(([store, path]) => store.getCollectionFromFullPath(path)));
 }
 
 export function getContentStore(path?: string, options?: SetOptions) {
