@@ -167,10 +167,6 @@ section {
             a[role="button"] {
                 width: 98%;
                 border: 0;
-
-                &:not([disabled]):hover {
-                    border: 0;
-                }
             }
         }
     }

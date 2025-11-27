@@ -45,7 +45,7 @@
     </li>
     {:else}
     <li>
-        <a use:link href='/page/{nav.path}'>
+        <a role="button" use:link href='/page/{nav.path}'>
             {nav.id}
         </a>
     </li>
@@ -55,7 +55,7 @@
 
 <style>
     ul {
-        list-style: circle;
+        list-style: none;
     }
 
     li {

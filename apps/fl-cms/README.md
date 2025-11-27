@@ -126,6 +126,18 @@ Property definitions are generated automatically and stored in:
 Work with [collections](./docs/images/fl-cms_list.png), [documents](./docs/images/fl-cms_content.png), and nested sub-collections easily.
 
 
+### 4. Data models
+
+Fl-CMS uses mostly the same datamodels as those defined in the [FireCMS API](https://firecms.co/docs/collections/). There are some differences though.
+
+* Most advanced features (like validation) are not supported yet
+* The StringProperty was segregated into 
+  * UrlProperty `url` and 
+  * FileProberty `file` containing the storage config
+* The ArrayProperty can be from one type only
+  * The ArrayProperty with oneOf properties is a BlockSetProperty of `set` now
+* Check out `properties.simple.ts` from the sources for more details
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Known Bugs and Limitations

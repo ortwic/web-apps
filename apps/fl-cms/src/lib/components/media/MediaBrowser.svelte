@@ -73,7 +73,7 @@
     
 </script>
 
-<section class="content-64">
+<header>
     <Toolbar width="100%">
         <span class="no-wrap">
             <button {disabled} class="icon clear" title="Create folder"
@@ -89,7 +89,9 @@
             <Breadcrumb {path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
         </span>
     </Toolbar>
-    
+</header>
+
+<section class="content-64">    
     <Loading {isLoading}>
         <div class="grid">
             {#each $items$ as item (item.path)}

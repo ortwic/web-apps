@@ -98,7 +98,7 @@ export class SchemaStore implements Readable<Collection[]> {
             if (node) {
                 const id = segments.shift();
                 if (target.id === id) {
-                    if ('merge' in this.store.options && this.store.options.merge) {
+                    if ('merge' in this.store.setOptions && this.store.setOptions.merge) {
                         node.properties = { ...node.properties, ...target.properties };
                     } else {
                         node.properties = target.properties;

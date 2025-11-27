@@ -1,3 +1,5 @@
+import { EntityReference, GeoPoint, Vector } from "./entities";
+
 /**
  * Required as hook for ts-json-schema-generator only
  */
@@ -11,8 +13,14 @@ export type DataType<T extends CMSType = CMSType> =
         T extends number ? "number" :
             T extends boolean ? "boolean" :
                 T extends Date ? "date" :
-                    T extends Array<CMSType> ? "array" :
-                        T extends Record<string, any> ? "map" : never;
+                    T extends URL ? "url" :
+                        T extends File ? "file" :
+                            T extends GeoPoint ? "geopoint" :
+                                T extends Vector ? "vector" :
+                                    T extends EntityReference ? "reference" :
+                                        T extends Set<CMSType> ? "set" :
+                                            T extends Array<CMSType> ? "array" :
+                                                T extends Record<string, any> ? "map" : never;
 
 /**
  * @group Entity properties
@@ -22,7 +30,12 @@ export type CMSType =
     | number
     | boolean
     | Date
+    | URL
+    | File
+    | GeoPoint
+    | EntityReference
     | Record<string, any>
+    | Set<CMSType>
     | CMSType[];
 
 /**
@@ -30,10 +43,15 @@ export type CMSType =
  */
 export type AnyProperty =
     StringProperty |
+    UrlProperty |
+    FileProperty |
     NumberProperty |
     BooleanProperty |
     DateProperty |
+    GeopointProperty |
+    ReferenceProperty |
     ArrayProperty |
+    BlockSetProperty |
     MapProperty;
 
 /**
@@ -44,8 +62,13 @@ export type Property<T extends CMSType = CMSType> =
         T extends number ? NumberProperty :
             T extends boolean ? BooleanProperty :
                 T extends Date ? DateProperty :
-                    T extends Array<CMSType> ? ArrayProperty<T> :
-                        T extends Record<string, any> ? MapProperty<T> : AnyProperty;
+                    T extends URL ? UrlProperty : 
+                        T extends File ? FileProperty :
+                            T extends GeoPoint ? GeopointProperty :
+                                T extends EntityReference ? ReferenceProperty :
+                                    T extends Set<CMSType> ? BlockSetProperty :
+                                        T extends Array<CMSType> ? ArrayProperty<T> :
+                                            T extends Record<string, any> ? MapProperty<T> : AnyProperty;
 
 /**
  * Interface including all common properties of a CMS property
@@ -233,23 +256,6 @@ export interface StringProperty extends BaseProperty<string> {
     enumValues?: EnumValues;
 
     /**
-     * You can specify a `Storage` configuration. It is used to
-     * indicate that this string refers to a path in Google Cloud Storage.
-     */
-    storage?: StorageConfig;
-
-    /**
-     * If the value of this property is a URL, you can set this flag to true
-     * to add a link, or one of the supported media types to render a preview
-     */
-    url?: boolean | PreviewType;
-
-    /**
-     * Does this field include an email
-     */
-    email?: boolean;
-
-    /**
      * Should this string be rendered as a tag instead of just text.
      */
     previewAsTag?: boolean;
@@ -260,8 +266,37 @@ export interface StringProperty extends BaseProperty<string> {
     clearable?: boolean;
 }
 
+export interface UrlProperty extends BaseProperty<string> {
+
+    dataType: "url";
+
+    /**
+     * If the value of this property is a URL, you can set this flag to true
+     * to add a link, or one of the supported media types to render a preview
+     */
+    url: boolean | PreviewType;
+
+    /**
+     * Does this field include an email
+     */
+    email?: boolean;
+}
+
+export interface FileProperty extends BaseProperty<string> {
+
+    dataType: "file";
+
+    /**
+     * You can specify a `Storage` configuration. It is used to
+     * indicate that this string refers to a path in Google Cloud Storage.
+     */
+    storage: StorageConfig;
+
+    preview?: PreviewType;
+}
+
 /**
- * @group Entity properties
+ * @group An array which repeats a property of exactly one type.
  */
 export interface ArrayProperty<T extends ArrayT[] = any[], ArrayT extends CMSType = CMSType> extends BaseProperty<T> {
 
@@ -273,7 +308,20 @@ export interface ArrayProperty<T extends ArrayT[] = any[], ArrayT extends CMSTyp
      * You can leave this field empty only if you are providing a custom field,
      * or using the `oneOf` prop, otherwise an error will be thrown.
      */
-    of?: Property<ArrayT>;
+    of: Property<ArrayT>;
+
+    /**
+     * Should the field be initially expanded. Defaults to `true`
+     */
+    expanded?: boolean;
+}
+
+/**
+ * @group A collection of mixed properties which are repeated in any order.
+ */
+export interface BlockSetProperty<T extends ArrayT[] = any[], ArrayT extends CMSType = CMSType> extends BaseProperty<T> {
+
+    dataType: "set";
 
     /**
      * Use this field if you would like to have an array of typed objects.
@@ -290,7 +338,7 @@ export interface ArrayProperty<T extends ArrayT[] = any[], ArrayT extends CMSTyp
      * An example use case for this feature may be a blog entry, where you have
      * images and text blocks using markdown.
      */
-    oneOf?: {
+    oneOf: {
         /**
          * Record of properties, where the key is the `type` and the value
          * is the corresponding property
@@ -402,6 +450,49 @@ export interface DateProperty extends BaseProperty<Date> {
      * Add an icon to clear the value and set it to `null`. Defaults to `false`
      */
     clearable?: boolean;
+}
+
+/**
+ * @group Entity properties
+ */
+// TODO: currently this is the only unsupported field
+export interface GeopointProperty extends BaseProperty<GeoPoint> {
+
+    dataType: "geopoint";
+
+    /**
+     * Rules for validating this property
+     */
+    validation?: PropertyValidationSchema,
+
+}
+
+/**
+ * @group Entity properties
+ */
+export interface ReferenceProperty extends BaseProperty<EntityReference> {
+
+    dataType: "reference";
+
+    /**
+     * Absolute collection path of the collection this reference points to.
+     * The collection of the entity is inferred based on the root navigation, so
+     * the filters and search delegate existing there are applied to this view
+     * as well.
+     * You can leave this prop undefined if the path is not yet know, e.g.
+     * you are using a property builder and the path depends on a different
+     * property.
+     * Note that you can also use a collection alias.
+     */
+    path?: string;
+
+    /**
+     * Properties that need to be rendered when displaying a preview of this
+     * reference. If not specified the first 3 are used. Only the first 3
+     * specified values are considered.
+     */
+    previewProperties?: string[];
+
 }
 
 /**

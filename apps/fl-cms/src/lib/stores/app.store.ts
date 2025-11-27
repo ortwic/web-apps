@@ -68,9 +68,11 @@ class FirebaseAppAdapter {
             const storage = getStorage(this.app, bucket);
             if (this.useEmulator && this.config.storageBucket && !currentStorages.has(storage)) {
                 const url = new URL(this.config.storageBucket);
-                connectStorageEmulator(storage, url.hostname, +url.port || 8188);
-                showInfo(`Using emulator on ${url.hostname}:${url.port}`);
-                currentStorages.add(storage);
+                if (!url.hostname.match('^.+\.appspot\.com$')) {
+                    connectStorageEmulator(storage, url.hostname, +url.port || 8188);
+                    showInfo(`Using emulator on ${url.hostname}:${url.port}`);
+                    currentStorages.add(storage);
+                }
             }
 
             return storage;

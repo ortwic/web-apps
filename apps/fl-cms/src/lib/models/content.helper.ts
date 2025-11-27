@@ -1,6 +1,6 @@
 import type { Collection } from "./schema.model";
-import type { AnyProperty, ArrayProperty, MapProperty, StringProperty } from "../packages/firecms_core/types/properties.simple";
-import type { ValueType } from "./content.type";
+import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty } from "../packages/firecms_core/types/properties.simple";
+import type { SectionType, ValueType } from "./content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -11,8 +11,8 @@ export function createDefault<T extends Record<string, unknown>>(collection: Pic
     return obj as T;
 }
 
-export function defaultValueByType(prop: AnyProperty): ValueType {
-    switch (prop.dataType) {
+export function defaultValueByType(property: AnyProperty): ValueType {
+    switch (property.dataType) {
         case 'string':
             return '';
         case 'number':
@@ -22,31 +22,44 @@ export function defaultValueByType(prop: AnyProperty): ValueType {
         case 'array':
             return [];
         case 'map':
-            return createDefault(prop);
+            return createDefault(property);
         default:
             return null;
     }
 }
 
-export function isImageUrl(prop: AnyProperty): boolean {
-    const sp = prop as StringProperty;
-    return sp 
-        && sp.storage?.storeUrl === true 
-        && sp.storage?.acceptedFiles?.includes('image/*') === true;
+export function isFileType(property: AnyProperty, preview?: PreviewType): property is FileProperty {
+    const prop = property as FileProperty;
+    return prop && prop?.storage !== undefined && prop?.preview === preview;
 }
 
-export function isMarkdown(prop: AnyProperty): boolean {
-    const sp = prop as StringProperty;
-    return sp && sp.markdown === true;
+export function isImageUrl(property: AnyProperty): property is UrlProperty {
+    const prop = property as UrlProperty;
+    return prop && prop?.url === 'image';
 }
 
-export const isMapProperty = (prop: AnyProperty): prop is MapProperty => prop?.dataType === "map";
-export const isArrayProperty = (prop: AnyProperty): prop is ArrayProperty => prop?.dataType === "array";
-export function arrayToMap<T extends AnyProperty>(
+export function isMarkdown(property: AnyProperty): property is StringProperty {
+    const prop = property as StringProperty;
+    return prop && prop.markdown === true;
+}
+
+export function isArrayProperty(property: AnyProperty, type?: DataType): property is ArrayProperty {
+    const prop = property as ArrayProperty;
+    if (property.dataType === 'array') {
+        return type ? prop?.of?.dataType === type : prop?.of !== undefined;
+    }
+    return false;
+}
+
+export const isMapProperty = (prop?: AnyProperty): prop is MapProperty => prop?.dataType === "map";
+
+export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty => prop?.dataType === "set";
+
+export function arrayPropertyToMapProperty<T extends AnyProperty>(
     property: AnyProperty, 
     typeGuard?: (prop: AnyProperty) => prop is T
 ): Record<string, T> {
-    if (property && property.dataType === "array" && property.oneOf?.properties) {
+    if (property && property.dataType === "set" && property.oneOf?.properties) {
         return Object.entries(property.oneOf.properties)
             .filter((t): t is [string, T] => typeGuard ? typeGuard(t[1]) : true)
             .reduce((acc, [field, prop]) => {
@@ -55,6 +68,15 @@ export function arrayToMap<T extends AnyProperty>(
             }, {} as Record<string, T>);
     }
     return {};
+}
+
+export function arrayToSectionMap(array: SectionType[]) {
+    return array
+        .filter(item => typeof item?.value === 'string')
+        .reduce((acc, { type, value }: SectionType) => {
+            acc[type] = value;
+            return acc;
+        }, {} as Record<string, unknown>);
 }
 
 export function mergeObject<T>(old: T, value: T) {
