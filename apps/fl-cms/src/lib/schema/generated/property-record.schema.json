@@ -46,6 +46,61 @@
         "of": {
           "$ref": "#/definitions/Property"
         },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType",
+        "of"
+      ],
+      "type": "object"
+    },
+    "BlockSetProperty": {
+      "additionalProperties": false,
+      "description": "Array property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "set",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "expanded": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
         "oneOf": {
           "additionalProperties": false,
           "properties": {
@@ -82,7 +137,8 @@
         }
       },
       "required": [
-        "dataType"
+        "dataType",
+        "oneOf"
       ],
       "type": "object"
     },
@@ -251,6 +307,63 @@
         }
       ]
     },
+    "FileProperty": {
+      "additionalProperties": false,
+      "description": "Url property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "string",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "preview": {
+          "$ref": "#/definitions/PreviewType"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "storage": {
+          "$ref": "#/definitions/StorageConfig"
+        },
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
     "MapProperty": {
       "additionalProperties": false,
       "description": "Map property",
@@ -414,7 +527,16 @@
           "$ref": "#/definitions/DateProperty"
         },
         {
+          "$ref": "#/definitions/UrlProperty"
+        },
+        {
+          "$ref": "#/definitions/FileProperty"
+        },
+        {
           "$ref": "#/definitions/ArrayProperty"
+        },
+        {
+          "$ref": "#/definitions/BlockSetProperty"
         },
         {
           "$ref": "#/definitions/MapProperty"
@@ -509,9 +631,6 @@
         "editable": {
           "type": "boolean"
         },
-        "email": {
-          "type": "boolean"
-        },
         "enumValues": {
           "$ref": "#/definitions/EnumValues"
         },
@@ -539,8 +658,59 @@
         "readOnly": {
           "type": "boolean"
         },
-        "storage": {
-          "$ref": "#/definitions/StorageConfig"
+        "validation": {
+          "$ref": "#/definitions/PropertyValidation",
+          "description": "Validation rules"
+        }
+      },
+      "required": [
+        "dataType"
+      ],
+      "type": "object"
+    },
+    "UrlProperty": {
+      "additionalProperties": false,
+      "description": "Url property",
+      "properties": {
+        "columnWidth": {
+          "description": "Width of the column in the collection view",
+          "type": "number"
+        },
+        "dataType": {
+          "const": "string",
+          "description": "Datatype of the property",
+          "type": "string"
+        },
+        "defaultValue": {
+          "description": "Default value"
+        },
+        "description": {
+          "description": "Short description displayed under the field",
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "boolean"
+        },
+        "hideFromCollection": {
+          "description": "Visibility flags",
+          "type": "boolean"
+        },
+        "longDescription": {
+          "description": "Longer description displayed in popover",
+          "type": "string"
+        },
+        "name": {
+          "description": "Property name",
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean"
         },
         "url": {
           "anyOf": [
@@ -558,7 +728,8 @@
         }
       },
       "required": [
-        "dataType"
+        "dataType",
+        "url"
       ],
       "type": "object"
     }

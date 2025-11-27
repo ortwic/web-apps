@@ -61,6 +61,10 @@
     letter-spacing: .1rem;
 }
 
+.hl {
+    color: var(--color-hl) !important;
+}
+
 .small {
     font-size: small;
 }

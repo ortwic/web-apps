@@ -1,12 +1,11 @@
 <script lang="ts">
     import { of } from 'rxjs';
-    import { get } from 'svelte/store';
     import { push } from 'svelte-spa-router';
     import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
     import { templates } from '../../schema/predefined-collections';
     import { createValidator } from '../../schema/schema-validation';
-    import type { Collection } from '../../models/schema.model';
+    import type { Collection, Entity } from '../../models/schema.model';
     import { currentClientUser } from '../../stores/app.store';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
     import { showError, showInfo } from '../../stores/notification.store';
@@ -27,8 +26,6 @@
 
     $: disabled = !$currentClientUser;
 
-    // Calculation of popup within a dialog element fails, so use static position as a workaround
-    const staticTemplatePopupPosition = { clientX: 80, clientY: 50 } as MouseEvent;
     const schemaStore = createSchemaStore({ merge: false });
     const contentStore = createDocumentStore(item.path, { merge: false });
     const documents = $contentStore;
@@ -39,12 +36,15 @@
             await $schemaStore.updateProperties(item);
             showInfo(`${item.path} saved`);
             dirty = false;
+            if (window.history.length) {
+                window.history.back();
+            }
         } catch (error) {
             showError(`${error}`);
         }
     }
         
-    async function appendInferredPropsFromData() {
+    async function appendInferredPropsFromData(documents: Entity[]) {
         const { buildEntityPropertiesFromData } = await import('../../packages/schema_inference');
         const getType = (value: any) => {
             if (typeof value === "number")
@@ -60,7 +60,7 @@
             return "map";
         };
         
-        const inferredProps = await buildEntityPropertiesFromData(get(documents), getType);
+        const inferredProps = await buildEntityPropertiesFromData(documents, getType);
         properties = { 
             ...item.properties, 
             ...inferredProps 
@@ -75,7 +75,7 @@
     }
 
     function setProperties<T>(props: T) {
-        if (validate(props)) {
+        if (validate(props) || import.meta.env.DEV) {
             item.properties = props as Properties;
             validationMessages = [];
             dirty = true;
@@ -90,13 +90,16 @@
 </script>
 
 <Toolbar>
-    <button {disabled} title="Save properties" class="icon clear" on:click={saveCollection}>
-        <i class:dirty class="bx bx-save"></i>
+    <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
+        <i class="bx bx-arrow-back"></i>
     </button>
-    <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(staticTemplatePopupPosition)}>
+    <button disabled={disabled || !dirty} title="Save properties" class="icon clear" on:click={saveCollection}>
+        <i class="bx bx-save hl"></i>
+    </button>
+    <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(ev)}>
         <i class="bx bxs-box"></i>
     </button>
-    <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={appendInferredPropsFromData}>
+    <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={() => appendInferredPropsFromData($documents)}>
         <i class="bx bxs-magic-wand"></i>
     </button>
     <!-- Feature not yet fully implemented -->
@@ -140,10 +143,6 @@
 </PopupMenu>
 
 <style lang="scss">
-    .dirty {
-        color: var(--color-hl);
-    }
-
     .input {
         min-height: 12em;
     }

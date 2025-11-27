@@ -152,7 +152,7 @@ button {
     text-decoration: none;
 }
 
-a[role='button']:not([disabled]):hover,
+a[role='button']:not([disabled], .icon):hover,
 button:not([disabled]):hover {
     border-color: var(--color-theme-1);
     text-decoration: none;
@@ -204,6 +204,10 @@ i.bx {
     padding: 0.2rem;
     color: var(--color-theme-2);
     transition: all .25s ease-in-out;
+}
+
+i.bx:hover {
+    border-color: var(--color-theme-1) !important;
 }
 
 .bx-trash {

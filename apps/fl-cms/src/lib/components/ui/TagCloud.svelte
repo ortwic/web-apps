@@ -18,6 +18,7 @@
   function update(event: Event & { currentTarget: EventTarget & HTMLSpanElement; }, i: number) {
     labels[i] = event.currentTarget.innerText;
     dispatch("change", labels);
+    event.currentTarget.blur();
   }
 
   function remove(tag: string) {

@@ -9,11 +9,12 @@
     import PopupMenu from '../ui/PopupMenu.svelte';
     import type { Content, SectionType } from '../../models/content.type';
     import { currentClientUser } from '../../stores/app.store';
-    import { arrayToMap, defaultValueByType, mergeObject } from '../../models/content.helper';
+    import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from '../../models/content.helper';
     import { getContentStore, getCurrentScheme } from '../../stores/db/firestore.store';
     import { showInfo } from '../../stores/notification.store';
     import { fromStore } from '../../utils/rx.store';
     import { isUnique } from '../../utils/ui.helper';
+    import Loading from '../ui/Loading.svelte';
     import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
@@ -36,7 +37,7 @@
         )
     );
     const contentTypes = currentSchema.pipe(
-        map(schema => arrayToMap((schema?.properties as Properties)['content'])),
+        map(schema => arrayPropertyToMapProperty((schema?.properties as Properties)['content'])),
         startWith({} as Record<string, AnyProperty>)
     );
 
@@ -70,7 +71,7 @@
         }
 
         if (currentIndex !== undefined && isUnique(document.content, item)
-            && document.content.insert(item, currentIndex + 1)) {
+            && document.content.insert(item, currentIndex)) {
             $contentStore$.setDocuments(document);
         }
         currentIndex = undefined;
@@ -89,8 +90,8 @@
     }
 
     async function updateSection(document: Content, partial: object, index: number) {
-        const section = document.content[index];
-        if (section.value !== partial) {
+        const section = document && document.content[index];
+        if (section && section.value !== partial) {
             section.value = mergeObject(section.value, partial);
             await $contentStore$.setDocuments(document);
             
@@ -107,14 +108,19 @@
     }
 </script>
 
+<header>
+    <Toolbar>
+        <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
+            <i class="bx bx-arrow-back"></i>
+        </button>
+        <span slot="title">
+            <Breadcrumb path={fullPath} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
+        </span>
+    </Toolbar>
+</header>
+
 <section class="content-64">
     {#if $document$}
-        <Toolbar>
-            <span slot="title">
-                <Breadcrumb path={fullPath} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
-            </span>
-        </Toolbar>
-
         <Section open={!$document$.content?.length} value={$document$} title="Details of {$currentSchema?.name}"
             property={{ dataType: 'map', properties: $properties }} type="details"
             on:change={({ detail }) => updateProperty($document$, detail)}>
@@ -128,27 +134,29 @@
         
         {#each $document$.content ?? [] as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
-        <Section {value} {type} property={$contentTypes[type]} {disabled}
-            on:change={({ detail }) => updateSection($document$, detail, i)}>
-            <span slot="commands">
-                <button class="icon clear" {disabled} title="Add section"
-                    on:click={(ev) => showPopupMenu(ev, 'add', i)}>
-                    <i class="bx bx-plus"></i>
-                </button>
-                <button class="icon clear" {disabled} title="Move up"
-                    on:click={() => moveUp($document$, i)}>
-                    <i class="bx bx-up-arrow"></i>
-                </button>
-                <button class="icon clear" {disabled} title="Move down"
-                    on:click={() => moveDown($document$, i)}>
-                    <i class="bx bx-down-arrow"></i>
-                </button>
-                <button class="icon clear" {disabled} title="Edit section"
-                    on:click={(ev) => showPopupMenu(ev, 'edit', i)}>
-                    <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
-                </button>
-            </span>
-        </Section>
+        <Loading isLoading={!$contentTypes[type]}>
+            <Section {value} {type} property={$contentTypes[type]} {disabled}
+                on:change={({ detail }) => updateSection($document$, detail, i)}>
+                <span slot="commands">
+                    <button class="icon clear" {disabled} title="Add section"
+                        on:click={(ev) => showPopupMenu(ev, 'add', i)}>
+                        <i class="bx bx-plus"></i>
+                    </button>
+                    <button class="icon clear" {disabled} title="Move up"
+                        on:click={() => moveUp($document$, i)}>
+                        <i class="bx bx-up-arrow"></i>
+                    </button>
+                    <button class="icon clear" {disabled} title="Move down"
+                        on:click={() => moveDown($document$, i)}>
+                        <i class="bx bx-down-arrow"></i>
+                    </button>
+                    <button class="icon clear" {disabled} title="Edit section"
+                        on:click={(ev) => showPopupMenu(ev, 'edit', i)}>
+                        <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
+                    </button>
+                </span>
+            </Section>
+        </Loading>
         </div>
         {/each}
 

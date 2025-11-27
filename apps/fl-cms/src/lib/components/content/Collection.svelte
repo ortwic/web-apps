@@ -1,20 +1,19 @@
 <script lang="ts">
     import json from 'json5';
-    import { push } from 'svelte-spa-router';
-    import { firstValueFrom, from, map, of, switchMap } from 'rxjs';
+    import { link, push } from 'svelte-spa-router';
+    import { firstValueFrom, map, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
+    import { createDefault } from '../../models/content.helper';
     import type { Entity, Collection } from '../../models/schema.model';
+    import { currentClientUser } from '../../stores/app.store';
     import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../stores/db/firestore.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
-    import { createDefault } from '../../models/content.helper';
     import Toolbar from '../ui/Toolbar.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
     import { showError, showInfo } from '../../stores/notification.store';
-    import { toStore } from '../../utils/rx.store';
-    import CollectionEditor from '../schema/CollectionEditor.svelte';
     import JSONEditor from '../ui/JSONEditor.svelte';
     import '../../../styles/tabulator.css';
     
@@ -22,14 +21,16 @@
     
     let showAddEntry = false;
     let newEntryId: string;
-    let showSettings = false;
     let uploadInput: HTMLInputElement;
     let importJsonData: Entity[] | null;
     let invalidJsonMessage: string | undefined;
 
+    $: disabled = !$currentClientUser;
+
+    const schemaPath = path.pipe(map(p => p.split('/').filter((s, i) => i % 2 === 0).join('/')));
     const currentSchema = getCurrentScheme(path);
     const contentStore = createDocumentStore(path);
-    const documents$ = contentStore.pipe(switchMap(s => from(s.getDocuments<Entity>())));
+    const documents$ = contentStore.pipe(switchMap(s => s.getDocumentStream<Entity>()));
     const columns$ = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
@@ -37,20 +38,28 @@
         updateHandler: update, 
         actions: [
             {
-                label: '<i class="bx bx-edit"></i> Edit details',
+                disabled,
+                label: '<i class="bx bx-trash"></i>',
+                menu: [
+                    { 
+                        label: '<i class="bx bx-check"></i> Confirm', 
+                        action: (e: MouseEvent, cell: CellComponent) => {
+                            const id = cell.getData()['id'];
+                            $contentStore.removeDocuments(id)
+                                .then(() => showInfo(`Entity ${id} was removed!`));
+                        } 
+                    },
+                    {
+                        label: '<i class="bx bx-x"></i> Cancel'
+                    }
+                ]
+            },
+            {
+                disabled,
+                label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     const id = cell.getData()['id'];
                     push(`/page/${$path}/${id}`);
-                }
-            }, 
-            {
-                label: '<i class="bx bx-trash"></i> Delete entry',
-                action: (e: MouseEvent, cell: CellComponent) => {
-                    if (confirm('Are you sure?')) {
-                        const id = cell.getData()['id'];
-                        $contentStore.removeDocuments(id)
-                            .then(() => showInfo(`Entity ${id} was removed!`));
-                    }
                 }
             }
         ]
@@ -58,10 +67,10 @@
     
     $: columns = $columns$;
 
-    function addEntry(schema: Collection | null) {
+    async function addEntry(schema: Collection | null) {
         const document = createDefault<Entity>(schema);
         document.id = newEntryId;
-        $contentStore.setDocuments(document);
+        await $contentStore.setDocuments(document);
         showAddEntry = false;
         newEntryId = '';
     }
@@ -130,18 +139,21 @@
 
 <header>
     <Toolbar>
-        <button title="Import as JSON" class="icon clear" on:click={() => showAddEntry = true}>
-            <i class="bx bx-plus"></i>
+        <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
+            <i class="bx bx-arrow-back"></i>
         </button>
-        <button title="Import as JSON" class="icon clear" on:click={selectFile}>
+        <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
+            <i class="bx bx-plus hl"></i>
+        </button>
+        <button title="Import as JSON" {disabled} class="icon clear" on:click={selectFile}>
             <i class="bx bx-import"></i>
         </button>
         <button title="Export to JSON" class="icon clear" on:click={exportAsJson}>
             <i class="bx bx-export"></i>
         </button>
-        <button title="Settings" class="icon clear" on:click={() => showSettings = true}>
-            <i class="bx bx-cog"></i>
-        </button>
+        <a role="button" href="/config/{$path}" use:link={`/config/${$schemaPath}`} class="icon clear" title="Edit schema">
+            <i class="bx bx-code-curly"></i>
+        </a>
         <span slot="title">
             <Breadcrumb {path} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
@@ -153,8 +165,8 @@
 {:then schema}
 <section>
     <!-- on path change columns must be invalidated to keep them in sync -->
-    {#key columns}
-    <Table idField="id" data={toStore(documents$)} persistenceID={$path} {columns}
+    {#key $path}
+    <Table idField="id" data={documents$} persistenceID={$path} {columns}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
     {/key}
 </section>
@@ -168,12 +180,6 @@
         <i class="bx bx-plus"></i>
         Add to collection
     </button>
-</Modal>
-
-<Modal open={showSettings} width="100%" on:close={() => showSettings = false}>
-    {#if showSettings && schema}
-    <CollectionEditor item={schema} />
-    {/if}
 </Modal>
 {/await}
 

@@ -32,7 +32,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
 
     constructor(private store: Firestore | null, 
         private path: string | undefined, 
-        public options: SetOptions = defaultSetOptions
+        public setOptions: SetOptions = defaultSetOptions
     ) {
         const pathValid = path && path.split('/').length % 2 > 0;
         if (!pathValid) {
@@ -52,10 +52,10 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         return this.documents.subscribe(run, invalidate);
     }
 
-    public getDocumentStream<T extends DocumentData>(...constraints: QueryConstraint[]): Observable<T[]> {
+    public getDocumentStream<T extends Entity>(...constraints: QueryConstraint[]): Observable<T[]> {
         if (this.store && this.path) {
             const query = this.createQuery<T>(...constraints);
-            return collectionData<T>(query, this.options).pipe(startWith([]));
+            return collectionData<T>(query, { idField: 'id' }).pipe(startWith([]));
         }
         return of([]);
     }
@@ -77,13 +77,13 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
     
     private createQuery<T extends DocumentData>(...constraints: QueryConstraint[]): Query<T> {
         const items = collection(this.store, this.path) as CollectionReference<T>;
-        return query<T>(items, ...constraints);
+        return query<T, DocumentData>(items, ...constraints);
     }
     
     public getDocument(id?: string): Observable<T | null> {
         if (id && this.store && this.path) {
             const docRef = doc(this.store, this.path, id);
-            return docData(docRef, { idField: 'id' });
+            return docData(docRef, { idField: 'id' }) as Observable<T | null>;
         }
         return of(null);
     }
@@ -95,7 +95,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
             const commitedData = documents.map((data) => {
                 const dataWithoutNullValues = omitUndefinedFields(data);
                 const docRef = doc(this.store!, this.path, data.id);
-                batch.set(docRef, dataWithoutNullValues, this.options);
+                batch.set(docRef, dataWithoutNullValues, this.setOptions);
                 return dataWithoutNullValues;
             });
 

@@ -7,35 +7,26 @@ export const templates: Record<string, EntityCollection> = {
         path: 'blog',
         description: 'A collection of blog entries',
         properties: {
-            sticky: {
-                name: 'Sticky',
-                dataType: 'boolean',
-            },
-            images: {
-                oneOf: {
-                    properties: {
-                        url: {
-                            url: 'image',
-                            dataType: 'string',
-                            name: 'url',
-                        },
-                        file: {
-                            storage: {
-                                storagePath: '/images/blog',
-                                storeUrl: true,
-                                fileName: '{file}',
-                                acceptedFiles: [
-                                    'image/*',
-                                ],
-                            },
-                            name: 'File',
-                            dataType: 'string',
-                        },
-                    },
+            id: {
+                editable: false,
+                dataType: 'string',
+                name: 'Id',
+                readOnly: true,
+                validation: {
+                    required: true,
                 },
-                dataType: 'array',
-                name: 'Images',
-                columnWidth: 255,
+            },
+            image: {
+                dataType: 'file',
+                name: 'Image',
+                storage: {
+                    storeUrl: true,
+                    acceptedFiles: [
+                        'image/*',
+                    ],
+                    storagePath: 'images/blog',
+                },
+                preview: 'image',
             },
             title: {
                 validation: {
@@ -57,17 +48,35 @@ export const templates: Record<string, EntityCollection> = {
                     valueField: 'value',
                     typeField: 'type',
                     properties: {
-                        quote: {
-                            multiline: true,
-                            name: 'Quote',
+                        text: {
+                            markdown: true,
                             dataType: 'string',
+                            name: 'Text',
+                        },
+                        quote: {
+                            name: 'Quote',
+                            properties: {
+                                cite: {
+                                    dataType: 'string',
+                                    name: 'cite',
+                                },
+                                text: {
+                                    validation: {
+                                        required: true,
+                                    },
+                                    multiline: true,
+                                    dataType: 'string',
+                                    name: 'text',
+                                },
+                            },
+                            dataType: 'map',
                         },
                         iframe: {
                             name: 'IFrame',
                             dataType: 'map',
                             properties: {
                                 src: {
-                                    dataType: 'string',
+                                    dataType: 'url',
                                     validation: {
                                         required: true,
                                     },
@@ -83,6 +92,7 @@ export const templates: Record<string, EntityCollection> = {
                         images: {
                             dataType: 'array',
                             of: {
+                                dataType: 'file',
                                 storage: {
                                     storagePath: 'images',
                                     acceptedFiles: [
@@ -92,38 +102,16 @@ export const templates: Record<string, EntityCollection> = {
                                         cacheControl: 'max-age=1000000',
                                     },
                                 },
-                                dataType: 'string',
+                                preview: 'image'
                             },
                             description: 'This fields allows uploading multiple images at once and reordering',
                             name: 'Images',
-                        },
-                        youtube: {
-                            name: 'YouTube',
-                            properties: {
-                                id: {
-                                    dataType: 'string',
-                                    name: 'id',
-                                    validation: {
-                                        required: true,
-                                    },
-                                },
-                                title: {
-                                    name: 'title',
-                                    dataType: 'string',
-                                },
-                            },
-                            dataType: 'map',
-                        },
-                        text: {
-                            markdown: true,
-                            dataType: 'string',
-                            name: 'Text',
                         },
                     },
                 },
                 description: 'Content blocks for the blog entry',
                 name: 'Content',
-                dataType: 'array',
+                dataType: 'set',
             },
             created_on: {
                 dataType: 'date',
@@ -150,6 +138,10 @@ export const templates: Record<string, EntityCollection> = {
                 clearable: true,
                 name: 'Publish date',
             },
+            sticky: {
+                name: 'Sticky',
+                dataType: 'boolean',
+            },
             reviewed: {
                 dataType: 'boolean',
                 name: 'Reviewed',
@@ -171,6 +163,15 @@ export const templates: Record<string, EntityCollection> = {
         path: 'list',
         description: 'Simple list of items',
         properties: {
+            id: {
+                editable: false,
+                dataType: 'string',
+                name: 'Id',
+                readOnly: true,
+                validation: {
+                    required: true,
+                },
+            },
             order: {
                 dataType: 'number',
                 name: 'Order',
@@ -185,10 +186,6 @@ export const templates: Record<string, EntityCollection> = {
                     required: true,
                 },
             },
-            caption: {
-                dataType: 'string',
-                name: 'Caption',
-            },
             description: {
                 dataType: 'string',
                 name: 'Description',
@@ -202,6 +199,15 @@ export const templates: Record<string, EntityCollection> = {
         path: 'pages',
         description: 'List of website pages that can be edited here',
         properties: {
+            id: {
+                editable: false,
+                dataType: 'string',
+                name: 'Id',
+                readOnly: true,
+                validation: {
+                    required: true,
+                },
+            },
             title: {
                 name: 'Page Title',
                 validation: {
@@ -250,7 +256,7 @@ export const templates: Record<string, EntityCollection> = {
                                     validation: {
                                         required: true,
                                     },
-                                    dataType: 'string',
+                                    dataType: 'url',
                                 },
                                 type: {
                                     enumValues: [
@@ -300,7 +306,8 @@ export const templates: Record<string, EntityCollection> = {
                                         storagePath: 'page_sections/images',
                                     },
                                     name: 'Section Image',
-                                    dataType: 'string',
+                                    dataType: 'file',
+                                    preview: 'image',
                                 },
                                 title: {
                                     validation: {
@@ -315,7 +322,7 @@ export const templates: Record<string, EntityCollection> = {
                                     dataType: 'string',
                                 },
                                 link: {
-                                    dataType: 'string',
+                                    dataType: 'url',
                                     name: 'Section Link',
                                     url: true,
                                 },
@@ -327,17 +334,8 @@ export const templates: Record<string, EntityCollection> = {
                             of: {
                                 dataType: 'map',
                                 properties: {
-                                    image: {
-                                        storage: {
-                                            storagePath: 'page_sections/images',
-                                            acceptedFiles: [
-                                                'image/*',
-                                            ],
-                                        },
-                                        dataType: 'string',
-                                    },
                                     file: {
-                                        dataType: 'string',
+                                        dataType: 'file',
                                         storage: {
                                             storagePath: 'page/images/slider',
                                             storeUrl: true,
@@ -345,11 +343,12 @@ export const templates: Record<string, EntityCollection> = {
                                                 'image/*',
                                             ],
                                         },
+                                        preview: 'image',
                                         name: 'File',
                                     },
                                     url: {
                                         url: 'image',
-                                        dataType: 'string',
+                                        dataType: 'url',
                                         name: 'url',
                                     },
                                     title: {
@@ -362,11 +361,21 @@ export const templates: Record<string, EntityCollection> = {
                                 },
                             },
                             dataType: 'array',
+                        },
+                        file: {
+                            dataType: 'file',
+                            storage: {
+                                acceptedFiles: [
+                                    'image/*',
+                                ],
+                                storagePath: 'page/sections/images',
+                            },
+                            name: 'File',
                         }
                     },
                 },
                 name: 'Content',
-                dataType: 'array',
+                dataType: 'set',
             },
             min_read_time: {
                 name: 'Min Read Time',
@@ -393,7 +402,8 @@ export const templates: Record<string, EntityCollection> = {
                         name: 'Subheadline',
                     },
                     image: {
-                        dataType: 'string',
+                        dataType: 'file',
+                        preview: 'image',
                         name: 'Image',
                         storage: {
                             storeUrl: true,
@@ -412,7 +422,7 @@ export const templates: Record<string, EntityCollection> = {
                         name: 'Call to Action',
                     },
                     call_to_action_link: {
-                        dataType: 'string',
+                        dataType: 'url',
                         name: 'CTA Link',
                         url: true,
                     },

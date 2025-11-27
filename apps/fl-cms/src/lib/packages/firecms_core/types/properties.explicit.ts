@@ -8,7 +8,18 @@ export type PropertyRecord = Record<string, Property>;
  */
 export interface BaseProperty {
   /** Datatype of the property */
-  dataType: "string" | "number" | "boolean" | "date" | "array" | "map";
+  dataType: "string" | 
+    "number" | 
+    "boolean" | 
+    "date" | 
+    "url" | 
+    "file" | 
+    "geopoint" | 
+    "vector" | 
+    "reference" | 
+    "array" | 
+    "set" | 
+    "map";
 
   /** Property name */
   name?: string;
@@ -53,11 +64,26 @@ export interface StringProperty extends BaseProperty {
   multiline?: boolean;
   markdown?: boolean;
   enumValues?: EnumValues;
-  storage?: StorageConfig;
-  url?: boolean | PreviewType;
-  email?: boolean;
   previewAsTag?: boolean;
   clearable?: boolean;
+}
+
+/**
+ * Url property
+ */
+export interface UrlProperty extends BaseProperty {
+  dataType: "string";
+  url: boolean | PreviewType;
+  email?: boolean;
+}
+
+/**
+ * Url property
+ */
+export interface FileProperty extends BaseProperty {
+  dataType: "string";
+  storage?: StorageConfig;
+  preview?: PreviewType;
 }
 
 /**
@@ -91,8 +117,16 @@ export interface DateProperty extends BaseProperty {
  */
 export interface ArrayProperty extends BaseProperty {
   dataType: "array";
-  of?: Property; // nested property type
-  oneOf?: {
+  of: Property;
+  expanded?: boolean;
+}
+
+/**
+ * Array property
+ */
+export interface BlockSetProperty extends BaseProperty {
+  dataType: "set";
+  oneOf: {
     properties: Record<string, Property>;
     propertiesOrder?: string[];
     typeField?: string;
@@ -123,7 +157,10 @@ export type Property =
   | NumberProperty
   | BooleanProperty
   | DateProperty
+  | UrlProperty
+  | FileProperty
   | ArrayProperty
+  | BlockSetProperty
   | MapProperty;
 
 /**

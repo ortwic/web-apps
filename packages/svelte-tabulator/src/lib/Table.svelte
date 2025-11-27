@@ -72,7 +72,7 @@
   const rowGroups: Record<string, GroupArg> = {};
   export let idField: keyof T;
   export let columns: ColumnDefinition[] = [];
-  export let data: Readable<T[]>;
+  export let data: Readable<T[]> | Observable<T[]>;
   export let groupBy: string[] | undefined = undefined;
   export let placeholder = '';
   export let placeholderSearch = '';
@@ -80,6 +80,7 @@
   export let detailFormatter: DetailFormatter | undefined = undefined;
   export const isGroupedBy = (field: string) => field in rowGroups;
   export let persistenceID = '';
+  export let enableResponsiveLayoutSupport = false;
   let useResponsiveLayout = false;
   let searchTerm = '';
   let table: Observable<Tabulator>;
@@ -145,7 +146,7 @@
   function createTable(orientation: Orientation) {
     $table?.destroy();
 
-    useResponsiveLayout = orientation === 'portrait';
+    useResponsiveLayout = enableResponsiveLayoutSupport && orientation === 'portrait';
     const persistence = {
         columns: usePersistance && !useResponsiveLayout ? [ 'width', 'visible' ] : false,
         sort: usePersistance,

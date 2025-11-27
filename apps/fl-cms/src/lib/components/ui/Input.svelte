@@ -8,6 +8,7 @@
     export let value: string;
     export let placeholder = '';
     export let disabled = false;
+    export let multiline = false;
 
     const dispatch = createEventDispatcher<{ changed: string }>();
     let original = value;
@@ -15,20 +16,26 @@
     $: dirty = value !== original;
     $: title = dirty ? 'Press enter to save' : '';
 
-    function input(e: Event & { currentTarget: HTMLInputElement }) {
+    function input(e: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement; }) {
         value = e.currentTarget.value;
     }
 
-    function changed(event: Event & { currentTarget: EventTarget & HTMLInputElement; }) {
+    function changed(event: Event & { currentTarget: EventTarget & HTMLInputElement | HTMLTextAreaElement; }) {
         original = event.currentTarget.value;
         dispatch('changed', event.currentTarget.value);
     }
 </script>
 
+{#if multiline}
+<textarea {id} {disabled} {placeholder} class:dirty {title} rows="8" cols="50"
+    on:input={(ev) => input(ev)}
+    on:blur={(ev) => changed(ev)}>{value}</textarea>
+{:else}
 <input {type} {id} {disabled} {value} {placeholder} class:dirty {title}
     on:input={(ev) => input(ev)}
     on:keydown={(ev) => confirmed(ev) && changed(ev)}
     on:blur={(ev) => changed(ev)} />
+{/if}
 
 <style>
     input, input:focus-visible {

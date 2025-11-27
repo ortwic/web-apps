@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
-  import type { AnyProperty, ArrayProperty } from "../../packages/firecms_core/types/properties.simple";
-  import { isImageUrl, mergeObject } from "../../models/content.helper";
+  import type { AnyProperty } from "../../packages/firecms_core/types/properties.simple";
+  import { isFileType, isImageUrl, isArrayProperty, mergeObject, isBlockSetProperty } from "../../models/content.helper";
   import { currentClientUser } from "../../stores/app.store";
   import { timestampToIsoDate } from "../../stores/db/firestore.store";
   import Expand from '../ui/Expand.svelte';
@@ -10,6 +10,8 @@
   import ImageSelect from "./ImageSelect.svelte";
   import TagCloud from "../ui/TagCloud.svelte";
   import Input from "../ui/Input.svelte";
+  import Select from "../ui/Select.svelte";
+  import SectionCards from "./SectionCards.svelte";
   
   export let document: DocumentData;
   export let properties: Record<string, AnyProperty>;
@@ -25,14 +27,6 @@
     } catch (error: any) {
         console.warn(`error parsing timestamp for field '${field}`, error.message);
     }
-  }
-
-  function useTagCloud(field: string): boolean {
-    const prop = properties[field] as ArrayProperty;
-    if (Array.isArray(document[field]) && properties[field].dataType === 'array') {
-        return prop?.of?.dataType === 'string';
-    }
-    return false;
   }
 
   function update<T>(value: T, field: string) {
@@ -52,6 +46,7 @@
 </script>
 
 {#if document && typeof properties === 'object'}
+<div class="x-flex-full"><span></span><slot name="commands"></slot></div>
 <ul>
     {#each Object.entries(properties) as [field, prop]}
     {#if document[field] !== undefined}
@@ -68,30 +63,25 @@
             {:else if prop.dataType === 'string' && prop.markdown === true}
             <span class="colspan">
                 <MarkdownEditor value={document[field] ?? ''} {disabled} placeholder={prop.name}
-                    mediaPath={`${prop.storage?.storagePath}`} storeUrl={prop.storage?.storeUrl}
                     on:change={({ detail }) => update(detail, field)} />
             </span>
             {:else}
                 <label for="{field}">{prop.name ?? field}</label>
-                {#if prop.dataType === 'string' && isImageUrl(prop)}
+                {#if isFileType(prop, 'image')}
                 <ImageSelect value={document[field]} alt={field} storage={prop.storage} disabled="{disabled || prop.editable === false}" 
                     on:changed={({ detail }) => update(detail, field)} />
-                {:else if prop.dataType === 'string' && prop.enumValues?.length}
-                <select id="{field}" disabled="{disabled || prop.editable === false}" 
-                    value="{document[field] ?? ''}" 
-                    on:change={(ev) => update(ev, field)}>
-                    {#if Array.isArray(prop.enumValues)}
-                        {#each prop.enumValues as value}
-                        <option value="{value.id}">{value.label}</option>
-                        {/each}
-                    {:else}
-                        {#each Object.keys(prop.enumValues) as key, i}
-                        <option value="{key}">{JSON.stringify(prop.enumValues[i])}</option>
-                        {/each}
-                    {/if}
-                </select>
-                {:else if useTagCloud(field)}
+                {:else if isImageUrl(prop)}
+                <ImageSelect value={document[field]} alt={field} disabled="{disabled || prop.editable === false}" 
+                    on:changed={({ detail }) => update(detail, field)} />
+                {:else if prop.dataType === 'string' && prop.enumValues != undefined}
+                <Select id={field} value={document[field] ?? ''} disabled="{disabled || prop.editable === false}"
+                    options="{prop.enumValues}" on:changed={({ detail }) => update(detail, field)} />
+                {:else if isArrayProperty(prop, 'string')}
+                {#key document[field]}
                 <TagCloud labels="{document[field]}" on:change={({ detail }) => update(detail, field)} />
+                {/key}
+                {:else if isArrayProperty(prop) || isBlockSetProperty(prop)}
+                <SectionCards property={prop} items={document[field]} on:change={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'boolean'}
                 <input type="checkbox" id="{field}" disabled="{disabled || prop.editable === false}" 
                     checked="{document[field] ?? false}" on:input={(ev) => updateInput(ev, field)} />
