@@ -8,7 +8,6 @@ import { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
 import type { Collection, Entity } from '../../models/schema.model';
 import { fromStore } from '../../utils/rx.store';
-import type { Content } from '../../models/content.type';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
@@ -18,19 +17,8 @@ export function createSchemaStore(options?: SetOptions): Readable<SchemaStore> {
     );
 }
 
-export function getCurrentScheme(path: Observable<string | undefined>): Observable<Collection | null> {
-    return combineLatest([fromStore(createSchemaStore()), path])
-        .pipe(switchMap(([store, path]) => store.getCollectionFromFullPath(path)));
-}
-
-export function getContentStore(path?: string, options?: SetOptions) {
-    return derived<Readable<Firestore | null>, DocumentStore<Content>>(currentFirestore, (store, set) =>
-        set(new DocumentStore(store, path, options))
-    );
-}
-
-export function createDocumentStore<T extends Entity>(path: Observable<string> | string, options?: SetOptions): Observable<DocumentStore<T>> {
-    const path$ = typeof path === 'string' ? of(path) : path;
+export function createDocumentStore<T extends Entity>(path: Observable<string | undefined> | string | undefined, options?: SetOptions): Observable<DocumentStore<T>> {
+    const path$ = path instanceof Observable ? path : of(path);
     return combineLatest([fromStore(currentFirestore), path$]).pipe(
         map(([store, path]) => new DocumentStore<T>(store, path, options))
     );

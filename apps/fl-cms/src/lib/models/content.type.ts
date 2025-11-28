@@ -1,7 +1,3 @@
-import type { Entity } from "./schema.model";
-
-export type Content = Entity & { content: SectionType[] };
-
 export type SectionType = {
     value: ValueType;
     type: string;

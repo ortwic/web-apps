@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { of } from 'rxjs';
     import { push } from 'svelte-spa-router';
     import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
@@ -89,10 +88,7 @@
     }
 </script>
 
-<Toolbar>
-    <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
-        <i class="bx bx-arrow-back"></i>
-    </button>
+<Toolbar showNav={true}>
     <button disabled={disabled || !dirty} title="Save properties" class="icon clear" on:click={saveCollection}>
         <i class="bx bx-save hl"></i>
     </button>
@@ -109,7 +105,7 @@
     </button>
     {/if}
     <span slot="title">
-        <Breadcrumb path={of(item.path)} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
+        <Breadcrumb path={item.path} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
     </span>
 </Toolbar>
 

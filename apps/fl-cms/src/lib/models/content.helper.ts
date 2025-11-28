@@ -70,13 +70,14 @@ export function arrayPropertyToMapProperty<T extends AnyProperty>(
     return {};
 }
 
-export function arrayToSectionMap(array: SectionType[]) {
-    return array
+export function arrayToSectionMap(array?: SectionType[]): Record<string, unknown> {
+    const result = {} as Record<string, unknown>;
+    return array ? array
         .filter(item => typeof item?.value === 'string')
         .reduce((acc, { type, value }: SectionType) => {
             acc[type] = value;
             return acc;
-        }, {} as Record<string, unknown>);
+        }, result) : result;
 }
 
 export function mergeObject<T>(old: T, value: T) {

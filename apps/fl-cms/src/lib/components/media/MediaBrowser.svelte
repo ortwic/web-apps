@@ -86,7 +86,7 @@
             </button>
         </span>
         <span slot="title">
-            <Breadcrumb {path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
+            <Breadcrumb path={$path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
         </span>
     </Toolbar>
 </header>

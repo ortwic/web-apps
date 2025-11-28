@@ -86,14 +86,14 @@
                     on:click|preventDefault={() => select(item)} class="nav link flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
-                        <i class="bx bx-lg bx-list-ul"></i>
+                        <i class="bx bx-list-ul"></i>
                     </span>
                 </a>
                 {:else}
                 <a role="button" use:link href="/page/{item.path}" class="nav flex-center" tabindex={i}>
                     <h2>{item.path}</h2>
                     <span>
-                        <i class="bx bx-lg bx-right-arrow-alt"></i>
+                        <i class="bx bx-right-arrow-alt"></i>
                     </span>
                 </a>
                 {/if}

@@ -1,43 +1,42 @@
-<script lang="ts">
+<script lang="ts" generics="T extends Entity">
     import { flip } from 'svelte/animate';
     import { params, push } from 'svelte-spa-router';
     import json from 'json5';
-    import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
+    import { combineLatest, map, Observable, of, startWith, switchMap } from 'rxjs';
     import type { AnyProperty, Properties } from '../../packages/firecms_core/types/properties.simple';
     import Toolbar from '../ui/Toolbar.svelte';
-    import Breadcrumb from '../ui/Breadcrumb.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
-    import type { Content, SectionType } from '../../models/content.type';
+    import type { SectionType } from '../../models/content.type';
     import { currentClientUser } from '../../stores/app.store';
+    import type { Collection, Entity } from '../../models/schema.model';
     import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from '../../models/content.helper';
-    import { getContentStore, getCurrentScheme } from '../../stores/db/firestore.store';
+    import { DocumentStore } from '../../stores/db/document.service';
     import { showInfo } from '../../stores/notification.store';
-    import { fromStore } from '../../utils/rx.store';
     import { isUnique } from '../../utils/ui.helper';
+    import Breadcrumb from '../ui/Breadcrumb.svelte';
     import Loading from '../ui/Loading.svelte';
     import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
 
-    export let fullPath = of('');
-    export let path = of('');
+    export let contentSchema = of<Collection | null>(null);
+    export let contentStore: Observable<DocumentStore<T>>;
+    export let contentKey: keyof T & string;
     export let id = of('');
 
-    const contentStore$ = path.pipe(switchMap((path) => fromStore(getContentStore(path))));
-    const document$ =  combineLatest([contentStore$, id]).pipe(switchMap(([store, id]) => store.getDocument(id)));
+    const document$ =  combineLatest([contentStore, id]).pipe(switchMap(([store, id]) => store.getDocument(id)));
 
-    const currentSchema = getCurrentScheme(path);
-    const properties = currentSchema.pipe(
+    const properties = contentSchema.pipe(
         map(schema => Object.entries(schema?.properties as Properties ?? [])
-            .filter(([field]) => field !== 'content')
+            .filter(([field]) => field !== contentKey)
             .reduce((acc, [field, prop]) => {
                 acc[field] = prop;
                 return acc;
             }, {} as Record<string, AnyProperty>)
         )
     );
-    const contentTypes = currentSchema.pipe(
-        map(schema => arrayPropertyToMapProperty((schema?.properties as Properties)['content'])),
+    const contentTypes = contentSchema.pipe(
+        map(schema => arrayPropertyToMapProperty((schema?.properties as Properties)[contentKey])),
         startWith({} as Record<string, AnyProperty>)
     );
 
@@ -53,55 +52,55 @@
         }
     }
 
-    async function updateProperty(document: Content, obj: Record<string, unknown>) {
-        if (obj && document) {
-            Object.entries(obj).forEach(([field, value]) => document[field] = value);
-            await $contentStore$.setDocuments(document);
+    async function updateProperty(document: T, partial: Partial<T>) {
+        if (partial && document) {
+            Object.entries(partial).forEach(([field, value]) => (document as any)[field] = value);
+            await $contentStore.setDocuments(document);
         }
     }
 
-    function insertSection(type: string, document: Content) {
+    function insertSection(type: string, document: T) {
         const item: SectionType = {
             type,
             value: defaultValueByType($contentTypes[type]),
             __id: Date.now()
         };
-        if (!document.content) {
-            document.content = [];
+        if (!document[contentKey]) {
+            (document as any)[contentKey] = [];
         }
 
-        if (currentIndex !== undefined && isUnique(document.content, item)
-            && document.content.insert(item, currentIndex)) {
-            $contentStore$.setDocuments(document);
+        if (currentIndex !== undefined && isUnique(document[contentKey], item)
+            && document[contentKey].insert(item, currentIndex)) {
+            $contentStore.setDocuments(document);
         }
         currentIndex = undefined;
     }
 
-    function moveUp(document: Content, index: number) {
-        if (document.content.swap(index, index - 1)) {
-            $contentStore$.setDocuments(document);
+    function moveUp(document: T, index: number) {
+        if (document[contentKey].swap(index, index - 1)) {
+            $contentStore.setDocuments(document);
         }
     }
 
-    function moveDown(document: Content, index: number) {
-        if (document.content.swap(index, index + 1)) {
-            $contentStore$.setDocuments(document);
+    function moveDown(document: T, index: number) {
+        if (document[contentKey].swap(index, index + 1)) {
+            $contentStore.setDocuments(document);
         }
     }
 
-    async function updateSection(document: Content, partial: object, index: number) {
-        const section = document && document.content[index];
+    async function updateSection(document: T, partial: object, index: number) {
+        const section = document && document[contentKey][index];
         if (section && section.value !== partial) {
             section.value = mergeObject(section.value, partial);
-            await $contentStore$.setDocuments(document);
+            await $contentStore.setDocuments(document);
             
             showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
         }
     }
 
-    function removeSection(document: Content) {
-        if (currentIndex !== undefined && document.content.remove(currentIndex)) {
-            $contentStore$.setDocuments(document);
+    function removeSection(document: T) {
+        if (currentIndex !== undefined && document[contentKey].remove(currentIndex)) {
+            $contentStore.setDocuments(document);
 
             currentIndex = undefined;
         }
@@ -109,19 +108,17 @@
 </script>
 
 <header>
-    <Toolbar>
-        <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
-            <i class="bx bx-arrow-back"></i>
-        </button>
+    <Toolbar showNav={true}>
+        <slot name="commands"></slot>
         <span slot="title">
-            <Breadcrumb path={fullPath} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb path={`${$contentStore.path}/${$id}`} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
 
 <section class="content-64">
     {#if $document$}
-        <Section open={!$document$.content?.length} value={$document$} title="Details of {$currentSchema?.name}"
+        <Section open={!$document$[contentKey]?.length} value={$document$} title="Details of {$contentSchema?.name}"
             property={{ dataType: 'map', properties: $properties }} type="details"
             on:change={({ detail }) => updateProperty($document$, detail)}>
             <span slot="commands">
@@ -132,7 +129,7 @@
             </span>
         </Section>
         
-        {#each $document$.content ?? [] as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
+        {#each $document$[contentKey] ?? [] as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
         <Loading isLoading={!$contentTypes[type]}>
             <Section {value} {type} property={$contentTypes[type]} {disabled}
@@ -179,9 +176,7 @@
             </div>
         </PopupMenu>
     {:else}
-        <Toolbar>
-            <span slot="title">Document '{$params?.wild}' not found</span>
-        </Toolbar>
+        <h2 class="emphasis">Document '{$params?.wild}' not found</h2>
     {/if}
 </section>
 
