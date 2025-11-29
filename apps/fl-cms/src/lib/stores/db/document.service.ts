@@ -4,7 +4,7 @@ import { collection, onSnapshot, doc, writeBatch, query, getDocs } from 'firebas
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import type { Entity } from '../../models/schema.model';
+import type { Entity } from '../../models/schema.type';
 import { showError } from '../notification.store';
 
 // firestore does not like undefined values so omit them

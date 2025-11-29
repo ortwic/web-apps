@@ -7,7 +7,7 @@
     import PopupMenu from '../ui/PopupMenu.svelte';
     import { currentClientUser } from '../../stores/app.store';
     import type { ContentService } from '../../stores/db/content.service';
-    import type { Entity } from '../../models/schema.model';
+    import type { Entity } from '../../models/schema.type';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import Loading from '../ui/Loading.svelte';
     import Section from './Section.svelte';

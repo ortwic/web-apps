@@ -1,4 +1,4 @@
-import type { Collection } from "../lib/models/schema.model";
+import type { Collection } from "../lib/models/schema.type";
 
 export const schemeNestedSub: Collection = {
     id: 'sub11',

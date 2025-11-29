@@ -4,8 +4,8 @@
     import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
-    import { createDefault } from '../../models/content.helper';
-    import type { Entity, Collection } from '../../models/schema.model';
+    import { createDefault } from '../../utils/content.helper';
+    import type { Entity, Collection } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
     import { DocumentStore } from '../../stores/db/document.service';
     import { timestampToIsoDate } from '../../stores/db/firestore.helper';

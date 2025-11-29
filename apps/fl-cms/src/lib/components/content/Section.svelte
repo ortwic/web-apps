@@ -5,7 +5,7 @@
     import Expand from '../ui/Expand.svelte';
     import Input from '../ui/Input.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
-    import { isBlockSetProperty, isFileType, isImageUrl, isMapProperty, isMarkdown } from "../../models/content.helper";
+    import { isBlockSetProperty, isFileType, isImageUrl, isMapProperty, isMarkdown } from "../../utils/content.helper";
     import ImageSelect from './ImageSelect.svelte';
     import PropertyMap from "./PropertyMap.svelte";
     import SectionCards from './SectionCards.svelte';

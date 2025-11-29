@@ -1,8 +1,8 @@
 import { map, type Observable } from "rxjs";
 import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
 import type { Content, SectionType } from "../../models/content.type";
-import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../models/content.helper";
-import type { Collection } from "../../models/schema.model";
+import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../utils/content.helper";
+import type { Collection } from "../../models/schema.type";
 import { showInfo } from "../notification.store";
 import { isUnique } from "../../utils/ui.helper";
 import type { DocumentStore } from "./document.service";

@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
-    import type { Collection } from '../lib/models/schema.model';
+    import type { Collection } from '../lib/models/schema.type';
     import { showError, showWarn } from '../lib/stores/notification.store';
     import { currentClientUser } from '../lib/stores/app.store';
     import { createSchemaStore } from '../lib/stores/db/firestore.helper';

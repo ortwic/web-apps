@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
   import type { AnyProperty } from "../../packages/firecms_core/types/properties.simple";
-  import { isFileType, isImageUrl, isArrayProperty, mergeObject, isBlockSetProperty } from "../../models/content.helper";
+  import { isFileType, isImageUrl, isArrayProperty, mergeObject, isBlockSetProperty } from "../../utils/content.helper";
   import { currentClientUser } from "../../stores/app.store";
   import { timestampToIsoDate } from "../../stores/db/firestore.helper";
   import Expand from '../ui/Expand.svelte';

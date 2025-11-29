@@ -6,14 +6,14 @@ import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { appStore } from '../app.store';
 import { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
-import type { Collection, Entity } from '../../models/schema.model';
+import type { Collection, Entity } from '../../models/schema.type';
 import { fromStore } from '../../utils/rx.store';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
-export function createSchemaStore(options?: SetOptions): Readable<SchemaStore> {
+export function createSchemaStore(options?: SetOptions, name = '__schema'): Readable<SchemaStore> {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
-        set(new SchemaStore(new DocumentStore<Collection>(store, '__schema', options)))
+        set(new SchemaStore(new DocumentStore<Collection>(store, name, options)))
     );
 }
 

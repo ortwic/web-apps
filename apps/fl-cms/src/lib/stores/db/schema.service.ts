@@ -1,5 +1,5 @@
 import { derived, type Readable } from "svelte/store";
-import type { Collection } from "../../models/schema.model";
+import type { Collection } from "../../models/schema.type";
 import type { DocumentStore } from "./document.service";
 import { firstValueFrom, map, of, Observable } from "rxjs";
 

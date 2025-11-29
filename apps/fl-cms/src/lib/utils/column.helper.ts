@@ -1,10 +1,10 @@
 import { marked } from "marked";
 import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
 import type { ColumnDefinition, CellComponent, Editor, MenuObject } from "@web-apps/svelte-tabulator";
-import type { Collection } from "../models/schema.model";
+import type { Collection } from "../models/schema.type";
 import type { AnyProperty, BlockSetProperty, MapProperty } from "../packages/firecms_core/types/properties.simple";
-import type { ColumnOptions } from "../models/column.model";
-import { arrayToSectionMap, isFileType, isImageUrl, isMarkdown } from "../models/content.helper";
+import type { ColumnOptions } from "../models/column.type";
+import { arrayToSectionMap, isFileType, isImageUrl, isMarkdown } from "./content.helper";
 import { currentStorage } from "../stores/storage/storage.service";
 import type { SectionType } from "../models/content.type";
 import { isRelativeUrl } from "./string.helper";

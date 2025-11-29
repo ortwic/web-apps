@@ -2,7 +2,7 @@ import { get, writable } from "svelte/store";
 import { of } from "rxjs";
 import { merge } from "ts-deepmerge";
 import type { DocumentStore } from "../lib/stores/db/document.service";
-import type { Entity } from "../lib/models/schema.model";
+import type { Entity } from "../lib/models/schema.type";
 
 const defaultOptions = { merge: true };
 
