@@ -1,11 +1,11 @@
 import { map, type Observable } from "rxjs";
 import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
+import type { DocumentContract } from "../../contracts/document.contract";
 import type { Content, SectionType } from "../../models/content.type";
-import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../utils/content.helper";
 import type { Collection } from "../../models/schema.type";
-import { showInfo } from "../notification.store";
+import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../utils/content.helper";
 import { isUnique } from "../../utils/ui.helper";
-import type { DocumentStore } from "./document.service";
+import { showInfo } from "../notification.store";
 
 const contentKey: keyof Content = 'content';
 
@@ -37,7 +37,7 @@ export class ContentService {
         return this.document.pipe(map(d => d && d[contentKey] || []));
     }
 
-    constructor(private store: DocumentStore<Content>, private schema: Collection | null, private id?: string) {
+    constructor(private store: DocumentContract<Content>, private schema: Collection | null, private id?: string) {
         this.types = arrayPropertyToMapProperty((schema?.properties as Properties)[contentKey]);
     }
 

@@ -7,7 +7,7 @@ export const normalizePath = (path?: string) => path?.replace(/\/+/g, '/').trim(
 export const trimSlashes = (path?: string) => path?.replace(/^\/|\/$/g, '').trim();
 
 export function isRelativeUrl(url?: string | null): boolean {
-    return url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') || false;
+    return typeof url === 'string' && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:') || false;
 }
 
 export function getInitials(text: string, maxLength = 2) {

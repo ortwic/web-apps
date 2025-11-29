@@ -4,6 +4,7 @@ import { collection, onSnapshot, doc, writeBatch, query, getDocs } from 'firebas
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
+import type { DocumentContract } from '../../contracts/document.contract';
 import type { Entity } from '../../models/schema.type';
 import { showError } from '../notification.store';
 
@@ -26,7 +27,7 @@ const snapshotOptions: SnapshotOptions = {
     serverTimestamps: 'none'
 };
 
-export class DocumentStore<T extends Entity> implements Readable<T[]> {
+export class DocumentStore<T extends Entity> implements DocumentContract<T>, Readable<T[]> {
     private readonly documents = writable<T[]>([]);
     readonly unsubscribe: () => void = () => {};
 
