@@ -6,7 +6,7 @@ import { SchemaStore } from './schema.service';
 import { setupTestEnvironment } from "../../../tests/firebase.setup";
 import type { Properties } from '../../packages/firecms_core/types/properties.simple';
 import { DocumentStore } from './document.service';
-import type { Collection } from '../../models/schema.model';
+import type { Collection } from '../../models/schema.type';
 import { schemeNestedSub, schemeRoot, schemeSub } from '../../../tests/seed.data';
 import { firstValueFrom } from 'rxjs';
 

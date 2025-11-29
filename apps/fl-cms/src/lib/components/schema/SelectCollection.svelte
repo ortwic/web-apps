@@ -1,10 +1,10 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
     import { derived } from "svelte/store";
-    import type { Collection } from "../../models/schema.model";
+    import type { Collection } from "../../models/schema.type";
     import Modal from "../ui/Modal.svelte";
     import Toolbar from "../ui/Toolbar.svelte";
-    import { createDocumentStore } from "../../stores/db/firestore.store";
+    import { createDocumentStore } from "../../stores/db/firestore.helper";
 
     export let item: Collection;
     export let path: string;

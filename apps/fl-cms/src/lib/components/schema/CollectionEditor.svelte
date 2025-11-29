@@ -1,25 +1,22 @@
 <script lang="ts">
-    import { of } from 'rxjs';
+    import { switchMap } from 'rxjs';
     import { push } from 'svelte-spa-router';
-    import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
     import { templates } from '../../schema/predefined-collections';
     import { createValidator } from '../../schema/schema-validation';
-    import type { Collection, Entity } from '../../models/schema.model';
+    import type { Collection, Entity } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
-    import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
+    import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.helper';
     import { showError, showInfo } from '../../stores/notification.store';
     import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
-    import CollectionEditorTable from './CollectionEditorTable.svelte';
     import JSONEditor from '../ui/JSONEditor.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import schema from '../../schema/generated/property-record.schema.json';
 
     export let item: Collection;
     let dirty = false;
-    let showJsonView = true;
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
     let validationMessages: string[] = [];
@@ -27,8 +24,8 @@
     $: disabled = !$currentClientUser;
 
     const schemaStore = createSchemaStore({ merge: false });
-    const contentStore = createDocumentStore(item.path, { merge: false });
-    const documents = $contentStore;
+    const service = createDocumentStore(item.path, { merge: false });
+    const documents = service.pipe(switchMap(s => s.getDocumentStream()));
     const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {
@@ -45,25 +42,10 @@
     }
         
     async function appendInferredPropsFromData(documents: Entity[]) {
-        const { buildEntityPropertiesFromData } = await import('../../packages/schema_inference');
-        const getType = (value: any) => {
-            if (typeof value === "number")
-                return "number";
-            else if (typeof value === "string")
-                return "string";
-            else if (typeof value === "boolean")
-                return "boolean";
-            else if (Array.isArray(value))
-                return "array";
-            else if (value instanceof Timestamp)
-                return "date";
-            return "map";
-        };
-        
-        const inferredProps = await buildEntityPropertiesFromData(documents, getType);
+        const { buildEntityProperties } = await import('../../schema/inference.helper');
         properties = { 
             ...item.properties, 
-            ...inferredProps 
+            ...await buildEntityProperties(documents) 
         };
         item.properties = properties;
     }
@@ -83,37 +65,26 @@
             validationMessages = validationErrors(props);
         }
     }
-
-    function toggleEditView() {
-        showJsonView = !showJsonView;
-    }
 </script>
 
-<Toolbar>
-    <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
-        <i class="bx bx-arrow-back"></i>
-    </button>
-    <button disabled={disabled || !dirty} title="Save properties" class="icon clear" on:click={saveCollection}>
-        <i class="bx bx-save hl"></i>
-    </button>
-    <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(ev)}>
-        <i class="bx bxs-box"></i>
-    </button>
-    <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={() => appendInferredPropsFromData($documents)}>
-        <i class="bx bxs-magic-wand"></i>
-    </button>
-    <!-- Feature not yet fully implemented -->
-    {#if import.meta.env.DEV}
-    <button title="Toggle code view" class="icon clear" on:click={toggleEditView}>
-        <i class="bx {showJsonView ? 'bx-list-ul' : 'bx-code-curly'}"></i>
-    </button>
-    {/if}
-    <span slot="title">
-        <Breadcrumb path={of(item.path)} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
-    </span>
-</Toolbar>
+<header>
+    <Toolbar showNav={true}>
+        <button disabled={disabled || !dirty} title="Save properties" class="icon clear" on:click={saveCollection}>
+            <i class="bx bx-save hl"></i>
+        </button>
+        <button title="From templates" class="icon clear" on:click={(ev) => templateMenu.showPopupMenu(ev)}>
+            <i class="bx bxs-box"></i>
+        </button>
+        <button title="Infer from data" class="icon clear" disabled={!!item.parent} on:click={() => appendInferredPropsFromData($documents)}>
+            <i class="bx bxs-magic-wand"></i>
+        </button>
+        <slot name="commands"></slot>
+        <span slot="title">
+            <Breadcrumb path={item.path} rootPath="/config" on:navigate={({ detail: path }) => push(`/${path}`)} />
+        </span>
+    </Toolbar>
+</header>
 
-{#if showJsonView}
 <div class="input">
     <JSONEditor value={properties}
         on:changed={({ detail }) => setProperties(detail)} 
@@ -126,10 +97,6 @@
         <textarea readonly>{validationMessages.join('\n')}</textarea>
     </Expand>
 </div>
-
-{:else}
-<CollectionEditorTable properties={properties} />
-{/if}
 
 <PopupMenu bind:this={templateMenu}>
     <div class="small popup-menu y-flex">

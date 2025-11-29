@@ -6,8 +6,9 @@
   
     const pathStartsWith = derived(location, l => l.split('/').filter(Boolean).at(0));
     const title = derived(settingsStore, s => getInitials(s.selectedProjectId));
-    const returnUrl = $location ? `?returnUrl=${$location}` : '';
     const targetUrl = derived(querystring, q => q?.split('returnUrl=')[1] ?? '/');
+
+    $: returnUrl = $location ? `?returnUrl=${$location}` : '';
 </script>
 
 <header>

@@ -86,13 +86,13 @@
             </button>
         </span>
         <span slot="title">
-            <Breadcrumb {path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
+            <Breadcrumb path={$path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
         </span>
     </Toolbar>
 </header>
 
 <section class="content-64">    
-    <Loading {isLoading}>
+    <Loading {isLoading} title={$path}>
         <div class="grid">
             {#each $items$ as item (item.path)}
             {#if item.type !== 'file'}

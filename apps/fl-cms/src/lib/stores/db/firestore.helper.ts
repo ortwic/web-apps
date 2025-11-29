@@ -6,31 +6,21 @@ import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { appStore } from '../app.store';
 import { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
-import type { Collection, Entity } from '../../models/schema.model';
+import type { Collection, Entity } from '../../models/schema.type';
 import { fromStore } from '../../utils/rx.store';
-import type { Content } from '../../models/content.type';
+
+export const SCHEMA_DEFAULT_NAME = '__schema';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
-export function createSchemaStore(options?: SetOptions): Readable<SchemaStore> {
+export function createSchemaStore(options?: SetOptions, name = SCHEMA_DEFAULT_NAME): Readable<SchemaStore> {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
-        set(new SchemaStore(new DocumentStore<Collection>(store, '__schema', options)))
+        set(new SchemaStore(new DocumentStore<Collection>(store, name, options)))
     );
 }
 
-export function getCurrentScheme(path: Observable<string | undefined>): Observable<Collection | null> {
-    return combineLatest([fromStore(createSchemaStore()), path])
-        .pipe(switchMap(([store, path]) => store.getCollectionFromFullPath(path)));
-}
-
-export function getContentStore(path?: string, options?: SetOptions) {
-    return derived<Readable<Firestore | null>, DocumentStore<Content>>(currentFirestore, (store, set) =>
-        set(new DocumentStore(store, path, options))
-    );
-}
-
-export function createDocumentStore<T extends Entity>(path: Observable<string> | string, options?: SetOptions): Observable<DocumentStore<T>> {
-    const path$ = typeof path === 'string' ? of(path) : path;
+export function createDocumentStore<T extends Entity>(path: Observable<string | undefined> | string | undefined, options?: SetOptions): Observable<DocumentStore<T>> {
+    const path$ = path instanceof Observable ? path : of(path);
     return combineLatest([fromStore(currentFirestore), path$]).pipe(
         map(([store, path]) => new DocumentStore<T>(store, path, options))
     );

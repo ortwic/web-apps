@@ -1,6 +1,6 @@
-import type { Collection } from "./schema.model";
+import type { Collection } from "../models/schema.type";
 import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty } from "../packages/firecms_core/types/properties.simple";
-import type { SectionType, ValueType } from "./content.type";
+import type { SectionType, ValueType } from "../models/content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -33,14 +33,14 @@ export function isFileType(property: AnyProperty, preview?: PreviewType): proper
     return prop && prop?.storage !== undefined && prop?.preview === preview;
 }
 
-export function isImageUrl(property: AnyProperty): property is UrlProperty {
-    const prop = property as UrlProperty;
-    return prop && prop?.url === 'image';
-}
-
 export function isMarkdown(property: AnyProperty): property is StringProperty {
     const prop = property as StringProperty;
     return prop && prop.markdown === true;
+}
+
+export function isUrlProperty(property: AnyProperty, type?: PreviewType): property is UrlProperty {
+    const prop = property as UrlProperty;
+    return prop?.url && type ? prop?.url === type : prop?.url !== undefined;
 }
 
 export function isArrayProperty(property: AnyProperty, type?: DataType): property is ArrayProperty {
@@ -70,13 +70,14 @@ export function arrayPropertyToMapProperty<T extends AnyProperty>(
     return {};
 }
 
-export function arrayToSectionMap(array: SectionType[]) {
-    return array
+export function arrayToSectionMap(array?: SectionType[]): Record<string, unknown> {
+    const result = {} as Record<string, unknown>;
+    return array ? array
         .filter(item => typeof item?.value === 'string')
         .reduce((acc, { type, value }: SectionType) => {
             acc[type] = value;
             return acc;
-        }, {} as Record<string, unknown>);
+        }, result) : result;
 }
 
 export function mergeObject<T>(old: T, value: T) {

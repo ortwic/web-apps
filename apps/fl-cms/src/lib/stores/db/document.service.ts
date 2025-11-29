@@ -4,7 +4,8 @@ import { collection, onSnapshot, doc, writeBatch, query, getDocs } from 'firebas
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import type { Entity } from '../../models/schema.model';
+import type { DocumentContract } from '../../contracts/document.contract';
+import type { Entity } from '../../models/schema.type';
 import { showError } from '../notification.store';
 
 // firestore does not like undefined values so omit them
@@ -26,13 +27,13 @@ const snapshotOptions: SnapshotOptions = {
     serverTimestamps: 'none'
 };
 
-export class DocumentStore<T extends Entity> implements Readable<T[]> {
+export class DocumentStore<T extends Entity> implements DocumentContract<T>, Readable<T[]> {
     private readonly documents = writable<T[]>([]);
     readonly unsubscribe: () => void = () => {};
 
     constructor(private store: Firestore | null, 
-        private path: string | undefined, 
-        public setOptions: SetOptions = defaultSetOptions
+        public readonly path: string | undefined, 
+        public readonly setOptions: SetOptions = defaultSetOptions
     ) {
         const pathValid = path && path.split('/').length % 2 > 0;
         if (!pathValid) {
@@ -52,7 +53,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         return this.documents.subscribe(run, invalidate);
     }
 
-    public getDocumentStream<T extends Entity>(...constraints: QueryConstraint[]): Observable<T[]> {
+    public getDocumentStream(...constraints: QueryConstraint[]): Observable<T[]> {
         if (this.store && this.path) {
             const query = this.createQuery<T>(...constraints);
             return collectionData<T>(query, { idField: 'id' }).pipe(startWith([]));
@@ -88,7 +89,7 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
         return of(null);
     }
 
-    async setDocuments(...documents: T[]) {
+    async setDocuments(...documents: T[]): Promise<boolean> {
         if (this.store && this.path && documents.length) {
             const batch = writeBatch(this.store);
 
@@ -106,10 +107,12 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
                 console.debug(commitedData);
                 showError(error.message);                
             }
+            return true;
         }
+        return false;
     }
 
-    async removeDocuments(...ids: string[]) {
+    async removeDocuments(...ids: string[]): Promise<boolean> {
         if (this.store && this.path) {
             const batch = writeBatch(this.store);
 
@@ -119,7 +122,9 @@ export class DocumentStore<T extends Entity> implements Readable<T[]> {
             });
 
             await batch.commit();
+            return true;
         }
+        return false;
     }
 }
 

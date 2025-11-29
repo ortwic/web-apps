@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import { flip } from "svelte/animate";
     import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
-    import { arrayPropertyToMapProperty, defaultValueByType, isArrayProperty, isBlockSetProperty, mergeObject } from "../../models/content.helper";
+    import { arrayPropertyToMapProperty, defaultValueByType, isArrayProperty, isBlockSetProperty, mergeObject } from "../../utils/content.helper";
     import type { SectionType } from "../../models/content.type";
     import { withKey } from "../../utils/ui.helper";
     import Loading from "../ui/Loading.svelte";
@@ -92,7 +92,7 @@
 </script>
 
 
-<Loading isLoading={!items}>
+<Loading isLoading={!items} title={title}>
     <div class="x-flex">
         {#each withKey(items) as { item, key }, i (key)}
         <div class="card" animate:flip={{ duration: 300 }}>

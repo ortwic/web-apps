@@ -14,9 +14,10 @@
     export let alt = '';
 
     const dispatch = createEventDispatcher<{ changed: string }>();
-    const url$ = isRelativeUrl(value) ? from($currentStorage.getFileUrl(value)) : of(value);
     let open = false;
-
+    
+    $: url$ = isRelativeUrl(value) ? from($currentStorage.getFileUrl(value)) : of(value);
+    
     function showDialog() {
         if (!disabled) {
             open = true;
@@ -31,6 +32,7 @@
             value = '';
             dispatch('changed', '');
         }
+        open = false;
     }
 
     function update(url: string) {

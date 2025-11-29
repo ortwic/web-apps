@@ -207,7 +207,7 @@ i.bx {
 }
 
 i.bx:hover {
-    border-color: var(--color-theme-1) !important;
+    border-color: var(--color-theme-1);
 }
 
 .bx-trash {

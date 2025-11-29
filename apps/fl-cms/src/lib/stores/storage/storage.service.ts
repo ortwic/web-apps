@@ -58,7 +58,7 @@ export class StorageService {
     }
 
     async getFileUrl(path: string): Promise<string> {
-        if (this.storage) {
+        if (this.storage && path) {
             const fileRef = ref(this.storage, path);
             return await getDownloadURL(fileRef);
         }

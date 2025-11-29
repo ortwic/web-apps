@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { get } from "svelte/store";
 import type { Properties } from '../../packages/firecms_core/types/properties.simple';
-import type { Collection } from '../../models/schema.model';
+import type { Collection } from '../../models/schema.type';
 import type { DocumentStore } from './document.service';
 import { SchemaStore } from './schema.service';
 import { mockDocumentStore } from '../../../tests/mock.helper';

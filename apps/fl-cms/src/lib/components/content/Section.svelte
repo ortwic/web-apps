@@ -5,7 +5,7 @@
     import Expand from '../ui/Expand.svelte';
     import Input from '../ui/Input.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
-    import { isBlockSetProperty, isFileType, isImageUrl, isMapProperty, isMarkdown } from "../../models/content.helper";
+    import { isBlockSetProperty, isFileType, isUrlProperty, isMapProperty, isMarkdown } from "../../utils/content.helper";
     import ImageSelect from './ImageSelect.svelte';
     import PropertyMap from "./PropertyMap.svelte";
     import SectionCards from './SectionCards.svelte';
@@ -49,16 +49,16 @@
     </span>
     <div class="section">
         {#if typeof value === 'string' &&  isMarkdown(property)}
-        <MarkdownEditor {disabled} {value} placeholder={type} 
+        <MarkdownEditor {value} placeholder={type} disabled="{disabled || property.editable === false}"
             on:change={({ detail }) => change(detail)} />
         {:else if typeof value === 'string' && property?.dataType === 'string'}
-        <Input type="text" {value} {disabled} multiline={property.multiline}
-            on:changed={({ detail }) => change(detail)}/>
+        <Input type="text" {value} placeholder={type} disabled="{disabled || property.editable === false}" 
+            on:changed={({ detail }) => change(detail)} multiline={property.multiline}/>
+        {:else if isUrlProperty(property)}
+        <Input type="url" {value} placeholder={type} disabled="{disabled || property.editable === false}" 
+            on:changed={({ detail }) => change(detail)} />
         {:else if isFileType(property, 'image')}
         <ImageSelect {value} alt={type} storage={property.storage} disabled="{disabled || property.editable === false}" 
-            on:changed={({ detail }) => change(detail)} />
-        {:else if isImageUrl(property)}
-        <ImageSelect {value} alt={type} disabled="{disabled || property.editable === false}" 
             on:changed={({ detail }) => change(detail)} />
         {:else if Array.isArray(value)}
         <SectionCards {property} items={value} 

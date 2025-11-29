@@ -1,23 +1,25 @@
 <script lang="ts">
     import json from 'json5';
-    import { link, push } from 'svelte-spa-router';
-    import { firstValueFrom, map, of, switchMap } from 'rxjs';
+    import { push } from 'svelte-spa-router';
+    import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent } from '@web-apps/svelte-tabulator';
-    import { createDefault } from '../../models/content.helper';
-    import type { Entity, Collection } from '../../models/schema.model';
+    import { createDefault } from '../../utils/content.helper';
+    import type { Entity, Collection } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
-    import { createDocumentStore, timestampToIsoDate, getCurrentScheme } from '../../stores/db/firestore.store';
+    import { DocumentStore } from '../../stores/db/document.service';
+    import { timestampToIsoDate } from '../../stores/db/firestore.helper';
+    import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
-    import Toolbar from '../ui/Toolbar.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
+    import Toolbar from '../ui/Toolbar.svelte';
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
-    import { showError, showInfo } from '../../stores/notification.store';
     import JSONEditor from '../ui/JSONEditor.svelte';
     import '../../../styles/tabulator.css';
     
-    export let path = of('');
+    export let schema$ = of<Collection | null>(null);
+    export let documentStore$: Observable<DocumentStore<Entity>>;
     
     let showAddEntry = false;
     let newEntryId: string;
@@ -27,11 +29,8 @@
 
     $: disabled = !$currentClientUser;
 
-    const schemaPath = path.pipe(map(p => p.split('/').filter((s, i) => i % 2 === 0).join('/')));
-    const currentSchema = getCurrentScheme(path);
-    const contentStore = createDocumentStore(path);
-    const documents$ = contentStore.pipe(switchMap(s => s.getDocumentStream<Entity>()));
-    const columns$ = currentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
+    const documents$ = documentStore$.pipe(switchMap(s => s.getDocumentStream()));
+    const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
@@ -45,8 +44,8 @@
                         label: '<i class="bx bx-check"></i> Confirm', 
                         action: (e: MouseEvent, cell: CellComponent) => {
                             const id = cell.getData()['id'];
-                            $contentStore.removeDocuments(id)
-                                .then(() => showInfo(`Entity ${id} was removed!`));
+                            $documentStore$.removeDocuments(id)
+                                .then((ok) => ok ? showInfo(`Entity ${id} was removed!`) : showError(`Unable to remove entity ${id}`));
                         } 
                     },
                     {
@@ -59,29 +58,27 @@
                 label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     const id = cell.getData()['id'];
-                    push(`/page/${$path}/${id}`);
+                    push(`/page/${$documentStore$.path}/${id}`);
                 }
             }
         ]
     })));
-    
-    $: columns = $columns$;
 
     async function addEntry(schema: Collection | null) {
         const document = createDefault<Entity>(schema);
         document.id = newEntryId;
-        await $contentStore.setDocuments(document);
+        await $documentStore$.setDocuments(document);
         showAddEntry = false;
         newEntryId = '';
     }
 
-    function update<T extends Entity>(doc: T) {
+    async function update<T extends Entity>(doc: T) {
         try {
-            if ($path !== undefined) {
-                return $contentStore.setDocuments(doc)
-                    .then(() => showInfo(`Updated document ${JSON.stringify(doc)}`));
+            if (await $documentStore$.setDocuments(doc)) {
+                showInfo(`Updated document ${JSON.stringify(doc)}`);
+            } else {
+                showError(`Unable to update document ${JSON.stringify(doc)}`);
             }
-            showError(`DocumentId is undefined`);
         } catch (error: any) {
             showError(`Failed to update document: ${error?.message}`);
         }
@@ -112,7 +109,7 @@
         }
 
         try {
-            $contentStore.setDocuments(...importJsonData);
+            $documentStore$.setDocuments(...importJsonData);
         } catch (error: any) {
             showError("Failed to import documents:", error.message);
         } finally {
@@ -127,7 +124,7 @@
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${$path}.json`; 
+            link.download = `${$documentStore$.path}.json`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -138,10 +135,7 @@
 </script>
 
 <header>
-    <Toolbar>
-        <button title="Back" disabled={!history.length} class="icon clear" on:click={() => history.back()}>
-            <i class="bx bx-arrow-back"></i>
-        </button>
+    <Toolbar showNav={true}>
         <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
             <i class="bx bx-plus hl"></i>
         </button>
@@ -151,24 +145,24 @@
         <button title="Export to JSON" class="icon clear" on:click={exportAsJson}>
             <i class="bx bx-export"></i>
         </button>
-        <a role="button" href="/config/{$path}" use:link={`/config/${$schemaPath}`} class="icon clear" title="Edit schema">
-            <i class="bx bx-code-curly"></i>
-        </a>
+        <slot name="commands"></slot>
         <span slot="title">
-            <Breadcrumb {path} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
 
-{#await firstValueFrom(currentSchema)}
-<Loading />
+{#await firstValueFrom(schema$)}
+<Loading title="schema"/>
 {:then schema}
 <section>
+    {#if $documents$}
     <!-- on path change columns must be invalidated to keep them in sync -->
-    {#key $path}
-    <Table idField="id" data={documents$} persistenceID={$path} {columns}
+    {#key $columns$}
+    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$documentStore$.path}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
     {/key}
+    {/if}
 </section>
 
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>

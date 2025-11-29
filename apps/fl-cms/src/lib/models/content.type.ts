@@ -1,4 +1,4 @@
-import type { Entity } from "./schema.model";
+import type { Entity } from "./schema.type";
 
 export type Content = Entity & { content: SectionType[] };
 

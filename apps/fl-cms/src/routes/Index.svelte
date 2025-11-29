@@ -2,10 +2,10 @@
     import { onMount } from 'svelte';
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
-    import type { Collection } from '../lib/models/schema.model';
+    import type { Collection } from '../lib/models/schema.type';
     import { showError, showWarn } from '../lib/stores/notification.store';
     import { currentClientUser } from '../lib/stores/app.store';
-    import { createSchemaStore } from '../lib/stores/db/firestore.store';
+    import { createSchemaStore } from '../lib/stores/db/firestore.helper';
     import Modal from '../lib/components/ui/Modal.svelte';
     import SelectCollection from '../lib/components/schema/SelectCollection.svelte';
 
@@ -86,14 +86,14 @@
                     on:click|preventDefault={() => select(item)} class="nav link flex-center pointer">
                     <h2>{item.path}</h2>
                     <span>
-                        <i class="bx bx-lg bx-list-ul"></i>
+                        <i class="bx bx-list-ul"></i>
                     </span>
                 </a>
                 {:else}
                 <a role="button" use:link href="/page/{item.path}" class="nav flex-center" tabindex={i}>
                     <h2>{item.path}</h2>
                     <span>
-                        <i class="bx bx-lg bx-right-arrow-alt"></i>
+                        <i class="bx bx-right-arrow-alt"></i>
                     </span>
                 </a>
                 {/if}

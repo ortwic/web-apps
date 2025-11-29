@@ -12,7 +12,7 @@
 </script>
 
 <button disabled={!$appStore.validConfig} on:click={() => login()}>
-    <i class="bx bx-lg bx-log-in"></i> 
+    <i class="bx bx-log-in"></i> 
     <span> 
         {#if $appStore.useEmulator}
         Login to {EMULATOR_KEY}
