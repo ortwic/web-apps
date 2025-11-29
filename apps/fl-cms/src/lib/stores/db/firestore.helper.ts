@@ -9,9 +9,11 @@ import { SchemaStore } from './schema.service';
 import type { Collection, Entity } from '../../models/schema.type';
 import { fromStore } from '../../utils/rx.store';
 
+export const SCHEMA_DEFAULT_NAME = '__schema';
+
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
-export function createSchemaStore(options?: SetOptions, name = '__schema'): Readable<SchemaStore> {
+export function createSchemaStore(options?: SetOptions, name = SCHEMA_DEFAULT_NAME): Readable<SchemaStore> {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
         set(new SchemaStore(new DocumentStore<Collection>(store, name, options)))
     );

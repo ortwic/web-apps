@@ -11,8 +11,8 @@
     export let multiline = false;
 
     const dispatch = createEventDispatcher<{ changed: string }>();
-    let original = value;
-
+    
+    $: original = value;
     $: dirty = value !== original;
     $: title = dirty ? 'Press enter to save' : '';
 

@@ -10,7 +10,7 @@ import { showInfo } from "../notification.store";
 const contentKey: keyof Content = 'content';
 
 export class ContentService {
-    readonly types: Record<string, AnyProperty>;
+    private contentTypes: Record<string, AnyProperty> | null = null;
 
     get name() {
         return this.schema?.name;
@@ -37,14 +37,20 @@ export class ContentService {
         return this.document.pipe(map(d => d && d[contentKey] || []));
     }
 
-    constructor(private store: DocumentContract<Content>, private schema: Collection | null, private id?: string) {
-        this.types = arrayPropertyToMapProperty((schema?.properties as Properties)[contentKey]);
+    get types(): Record<string, AnyProperty> {
+        if (!this.contentTypes) {
+            this.contentTypes = arrayPropertyToMapProperty((this.schema?.properties as Properties)[contentKey]);
+        }
+        return this.contentTypes;
     }
 
-    updateProperty(document: Content, partial: Partial<Content>) {
+    constructor(private store: DocumentContract<Content>, private schema: Collection | null, private id?: string) {
+    }
+
+    update(document: Content, partial: Partial<Content>) {
         if (partial && document) {
             Object.entries(partial).forEach(([field, value]) => document[field] = value);
-            this.store.setDocuments(document);
+            this.saveChanges(document);
         }
     }
 
@@ -62,33 +68,42 @@ export class ContentService {
 
                 if (index !== undefined && isUnique(document[contentKey], item)
                     && document[contentKey].insert(item, index)) {
-                    this.store.setDocuments(document);
+                    this.saveChanges(document, index);
                 }
             },
             update: async (document: Content, partial: object) => {
                 const section = document && document[contentKey][index];
                 if (section && section.value !== partial) {
                     section.value = mergeObject(section.value, partial);
-                    await this.store.setDocuments(document);
-                    
-                    showInfo(`Contents of section #${index + 1} [${section.type}] updated.`);
+                    await this.saveChanges(document, index);
                 }
             },
             remove: (document: Content) => {
                 if (index !== undefined && document[contentKey].remove(index)) {
-                    this.store.setDocuments(document);
+                    this.saveChanges(document, index);
                 }
             },
             moveUp: (document: Content) => {
                 if (document[contentKey].swap(index, index - 1)) {
-                    this.store.setDocuments(document);
+                    this.saveChanges(document, index);
                 }
             },
             moveDown: (document: Content) => {
                 if (document[contentKey].swap(index, index + 1)) {
-                    this.store.setDocuments(document);
+                    this.saveChanges(document, index);
                 }
             }
         };
+    }
+
+    private async saveChanges(document: Content, index?: number) {
+        if (await this.store.setDocuments(document)) {
+            if (index !== undefined) {
+                const section = document && document[contentKey][index];
+                showInfo(`Contents of section #${index} [${section.type}] updated.`);
+            } else {
+                showInfo(`Contents of ${this.name} updated.`);
+            }
+        }
     }
 }

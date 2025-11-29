@@ -1,7 +1,6 @@
 <script lang="ts">
     import { switchMap } from 'rxjs';
     import { push } from 'svelte-spa-router';
-    import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
     import { templates } from '../../schema/predefined-collections';
     import { createValidator } from '../../schema/schema-validation';
@@ -43,25 +42,10 @@
     }
         
     async function appendInferredPropsFromData(documents: Entity[]) {
-        const { buildEntityPropertiesFromData } = await import('../../packages/schema_inference');
-        const getType = (value: any) => {
-            if (typeof value === "number")
-                return "number";
-            else if (typeof value === "string")
-                return "string";
-            else if (typeof value === "boolean")
-                return "boolean";
-            else if (Array.isArray(value))
-                return "array";
-            else if (value instanceof Timestamp)
-                return "date";
-            return "map";
-        };
-        
-        const inferredProps = await buildEntityPropertiesFromData(documents, getType);
+        const { buildEntityProperties } = await import('../../schema/inference.helper');
         properties = { 
             ...item.properties, 
-            ...inferredProps 
+            ...await buildEntityProperties(documents) 
         };
         item.properties = properties;
     }

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import type { DocumentData } from "firebase/firestore";
   import type { AnyProperty } from "../../packages/firecms_core/types/properties.simple";
-  import { isFileType, isImageUrl, isArrayProperty, mergeObject, isBlockSetProperty } from "../../utils/content.helper";
+  import { isFileType, isUrlProperty, isArrayProperty, mergeObject, isBlockSetProperty } from "../../utils/content.helper";
   import { currentClientUser } from "../../stores/app.store";
   import { timestampToIsoDate } from "../../stores/db/firestore.helper";
   import Expand from '../ui/Expand.svelte';
@@ -70,9 +70,6 @@
                 {#if isFileType(prop, 'image')}
                 <ImageSelect value={document[field]} alt={field} storage={prop.storage} disabled="{disabled || prop.editable === false}" 
                     on:changed={({ detail }) => update(detail, field)} />
-                {:else if isImageUrl(prop)}
-                <ImageSelect value={document[field]} alt={field} disabled="{disabled || prop.editable === false}" 
-                    on:changed={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'string' && prop.enumValues != undefined}
                 <Select id={field} value={document[field] ?? ''} disabled="{disabled || prop.editable === false}"
                     options="{prop.enumValues}" on:changed={({ detail }) => update(detail, field)} />
@@ -85,6 +82,9 @@
                 {:else if prop.dataType === 'boolean'}
                 <input type="checkbox" id="{field}" disabled="{disabled || prop.editable === false}" 
                     checked="{document[field] ?? false}" on:input={(ev) => updateInput(ev, field)} />
+                {:else if isUrlProperty(prop)}
+                <Input type="url" id={field} value={document[field]} disabled="{disabled || prop.editable === false}" 
+                    on:changed={({ detail }) => update(detail, field)} />
                 {:else if prop.dataType === 'string'}
                 <Input type="text" id="{field}" disabled="{disabled || prop.editable === false}" 
                     value="{document[field] ?? ''}" on:changed={({ detail }) => update(detail, field)} />

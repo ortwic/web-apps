@@ -33,14 +33,14 @@ export function isFileType(property: AnyProperty, preview?: PreviewType): proper
     return prop && prop?.storage !== undefined && prop?.preview === preview;
 }
 
-export function isImageUrl(property: AnyProperty): property is UrlProperty {
-    const prop = property as UrlProperty;
-    return prop && prop?.url === 'image';
-}
-
 export function isMarkdown(property: AnyProperty): property is StringProperty {
     const prop = property as StringProperty;
     return prop && prop.markdown === true;
+}
+
+export function isUrlProperty(property: AnyProperty, type?: PreviewType): property is UrlProperty {
+    const prop = property as UrlProperty;
+    return prop?.url && type ? prop?.url === type : prop?.url !== undefined;
 }
 
 export function isArrayProperty(property: AnyProperty, type?: DataType): property is ArrayProperty {

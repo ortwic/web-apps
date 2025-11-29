@@ -1,4 +1,4 @@
-<script lang="ts" generics="T extends Entity">
+<script lang="ts">
     import { flip } from 'svelte/animate';
     import { params, push } from 'svelte-spa-router';
     import json from 'json5';
@@ -7,15 +7,14 @@
     import PopupMenu from '../ui/PopupMenu.svelte';
     import { currentClientUser } from '../../stores/app.store';
     import type { ContentService } from '../../stores/db/content.service';
-    import type { Entity } from '../../models/schema.type';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
-    import Loading from '../ui/Loading.svelte';
     import Section from './Section.svelte';
 
     $: disabled = !$currentClientUser;
 
     export let contentService$: Observable<ContentService>;
     export let path: string;
+    export let rootPath = '/page';
 
     const document$ =  contentService$.pipe(switchMap(s => s.document));
     const content$ =  contentService$.pipe(switchMap(s => s.content));
@@ -37,7 +36,7 @@
     <Toolbar showNav={true}>
         <slot name="commands"></slot>
         <span slot="title">
-            <Breadcrumb {path} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb {path} {rootPath} on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
@@ -46,7 +45,7 @@
     {#if $document$ && $content$}
         <Section open={!$content$.length} value={$document$} title="Details of {$contentService$?.name}"
             property={{ dataType: 'map', properties: $contentService$.properties }} type="details"
-            on:change={({ detail }) => $contentService$.updateProperty($document$, detail)}>
+            on:change={({ detail }) => $contentService$.update($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" disabled={disabled || !$contentService$.hasContentDefinition} title="Add section"
                     on:click={(ev) => showPopupMenu(ev, 'add', 0)}>
@@ -57,29 +56,31 @@
         
         {#each $content$ as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
-        <Loading isLoading={!$contentService$.types[type]} title={type}>
-            <Section {value} {type} property={$contentService$.types[type]} {disabled}
-                on:change={({ detail }) => $contentService$.section(i).update($document$, detail)}>
-                <span slot="commands">
-                    <button class="icon clear" {disabled} title="Add section"
-                        on:click={(ev) => showPopupMenu(ev, 'add', i)}>
-                        <i class="bx bx-plus"></i>
-                    </button>
-                    <button class="icon clear" {disabled} title="Move up"
-                        on:click={() => $contentService$.section(i).moveUp($document$)}>
-                        <i class="bx bx-up-arrow"></i>
-                    </button>
-                    <button class="icon clear" {disabled} title="Move down"
-                        on:click={() => $contentService$.section(i).moveDown($document$)}>
-                        <i class="bx bx-down-arrow"></i>
-                    </button>
-                    <button class="icon clear" {disabled} title="Edit section"
-                        on:click={(ev) => showPopupMenu(ev, 'edit', i)}>
-                        <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
-                    </button>
-                </span>
-            </Section>
-        </Loading>
+        {#if $contentService$.types[type]}
+        <Section {value} {type} property={$contentService$.types[type]} {disabled}
+            on:change={({ detail }) => $contentService$.section(i).update($document$, detail)}>
+            <span slot="commands">
+                <button class="icon clear" {disabled} title="Add section"
+                    on:click={(ev) => showPopupMenu(ev, 'add', i)}>
+                    <i class="bx bx-plus"></i>
+                </button>
+                <button class="icon clear" {disabled} title="Move up"
+                    on:click={() => $contentService$.section(i).moveUp($document$)}>
+                    <i class="bx bx-up-arrow"></i>
+                </button>
+                <button class="icon clear" {disabled} title="Move down"
+                    on:click={() => $contentService$.section(i).moveDown($document$)}>
+                    <i class="bx bx-down-arrow"></i>
+                </button>
+                <button class="icon clear" {disabled} title="Edit section"
+                    on:click={(ev) => showPopupMenu(ev, 'edit', i)}>
+                    <i class="bx bx-dots-vertical"></i> <!-- ⋮ -->
+                </button>
+            </span>
+        </Section>
+        {:else}
+        <h2 class="input">Property definition for <span class="emphasis">'{type}'</span> not found!</h2>
+        {/if}
         </div>
         {/each}
 
