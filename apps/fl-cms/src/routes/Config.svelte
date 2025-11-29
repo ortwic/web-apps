@@ -2,7 +2,7 @@
     import { params } from "svelte-spa-router";
     import { combineLatest, of, switchMap } from "rxjs";
     import CollectionEditor from "../lib/components/schema/CollectionEditor.svelte";
-    import { createSchemaStore } from "../lib/stores/db/firestore.store";
+    import { createSchemaStore } from "../lib/stores/db/firestore.helper";
     import { fromStore } from "../lib/utils/rx.store";
 
     const schemaStore = createSchemaStore();

@@ -5,7 +5,7 @@
     import type { Collection } from '../lib/models/schema.model';
     import { showError, showWarn } from '../lib/stores/notification.store';
     import { currentClientUser } from '../lib/stores/app.store';
-    import { createSchemaStore } from '../lib/stores/db/firestore.store';
+    import { createSchemaStore } from '../lib/stores/db/firestore.helper';
     import Modal from '../lib/components/ui/Modal.svelte';
     import SelectCollection from '../lib/components/schema/SelectCollection.svelte';
 

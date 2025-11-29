@@ -92,7 +92,7 @@
 </header>
 
 <section class="content-64">    
-    <Loading {isLoading}>
+    <Loading {isLoading} title={$path}>
         <div class="grid">
             {#each $items$ as item (item.path)}
             {#if item.type !== 'file'}

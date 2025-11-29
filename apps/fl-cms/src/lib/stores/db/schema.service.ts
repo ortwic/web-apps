@@ -85,7 +85,7 @@ export class SchemaStore implements Readable<Collection[]> {
         if (path) {
             const segments = path.toLowerCase().split('/').filter(Boolean);
             const document = createTree(segments, []);
-            return this.store.setDocuments(document);
+            await this.store.setDocuments(document);
         }
     }
 
@@ -142,10 +142,10 @@ export class SchemaStore implements Readable<Collection[]> {
         if (segments.length > 1) {
             const root = await firstValueFrom(this.getCollectionFromSchemaPath(segments.shift()!));
             if(root && removeSubcollection(root)) {
-                return this.store.setDocuments(root);
+                await this.store.setDocuments(root);
             }
         } else if (segments.length) {
-            return this.store.removeDocuments(segments[0]);
+            await this.store.removeDocuments(segments[0]);
         }
     }
 }

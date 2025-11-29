@@ -8,7 +8,7 @@
     import type { Entity, Collection } from '../../models/schema.model';
     import { currentClientUser } from '../../stores/app.store';
     import { DocumentStore } from '../../stores/db/document.service';
-    import { timestampToIsoDate } from '../../stores/db/firestore.store';
+    import { timestampToIsoDate } from '../../stores/db/firestore.helper';
     import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
@@ -18,8 +18,8 @@
     import JSONEditor from '../ui/JSONEditor.svelte';
     import '../../../styles/tabulator.css';
     
-    export let contentSchema = of<Collection | null>(null);
-    export let contentStore: Observable<DocumentStore<Entity>>;
+    export let schema$ = of<Collection | null>(null);
+    export let documentStore$: Observable<DocumentStore<Entity>>;
     
     let showAddEntry = false;
     let newEntryId: string;
@@ -29,8 +29,8 @@
 
     $: disabled = !$currentClientUser;
 
-    const documents$ = contentStore.pipe(switchMap(s => s.getDocumentStream()));
-    const columns$ = contentSchema.pipe(map(s => prepareColumnDefinitions(s, { 
+    const documents$ = documentStore$.pipe(switchMap(s => s.getDocumentStream()));
+    const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
@@ -44,7 +44,7 @@
                         label: '<i class="bx bx-check"></i> Confirm', 
                         action: (e: MouseEvent, cell: CellComponent) => {
                             const id = cell.getData()['id'];
-                            $contentStore.removeDocuments(id)
+                            $documentStore$.removeDocuments(id)
                                 .then((ok) => ok ? showInfo(`Entity ${id} was removed!`) : showError(`Unable to remove entity ${id}`));
                         } 
                     },
@@ -58,7 +58,7 @@
                 label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     const id = cell.getData()['id'];
-                    push(`/page/${$contentStore.path}/${id}`);
+                    push(`/page/${$documentStore$.path}/${id}`);
                 }
             }
         ]
@@ -67,14 +67,14 @@
     async function addEntry(schema: Collection | null) {
         const document = createDefault<Entity>(schema);
         document.id = newEntryId;
-        await $contentStore.setDocuments(document);
+        await $documentStore$.setDocuments(document);
         showAddEntry = false;
         newEntryId = '';
     }
 
     async function update<T extends Entity>(doc: T) {
         try {
-            if (await $contentStore.setDocuments(doc)) {
+            if (await $documentStore$.setDocuments(doc)) {
                 showInfo(`Updated document ${JSON.stringify(doc)}`);
             } else {
                 showError(`Unable to update document ${JSON.stringify(doc)}`);
@@ -109,7 +109,7 @@
         }
 
         try {
-            $contentStore.setDocuments(...importJsonData);
+            $documentStore$.setDocuments(...importJsonData);
         } catch (error: any) {
             showError("Failed to import documents:", error.message);
         } finally {
@@ -124,7 +124,7 @@
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${$contentStore.path}.json`; 
+            link.download = `${$documentStore$.path}.json`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -147,19 +147,19 @@
         </button>
         <slot name="commands"></slot>
         <span slot="title">
-            <Breadcrumb path={$contentStore.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
+            <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
     </Toolbar>
 </header>
 
-{#await firstValueFrom(contentSchema)}
-<Loading />
+{#await firstValueFrom(schema$)}
+<Loading title="schema"/>
 {:then schema}
 <section>
     {#if $documents$}
     <!-- on path change columns must be invalidated to keep them in sync -->
     {#key $columns$}
-    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$contentStore.path}
+    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$documentStore$.path}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
     {/key}
     {/if}

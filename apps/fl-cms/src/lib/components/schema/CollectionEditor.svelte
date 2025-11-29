@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { switchMap } from 'rxjs';
     import { push } from 'svelte-spa-router';
     import { Timestamp } from 'firebase/firestore';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
@@ -6,7 +7,7 @@
     import { createValidator } from '../../schema/schema-validation';
     import type { Collection, Entity } from '../../models/schema.model';
     import { currentClientUser } from '../../stores/app.store';
-    import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.store';
+    import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.helper';
     import { showError, showInfo } from '../../stores/notification.store';
     import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
@@ -26,8 +27,8 @@
     $: disabled = !$currentClientUser;
 
     const schemaStore = createSchemaStore({ merge: false });
-    const contentStore = createDocumentStore(item.path, { merge: false });
-    const documents = $contentStore;
+    const service = createDocumentStore(item.path, { merge: false });
+    const documents = service.pipe(switchMap(s => s.getDocumentStream()));
     const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {

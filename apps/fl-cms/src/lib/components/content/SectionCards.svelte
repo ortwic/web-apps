@@ -92,7 +92,7 @@
 </script>
 
 
-<Loading isLoading={!items}>
+<Loading isLoading={!items} title={title}>
     <div class="x-flex">
         {#each withKey(items) as { item, key }, i (key)}
         <div class="card" animate:flip={{ duration: 300 }}>

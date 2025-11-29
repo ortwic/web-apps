@@ -4,7 +4,7 @@
   import type { AnyProperty } from "../../packages/firecms_core/types/properties.simple";
   import { isFileType, isImageUrl, isArrayProperty, mergeObject, isBlockSetProperty } from "../../models/content.helper";
   import { currentClientUser } from "../../stores/app.store";
-  import { timestampToIsoDate } from "../../stores/db/firestore.store";
+  import { timestampToIsoDate } from "../../stores/db/firestore.helper";
   import Expand from '../ui/Expand.svelte';
   import MarkdownEditor from "../ui/MarkdownEditor.svelte";
   import ImageSelect from "./ImageSelect.svelte";

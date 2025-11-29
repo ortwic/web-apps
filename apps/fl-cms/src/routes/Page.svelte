@@ -1,7 +1,9 @@
 <script lang="ts">
     import { link, params } from "svelte-spa-router";
     import { combineLatest, map, switchMap } from "rxjs";
-    import { createDocumentStore, createSchemaStore } from "../lib/stores/db/firestore.store";
+    import type { Content } from "../lib/models/content.type";
+    import { ContentService } from "../lib/stores/db/content.service";
+    import { createDocumentStore, createSchemaStore } from "../lib/stores/db/firestore.helper";
     import { fromStore } from "../lib/utils/rx.store";
     import List from "../lib/components/content/Collection.svelte";
     import Details from "../lib/components/content/Document.svelte";
@@ -14,13 +16,18 @@
     };
 
     const pathInfo = fromStore(params).pipe(map((p) => parsePath(p?.wild)));
-    const contentStore = createDocumentStore(pathInfo.pipe(map(p => p?.path)));
-    const contentSchema = combineLatest([
+    const documentStore$ = createDocumentStore<Content>(pathInfo.pipe(map(p => p?.path)));
+    const schema$ = combineLatest([
         fromStore(createSchemaStore()), 
         pathInfo
     ]).pipe(
         switchMap(([store, info]) => store.getCollectionFromFullPath(info?.path))
     );
+    const contentService$ = combineLatest([
+        documentStore$,
+        schema$,
+        pathInfo
+    ]).pipe(map(([store, schema, path]) => new ContentService(store, schema, path?.id)));
 
     function parsePath(wild: string | undefined): PathInfo | undefined {
         const segments = wild?.split('/') || [];
@@ -48,7 +55,7 @@
 </svelte:head>
 
 {#if $pathInfo?.type === 'Collection'}
-<List {contentSchema} {contentStore}>
+<List {schema$} {documentStore$}>
     <span slot="commands">
         <a role="button" href="/config/{$pathInfo.schemaPath}" use:link={`/config/${$pathInfo.schemaPath}`} class="icon clear" title="Edit schema">
             <i class="bx bx-wrench"></i>
@@ -57,7 +64,7 @@
 </List>
 
 {:else if $pathInfo?.type === 'Document'}
-<Details {contentSchema} {contentStore} contentKey="content" id={pathInfo.pipe(map(p => p?.id ?? ''))}>
+<Details {contentService$} path={`${$pathInfo.path}/${$pathInfo.id}`}>
     <span slot="commands">
         <a role="button" href="/config/{$pathInfo.schemaPath}" use:link={`/config/${$pathInfo.schemaPath}`} class="icon clear" title="Edit schema">
             <i class="bx bx-wrench"></i>
