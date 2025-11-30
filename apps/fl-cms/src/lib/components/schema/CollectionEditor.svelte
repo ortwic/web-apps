@@ -86,7 +86,7 @@
 </header>
 
 <div class="input">
-    <JSONEditor value={properties}
+    <JSONEditor value={properties} {schema}
         on:changed={({ detail }) => setProperties(detail)} 
         on:error={({ detail }) => validationMessages = [detail]} />
 </div>

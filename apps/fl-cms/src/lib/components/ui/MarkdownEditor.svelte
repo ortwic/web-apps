@@ -5,17 +5,20 @@
     import ImageSelectDialog from '../media/ImageDialog.svelte';
     import { currentStorage } from '../../stores/storage/storage.service';
     import { imageSelectPlugin, resolveImagesPlugin } from '../../extensions/bytemd.plugins';
+    import { debounce } from '../../utils/ui.helper';
 
     export let value = '';
     export let placeholder = '';
     export let disabled = false;
     export let mediaPath = '';
     export let storeUrl = false;
+    export let debounceInMs = 500;
 
     let imageSelect: ImageSelectDialog;
     let showImageSelector = false;
 
     const dispatch = createEventDispatcher<{ change: string }>();
+	const handleChange = debounce((value) => dispatch("change", value), debounceInMs);
 
     function selectImage(): Promise<string> {
         showImageSelector = true;
@@ -40,7 +43,7 @@
 {:else}
 <Editor {value} {placeholder}
     plugins={[imageSelectPlugin(selectImage), resolveImagesPlugin($currentStorage)]} 
-    on:change={({ detail }) => dispatch('change', detail['value'])}/>
+    on:change={({ detail }) => handleChange(detail['value'])}/>
 
 <ImageSelectDialog bind:this={imageSelect} open={showImageSelector} path={mediaPath} />
 {/if}
