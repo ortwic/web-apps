@@ -10,6 +10,7 @@ import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { highlightActiveLine, hoverTooltip, keymap } from '@codemirror/view';
 import type { ActionReturn } from 'svelte/action';
+import { debounce } from '../utils/ui.helper';
 
 type EditorParams<T> = {
     value: T;
@@ -25,9 +26,18 @@ export function codemirror<T>(
     parent: HTMLElement,
     { value, theme, schema, extensions, debounceInMs, onChanged, onError }: EditorParams<T>,
 ): ActionReturn<Pick<EditorParams<T>, 'value' | 'theme'>> {
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     const themeCompartment = new Compartment();
     const themeExtension = (theme: EditorParams<T>['theme']) => (theme === 'dark' ? oneDark : []);
+    
+    const handleChange = debounce((state: EditorState) => {
+        try {
+            value = json.parse<T>(state.doc.toString());
+            onChanged(value);
+        } catch (error: any) {
+            onError(error.message);
+        }
+    }, debounceInMs || 500);
+
     const state = EditorState.create({
         doc: json.stringify(value, null, 2),
         extensions: [
@@ -60,20 +70,7 @@ export function codemirror<T>(
             hoverTooltip(json5SchemaHover()),
             stateExtensions(schema as any),
             EditorView.lineWrapping,
-            EditorView.updateListener.of(({ state, docChanged }) => {
-                if (docChanged) {
-                    clearTimeout(debounceTimer);
-
-                    debounceTimer = setTimeout(() => {
-                        try {
-                            value = json.parse<T>(state.doc.toString());
-                            onChanged(value);
-                        } catch (error: any) {
-                            onError(error.message);
-                        }
-                    }, debounceInMs ?? 500);
-                }
-            }),
+            EditorView.updateListener.of(({ state, docChanged }) => (docChanged ? handleChange(state) : null)),
             themeCompartment.of(themeExtension(theme)),
             ...extensions,
         ],
