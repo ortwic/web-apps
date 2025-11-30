@@ -48,7 +48,8 @@ export function codemirror<T>(
             }),
             autocompletion({
                 override: [
-                    // TODO override prevents TypeError: a.result.options is not iterable
+                    // TODO override prevents TypeError: a.result.options is not iterable 
+                    // https://github.com/jsonnext/codemirror-json-schema/issues/159
                     (ctx: CompletionContext) => {
                         const completion = json5Completion();
                         const result = completion(ctx);
