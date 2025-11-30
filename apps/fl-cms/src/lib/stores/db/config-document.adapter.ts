@@ -1,8 +1,20 @@
 import { map, type Observable } from "rxjs";
 import type { DocumentContract } from "../../contracts/document.contract";
 import type { Content, SectionType } from "../../models/content.type";
+import type { Collection } from "../../models/schema.type";
 import type { SchemaStore } from "./schema.service";
 import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
+import contentMap from '../../schema/generated/property-content-as-content-map.json';
+import { SCHEMA_DEFAULT_NAME } from "./firestore.helper";
+
+export function schema(id = SCHEMA_DEFAULT_NAME): Collection {
+    return {
+        id,
+        name: 'Collection',
+        path: id,
+        properties: contentMap
+    } as Collection;
+}
 
 function propertyMapToContentArray(properties?: Properties<{}>): SectionType[] {
     const content = [] as SectionType[];
@@ -37,6 +49,7 @@ export class ConfigAdapter implements DocumentContract<Content> {
     }
 
     async setDocuments(...documents: Content[]): Promise<boolean> {
-        throw new Error('Not implemented');
+        console.error(new Error('Not implemented'));
+        return false;
     }
 }

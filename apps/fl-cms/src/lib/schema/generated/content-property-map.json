@@ -1,0 +1,66 @@
+{
+  "string": {
+    "dataType": "string",
+    "name": "String",
+    "preview": "file",
+    "storage": {
+      "$ref": "#/definitions/StorageConfig"
+    }
+  },
+  "number": {
+    "dataType": "number",
+    "name": "Number"
+  },
+  "boolean": {
+    "dataType": "boolean",
+    "name": "Boolean"
+  },
+  "date": {
+    "dataType": "date",
+    "name": "Date"
+  },
+  "array": {
+    "dataType": "array",
+    "name": "Array",
+    "of": {
+      "$ref": "#/definitions/Property"
+    }
+  },
+  "set": {
+    "dataType": "set",
+    "name": "Set",
+    "oneOf": {
+      "properties": {
+        "properties": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Property"
+          },
+          "type": "object"
+        },
+        "propertiesOrder": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "typeField": {
+          "type": "string"
+        },
+        "valueField": {
+          "type": "string"
+        }
+      },
+      "propertiesOrder": []
+    }
+  },
+  "map": {
+    "dataType": "map",
+    "name": "Map",
+    "properties": {
+      "additionalProperties": {
+        "$ref": "#/definitions/Property"
+      },
+      "type": "object"
+    }
+  }
+}

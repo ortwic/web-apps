@@ -1,5 +1,5 @@
 {
-  "$ref": "#/definitions/PropertyRecord",
+  "$ref": "#/definitions/Property",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "ArrayProperty": {
@@ -543,13 +543,6 @@
         }
       ],
       "description": "Union type for all properties"
-    },
-    "PropertyRecord": {
-      "additionalProperties": {
-        "$ref": "#/definitions/Property"
-      },
-      "description": "Required as hook for ts-json-schema-generator only",
-      "type": "object"
     },
     "PropertyValidation": {
       "additionalProperties": false,

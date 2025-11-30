@@ -19,6 +19,7 @@
     "fbem": "firebase emulators:start --only auth,firestore,storage --project=emulator --import firestore.local --export-on-exit",
     "build": "pnpm test:once && vite build",
     "build:icons": "node scripts/export-icons.mjs",
+    "build:schema": "npm run schema:json && npm run schema:properties",
     "preview": "vite preview",
     "host:beta": "pnpm build && firebase deploy -P firelighter-cms --only hosting:beta",
     "host:prod": "firebase -P firelighter-cms deploy --only hosting:prod",
@@ -28,7 +29,8 @@
     "test:browser": "firebase emulators:exec --only firestore:8088 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
     "test:debug": "firebase emulators:exec --only firestore:8088 'pnpm vitest --testTimeout 0'",
     "test:once": "firebase emulators:exec --only firestore:8088 'pnpm vitest run'",
-    "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.explicit.ts -t PropertyRecord -o src/lib/schema/generated/property-record.schema.json"
+    "schema:json": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.explicit.ts -t Property -o src/lib/schema/generated/property-record.schema.json",
+    "schema:properties": "npx tsx scripts/generate-schema.ts"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "^6.20.0",
@@ -46,8 +48,10 @@
     "@testing-library/user-event": "^14.4.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/json-schema": "^7.0.15",
+    "@types/lodash": "^4.14.192",
     "@types/luxon": "^3.4.2",
     "@types/marked": "^5.0.0",
+    "@types/node": "^24.10.1",
     "@types/object-hash": "^3.0.6",
     "@vitest/browser": "^3.1.4",
     "@web-apps/svelte-tabulator": "workspace:^",
@@ -60,6 +64,7 @@
     "firebase": "^12.6.0",
     "jsdom": "^22.1.0",
     "json5": "^2.2.3",
+    "lodash": "^4.17.21",
     "luxon": "^3.4.4",
     "marked": "^5.1.1",
     "nanoid": "^5.0.7",

@@ -1,0 +1,312 @@
+{
+  "id": {
+    "dataType": "string",
+    "name": "Id",
+    "validation": {
+      "required": true
+    },
+    "editable": false
+  },
+  "name": {
+    "dataType": "string",
+    "name": "Name",
+    "validation": {
+      "required": true
+    },
+    "editable": false
+  },
+  "path": {
+    "dataType": "string",
+    "name": "Path",
+    "validation": {
+      "required": true
+    },
+    "editable": false
+  },
+  "content": {
+    "dataType": "set",
+    "name": "Content",
+    "oneOf": {
+      "properties": {
+        "string": {
+          "dataType": "map",
+          "name": "String",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            },
+            "preview": {
+              "dataType": "string",
+              "name": "Preview",
+              "editable": true
+            },
+            "storage": {
+              "dataType": "map",
+              "name": "Storage",
+              "properties": {
+                "$ref": {
+                  "dataType": "string",
+                  "name": "$ref",
+                  "editable": true
+                }
+              },
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "number": {
+          "dataType": "map",
+          "name": "Number",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "boolean": {
+          "dataType": "map",
+          "name": "Boolean",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "date": {
+          "dataType": "map",
+          "name": "Date",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "array": {
+          "dataType": "map",
+          "name": "Array",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            },
+            "of": {
+              "dataType": "map",
+              "name": "Of",
+              "properties": {
+                "$ref": {
+                  "dataType": "string",
+                  "name": "$ref",
+                  "editable": true
+                }
+              },
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "set": {
+          "dataType": "map",
+          "name": "Set",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            },
+            "oneOf": {
+              "dataType": "map",
+              "name": "Oneof",
+              "properties": {
+                "properties": {
+                  "dataType": "map",
+                  "name": "Properties",
+                  "properties": {
+                    "properties": {
+                      "dataType": "map",
+                      "name": "Properties",
+                      "properties": {
+                        "additionalProperties": {
+                          "dataType": "map",
+                          "name": "Additionalproperties",
+                          "properties": {
+                            "$ref": {
+                              "dataType": "string",
+                              "name": "$ref",
+                              "editable": true
+                            }
+                          },
+                          "editable": true
+                        },
+                        "type": {
+                          "dataType": "string",
+                          "name": "Type",
+                          "editable": true
+                        }
+                      },
+                      "editable": true
+                    },
+                    "propertiesOrder": {
+                      "dataType": "map",
+                      "name": "Propertiesorder",
+                      "properties": {
+                        "items": {
+                          "dataType": "map",
+                          "name": "Items",
+                          "properties": {
+                            "type": {
+                              "dataType": "string",
+                              "name": "Type",
+                              "editable": true
+                            }
+                          },
+                          "editable": true
+                        },
+                        "type": {
+                          "dataType": "string",
+                          "name": "Type",
+                          "editable": true
+                        }
+                      },
+                      "editable": true
+                    },
+                    "typeField": {
+                      "dataType": "map",
+                      "name": "Typefield",
+                      "properties": {
+                        "type": {
+                          "dataType": "string",
+                          "name": "Type",
+                          "editable": true
+                        }
+                      },
+                      "editable": true
+                    },
+                    "valueField": {
+                      "dataType": "map",
+                      "name": "Valuefield",
+                      "properties": {
+                        "type": {
+                          "dataType": "string",
+                          "name": "Type",
+                          "editable": true
+                        }
+                      },
+                      "editable": true
+                    }
+                  },
+                  "editable": true
+                },
+                "propertiesOrder": {
+                  "dataType": "array",
+                  "name": "Propertiesorder",
+                  "of": {
+                    "dataType": "string",
+                    "name": "Propertiesorder",
+                    "editable": true
+                  },
+                  "editable": true
+                },
+                "typeField": {
+                  "dataType": "string",
+                  "name": "Typefield",
+                  "editable": true
+                },
+                "valueField": {
+                  "dataType": "string",
+                  "name": "Valuefield",
+                  "editable": true
+                }
+              },
+              "editable": true
+            }
+          },
+          "editable": true
+        },
+        "map": {
+          "dataType": "map",
+          "name": "Map",
+          "properties": {
+            "dataType": {
+              "dataType": "string",
+              "name": "Datatype",
+              "editable": true
+            },
+            "name": {
+              "dataType": "string",
+              "name": "Name",
+              "editable": true
+            },
+            "properties": {
+              "dataType": "map",
+              "name": "Properties",
+              "properties": {
+                "additionalProperties": {
+                  "dataType": "map",
+                  "name": "Additionalproperties",
+                  "properties": {
+                    "$ref": {
+                      "dataType": "string",
+                      "name": "$ref",
+                      "editable": true
+                    }
+                  },
+                  "editable": true
+                },
+                "type": {
+                  "dataType": "string",
+                  "name": "Type",
+                  "editable": true
+                }
+              },
+              "editable": true
+            }
+          },
+          "editable": true
+        }
+      }
+    }
+  }
+}

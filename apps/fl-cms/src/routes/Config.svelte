@@ -5,11 +5,10 @@
     import { createSchemaStore } from "../lib/stores/db/firestore.helper";
     import { fromStore } from "../lib/utils/rx.store";
     import type { Collection } from "../lib/models/schema.type";
-    import { ConfigAdapter } from "../lib/stores/db/config-document.adapter";
+    import { ConfigAdapter, schema } from "../lib/stores/db/config-document.adapter";
     import type { SchemaStore } from "../lib/stores/db/schema.service";
     import CollectionEditor from "../lib/components/schema/CollectionEditor.svelte";
     import Document from "../lib/components/content/Document.svelte";
-    // import schemaDefinition from '../lib/schema/collection.schema.json';
 
     const schemaStore$ = fromStore(createSchemaStore(undefined, '__schematest'));
     const schema$ = combineLatest([schemaStore$, fromStore(params)])
@@ -24,10 +23,7 @@
 
     function createContentService(store: SchemaStore, path?: string) {
         const adapter = new ConfigAdapter(store);
-        const schema = {
-            // ...schemaDefinition
-        } as unknown as Collection;
-        return new ContentService(adapter, schema, path);
+        return new ContentService(adapter, schema(), path);
     }
 
     function toggleEditView() {

@@ -1,0 +1,64 @@
+{
+  "id": "__schema",
+  "path": "__schema",
+  "name": "Collection",
+  "properties": {
+    "id": {
+      "dataType": "string",
+      "name": "Id",
+      "validation": {
+        "required": "true"
+      },
+      "editable": "false"
+    },
+    "name": {
+      "dataType": "string",
+      "name": "Name",
+      "validation": {
+        "required": "true"
+      },
+      "editable": "false"
+    },
+    "path": {
+      "dataType": "string",
+      "name": "Path",
+      "validation": {
+        "required": "true"
+      },
+      "editable": "false"
+    },
+    "content": {
+      "dataType": "set",
+      "name": "Content",
+      "oneOf": {
+        "properties": {
+          "string": {
+            "dataType": "string",
+            "name": "String",
+            "editable": true,
+            "properties": {
+              "name": {
+                "dataType": "string",
+                "name": "Name",
+                "editable": true
+              },
+              "validation": {
+                "dataType": "map",
+                "name": "Validation",
+                "properties": {
+                  "required": {
+                    "dataType": "boolean",
+                    "name": "Required",
+                    "editable": true
+                  }
+                },
+                "editable": true
+              }
+            }
+          }
+        }
+      },
+      "editable": true
+    }
+  }
+}
