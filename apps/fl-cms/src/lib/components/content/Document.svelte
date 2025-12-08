@@ -87,7 +87,7 @@
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small popup-menu no-wrap y-flex">
                 <button class="btn" {disabled} 
-                    on:click={() => currentIndex && $contentService$.section(currentIndex).remove($document$)}>
+                    on:click={() => currentIndex !== undefined && $contentService$.section(currentIndex).remove($document$)}>
                     <span class="emphasis"><i class="bx bx-trash"></i> remove</span>
                 </button>
             </div>
@@ -98,7 +98,7 @@
                 <div class="center emphasis" style="margin:.4em .8em">&mdash; Add &mdash;</div>
                 {#each Object.keys($contentService$.types) as type}
                     <button class="btn" {disabled} 
-                        on:click={() => currentIndex && $contentService$.section(currentIndex).insert(type, $document$)}>
+                        on:click={() => currentIndex !== undefined && $contentService$.section(currentIndex).insert(type, $document$)}>
                         <span class="emphasis"> {type}</span>
                     </button>
                 {/each}

@@ -14,12 +14,15 @@ export function createDefault<T extends Record<string, unknown>>(collection: Pic
 export function defaultValueByType(property: AnyProperty): ValueType {
     switch (property.dataType) {
         case 'string':
+        case 'file':
+        case 'url':
             return '';
         case 'number':
             return 0;
         case 'boolean':
             return false;
         case 'array':
+        case 'set':
             return [];
         case 'map':
             return createDefault(property);
@@ -53,7 +56,9 @@ export function isArrayProperty(property: AnyProperty, type?: DataType): propert
 
 export const isMapProperty = (prop?: AnyProperty): prop is MapProperty => prop?.dataType === "map";
 
-export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty => prop?.dataType === "set";
+export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty => prop?.dataType === "set" 
+    // backward compatibility to FireCMS
+    || prop?.dataType === "array" && (prop as any)?.oneOf !== undefined;
 
 export function arrayPropertyToMapProperty<T extends AnyProperty>(
     property: AnyProperty, 
