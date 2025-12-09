@@ -19,6 +19,8 @@ export function defaultValueByType(property: AnyProperty): CMSType | null {
             return '';
         case 'number':
             return 0;
+        case 'date':
+            return property.autoValue ? new Date() : null;
         case 'boolean':
             return false;
         case 'array':

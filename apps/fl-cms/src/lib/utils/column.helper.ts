@@ -126,6 +126,26 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                         return aggregateAsSpan(prop, value);
                     }
                 };
+
+            case 'url':
+                return {
+                    formatter(cell: CellComponent) {
+                        if (prop.dataType === 'url' && prop.url === 'image') {
+                            return previewImage(cell.getValue(), prop.name);
+                        }
+                        return previewFormatter(cell);
+                    }
+                };
+
+            case 'file':
+                return {
+                    formatter(cell: CellComponent) {
+                        if (prop.dataType === 'file' && prop.preview === 'image') {
+                            return previewImage(cell.getValue(), prop.name);
+                        }
+                        return previewFormatter(cell);
+                    }
+                };
         
             default:
                 if (prop.dataType === 'string' && prop.enumValues) {
@@ -155,18 +175,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
 
     function aggregate(prop: AnyProperty, value: object): HTMLElement[] {
         if (typeof value === 'string' && (isUrlProperty(prop, 'image') || isFileType(prop, 'image'))) {
-            const img = document.createElement('img');
-            img.classList.add('preview');
-            if (isRelativeUrl(value)) {
-                storage.getFileUrl(value)
-                    .then(url => img.setAttribute('src', url))
-                    .catch(console.warn);
-                img.setAttribute('alt', `Resolving path ${value}`);
-            } else {
-                img.setAttribute('src', value);
-                img.setAttribute('alt', prop.name ?? '');
-            }
-            return [img];
+            return [previewImage(value, prop.name)];
         } else if (typeof value === 'string') {
             const span = document.createElement('span');
             if (isMarkdown(prop)) {
@@ -190,5 +199,20 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 .filter(Boolean);
         }
         return [];
-    };
+    }
+
+    function previewImage(value: string, alt?: string): HTMLElement {
+        const img = document.createElement('img');
+        img.classList.add('preview');
+        if (isRelativeUrl(value)) {
+            storage.getFileUrl(value)
+                .then(url => img.setAttribute('src', url))
+                .catch(console.warn);
+            img.setAttribute('alt', `Resolving path ${value}`);
+        } else {
+            img.setAttribute('src', value);
+            img.setAttribute('alt', alt ?? '');
+        }
+        return img;
+    }
 }

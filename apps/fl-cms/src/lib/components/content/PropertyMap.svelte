@@ -58,116 +58,114 @@
     <div class="x-flex-full"><span></span><slot name="commands"></slot></div>
     <ul>
         {#each Object.entries(properties) as [field, prop]}
-            {#if document[field] !== undefined}
-                <li title={prop.dataType}>
-                    {#if prop.dataType === 'map' && prop.keyValue}
-                    <DynamicMap record={document[field]} title={prop.name ?? field}
-                        on:update={({ detail }) => update(detail, field, false)}
-                    />
-                    {:else if prop.dataType === 'map'}
-                    <Expand>
-                        <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
-                        <div class="input">
-                            <svelte:self
-                                document={document[field]}
-                                properties={prop.properties}
-                                on:update={({ detail }) => updateNested(document[field], detail.data, field, detail.merge)}
-                            />
-                        </div>
-                    </Expand>
-                    {:else if prop.dataType === 'string' && prop.markdown === true}
-                        <label for="{field}">{prop.name ?? field}</label>
-                        <MarkdownEditor
-                            value={document[field] ?? ''}
-                            {disabled}
-                            placeholder={prop.name}
-                            on:changed={({ detail }) => update(detail, field)}
+            <li title={prop.dataType}>
+                {#if prop.dataType === 'map' && prop.keyValue}
+                <DynamicMap record={document[field]} title={prop.name ?? field}
+                    on:update={({ detail }) => update(detail, field, false)}
+                />
+                {:else if prop.dataType === 'map'}
+                <Expand>
+                    <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
+                    <div class="input">
+                        <svelte:self
+                            document={document[field]}
+                            properties={prop.properties}
+                            on:update={({ detail }) => updateNested(document[field], detail.data, field, detail.merge)}
                         />
-                    {:else}
-                        <div class="grid">
-                            <label for={field}>{prop.name ?? field}</label>
-                            {#if isFileType(prop, 'image')}
-                                <ImageSelect
-                                    value={document[field]}
-                                    alt={field}
-                                    storage={prop.storage}
-                                    disabled={disabled || prop.editable === false}
-                                    on:changed={({ detail }) => update(detail, field)}
-                                />
-                            {:else if prop.dataType === 'string' && prop.enumValues != undefined}
-                                <Select
-                                    id={field}
-                                    value={document[field] ?? ''}
-                                    disabled={disabled || prop.editable === false}
-                                    options={prop.enumValues}
-                                    on:changed={({ detail }) => update(detail, field)}
-                                />
-                            {:else if isArrayProperty(prop, 'string')}
-                                {#key document[field]}
-                                    <TagCloud
-                                        labels={document[field]}
-                                        on:change={({ detail }) => update(detail, field)}
-                                    />
-                                {/key}
-                            {:else if isArrayProperty(prop) || isBlockSetProperty(prop)}
-                                <SectionCards
-                                    property={prop}
-                                    items={document[field]}
+                    </div>
+                </Expand>
+                {:else if prop.dataType === 'string' && prop.markdown === true}
+                    <label for="{field}">{prop.name ?? field}</label>
+                    <MarkdownEditor
+                        value={document[field] ?? ''}
+                        {disabled}
+                        placeholder={prop.name}
+                        on:changed={({ detail }) => update(detail, field)}
+                    />
+                {:else}
+                    <div class="grid">
+                        <label for={field}>{prop.name ?? field}</label>
+                        {#if isFileType(prop, 'image')}
+                            <ImageSelect
+                                value={document[field]}
+                                alt={field}
+                                storage={prop.storage}
+                                disabled={disabled || prop.editable === false}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else if prop.dataType === 'string' && prop.enumValues != undefined}
+                            <Select
+                                id={field}
+                                value={document[field] ?? ''}
+                                disabled={disabled || prop.editable === false}
+                                options={prop.enumValues}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else if isArrayProperty(prop, 'string')}
+                            {#key document[field]}
+                                <TagCloud
+                                    labels={document[field]}
                                     on:change={({ detail }) => update(detail, field)}
                                 />
-                            {:else if prop.dataType === 'boolean'}
-                                <input
-                                    type="checkbox"
-                                    id={field}
-                                    disabled={disabled || prop.editable === false}
-                                    checked={document[field] ?? false}
-                                    on:input={(ev) => updateInput(ev, field)}
-                                />
-                            {:else if isUrlProperty(prop)}
-                                <Input
-                                    type="url"
-                                    id={field}
+                            {/key}
+                        {:else if isArrayProperty(prop) || isBlockSetProperty(prop)}
+                            <SectionCards
+                                property={prop}
+                                items={document[field]}
+                                on:change={({ detail }) => update(detail, field)}
+                            />
+                        {:else if prop.dataType === 'boolean'}
+                            <input
+                                type="checkbox"
+                                id={field}
+                                disabled={disabled || prop.editable === false}
+                                checked={document[field] ?? false}
+                                on:input={(ev) => updateInput(ev, field)}
+                            />
+                        {:else if isUrlProperty(prop)}
+                            <Input
+                                type="url"
+                                id={field}
+                                value={document[field]}
+                                disabled={disabled || prop.editable === false}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else if prop.dataType === 'string'}
+                            <Input
+                                type="text"
+                                id={field}
+                                disabled={disabled || prop.editable === false}
+                                value={document[field] ?? ''}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else if prop.dataType === 'number'}
+                            <Input
+                                type="number"
+                                id={field}
+                                disabled={disabled || prop.editable === false}
+                                value={document[field] ?? ''}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else if prop.dataType === 'date'}
+                            <Input
+                                type="datetime-local"
+                                id={field}
+                                disabled={disabled || prop.editable === false || !!prop.autoValue}
+                                value={isoToLocal(field)}
+                                on:changed={({ detail }) => update(detail, field)}
+                            />
+                        {:else}
+                            <Expand>
+                                <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
+                                <JSONEditor
                                     value={document[field]}
-                                    disabled={disabled || prop.editable === false}
                                     on:changed={({ detail }) => update(detail, field)}
                                 />
-                            {:else if prop.dataType === 'string'}
-                                <Input
-                                    type="text"
-                                    id={field}
-                                    disabled={disabled || prop.editable === false}
-                                    value={document[field] ?? ''}
-                                    on:changed={({ detail }) => update(detail, field)}
-                                />
-                            {:else if prop.dataType === 'number'}
-                                <Input
-                                    type="number"
-                                    id={field}
-                                    disabled={disabled || prop.editable === false}
-                                    value={document[field] ?? ''}
-                                    on:changed={({ detail }) => update(detail, field)}
-                                />
-                            {:else if prop.dataType === 'date'}
-                                <Input
-                                    type="datetime-local"
-                                    id={field}
-                                    disabled={disabled || prop.editable === false}
-                                    value={isoToLocal(field)}
-                                    on:changed={({ detail }) => update(detail, field)}
-                                />
-                            {:else}
-                                <Expand>
-                                    <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
-                                    <JSONEditor
-                                        value={document[field]}
-                                        on:changed={({ detail }) => update(detail, field)}
-                                    />
-                                </Expand>
-                            {/if}
-                        </div>
-                    {/if}
-                </li>
-            {/if}
+                            </Expand>
+                        {/if}
+                    </div>
+                {/if}
+            </li>
         {/each}
     </ul>
 {:else if !document}
