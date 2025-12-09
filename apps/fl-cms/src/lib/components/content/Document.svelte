@@ -45,7 +45,7 @@
     {#if $document$ && $content$}
         <Section open={!$content$.length} value={$document$} title="Details of {$contentService$?.name}"
             property={{ dataType: 'map', properties: $contentService$.properties }} type="details"
-            on:change={({ detail }) => $contentService$.update($document$, detail)}>
+            on:changed={({ detail }) => $contentService$.update($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" disabled={disabled || !$contentService$.hasContentDefinition} title="Add section"
                     on:click={(ev) => showPopupMenu(ev, 'add', 0)}>
@@ -56,9 +56,9 @@
         
         {#each $content$ as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
-        {#if $contentService$.types[type]}
+        {#if value !== null && $contentService$.types[type]}
         <Section {value} {type} property={$contentService$.types[type]} {disabled}
-            on:change={({ detail }) => $contentService$.section(i).update($document$, detail)}>
+            on:changed={({ detail }) => $contentService$.section(i).update($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" {disabled} title="Add section"
                     on:click={(ev) => showPopupMenu(ev, 'add', i)}>
@@ -87,7 +87,7 @@
         <PopupMenu bind:this={editSectionMenu}>
             <div class="small popup-menu no-wrap y-flex">
                 <button class="btn" {disabled} 
-                    on:click={() => currentIndex && $contentService$.section(currentIndex).remove($document$)}>
+                    on:click={() => currentIndex !== undefined && $contentService$.section(currentIndex).remove($document$)}>
                     <span class="emphasis"><i class="bx bx-trash"></i> remove</span>
                 </button>
             </div>
@@ -98,7 +98,7 @@
                 <div class="center emphasis" style="margin:.4em .8em">&mdash; Add &mdash;</div>
                 {#each Object.keys($contentService$.types) as type}
                     <button class="btn" {disabled} 
-                        on:click={() => currentIndex && $contentService$.section(currentIndex).insert(type, $document$)}>
+                        on:click={() => currentIndex !== undefined && $contentService$.section(currentIndex).insert(type, $document$)}>
                         <span class="emphasis"> {type}</span>
                     </button>
                 {/each}

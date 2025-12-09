@@ -59,7 +59,12 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
     }
 
     function getCustomDefinitionByType<T>(field: string, prop: AnyProperty, options: ColumnOptions<T>): Partial<ColumnDefinition> {
-        const maxHeight = options?.maxHeight ? `${options.maxHeight}px` : 'auto';
+        const previewFormatter = (cell: CellComponent) => {
+            const element = cell.getElement();
+            element.classList.add('content-preview');
+            element.style.maxHeight = options?.maxHeight ? `${options.maxHeight}px` : 'auto';
+            return cell.getValue();
+        };
         const editor = <TValue>(editor: Editor, values?: TValue[]): Partial<ColumnDefinition> => {
             if (!prop.readOnly) {
                 return {
@@ -99,11 +104,8 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
 
                 return {
                     formatter(cell: CellComponent) {
-                        const element = cell.getElement();
-                        element.classList.add('content-preview');
-                        element.style.maxHeight = maxHeight;
-
-                        const map = arrayToSectionMap(cell.getValue() as SectionType[]);
+                        const value = previewFormatter(cell) as SectionType[];
+                        const map = arrayToSectionMap(value);
                         return aggregateAsSpan(prop.of, map);
                     }
                 }
@@ -111,11 +113,8 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
             case 'set':
                 return {
                     formatter(cell: CellComponent) {
-                        const element = cell.getElement();
-                        element.classList.add('content-preview');
-                        element.style.maxHeight = maxHeight;
-
-                        const map = arrayToSectionMap(cell.getValue() as SectionType[]);
+                        const value = previewFormatter(cell) as SectionType[];
+                        const map = arrayToSectionMap(value);
                         return aggregateAsSpan(prop, map);
                     }
                 }
@@ -123,10 +122,28 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
             case 'map':
                 return {
                     formatter(cell: CellComponent) {
-                        const element = cell.getElement();
-                        element.classList.add('content-preview');
-                        element.style.maxHeight = maxHeight;
-                        return aggregateAsSpan(prop, cell.getValue());
+                        const value = previewFormatter(cell);
+                        return aggregateAsSpan(prop, value);
+                    }
+                };
+
+            case 'url':
+                return {
+                    formatter(cell: CellComponent) {
+                        if (prop.dataType === 'url' && prop.url === 'image') {
+                            return previewImage(cell.getValue(), prop.name);
+                        }
+                        return previewFormatter(cell);
+                    }
+                };
+
+            case 'file':
+                return {
+                    formatter(cell: CellComponent) {
+                        if (prop.dataType === 'file' && prop.preview === 'image') {
+                            return previewImage(cell.getValue(), prop.name);
+                        }
+                        return previewFormatter(cell);
                     }
                 };
         
@@ -136,13 +153,13 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                         ? prop.enumValues.map(e => e.id) 
                         : Object.keys(prop.enumValues);
                     return {
-                        formatter: 'plaintext',
+                        formatter: previewFormatter,
                         ...editor('list', values)
                     };
                 }
 
                 return { 
-                    formatter: 'plaintext',
+                    formatter: previewFormatter,
                     ...editor('input')
                 };
         }
@@ -158,18 +175,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
 
     function aggregate(prop: AnyProperty, value: object): HTMLElement[] {
         if (typeof value === 'string' && (isUrlProperty(prop, 'image') || isFileType(prop, 'image'))) {
-            const img = document.createElement('img');
-            img.classList.add('preview');
-            if (isRelativeUrl(value)) {
-                storage.getFileUrl(value)
-                    .then(url => img.setAttribute('src', url))
-                    .catch(console.warn);
-                img.setAttribute('alt', `Resolving path ${value}`);
-            } else {
-                img.setAttribute('src', value);
-                img.setAttribute('alt', prop.name ?? '');
-            }
-            return [img];
+            return [previewImage(value, prop.name)];
         } else if (typeof value === 'string') {
             const span = document.createElement('span');
             if (isMarkdown(prop)) {
@@ -193,5 +199,20 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 .filter(Boolean);
         }
         return [];
-    };
+    }
+
+    function previewImage(value: string, alt?: string): HTMLElement {
+        const img = document.createElement('img');
+        img.classList.add('preview');
+        if (isRelativeUrl(value)) {
+            storage.getFileUrl(value)
+                .then(url => img.setAttribute('src', url))
+                .catch(console.warn);
+            img.setAttribute('alt', `Resolving path ${value}`);
+        } else {
+            img.setAttribute('src', value);
+            img.setAttribute('alt', alt ?? '');
+        }
+        return img;
+    }
 }

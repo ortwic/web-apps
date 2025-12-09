@@ -4,7 +4,7 @@
     import type { Extension } from '@codemirror/state';
     import { colorScheme } from '@web-apps/svelte-tabulator';
 
-    type T = $$Generic<object>;
+    type T = $$Generic<any>;
     export let value = {} as T;
     export let debounceInMs = 500;
     export let extensions: Extension[] = [];

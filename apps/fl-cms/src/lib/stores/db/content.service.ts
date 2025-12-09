@@ -2,15 +2,19 @@ import { map, type Observable } from "rxjs";
 import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
 import type { DocumentContract } from "../../contracts/document.contract";
 import type { Content, SectionType } from "../../models/content.type";
-import type { Collection } from "../../models/schema.type";
+import type { Collection, UpdateArgs } from "../../models/schema.type";
 import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../utils/content.helper";
 import { isUnique } from "../../utils/ui.helper";
 import { showInfo } from "../notification.store";
 
+type SaveOptions = { index?: number, merge?: boolean };
 const contentKey: keyof Content = 'content';
 
 export class ContentService {
     private contentTypes: Record<string, AnyProperty> | null = null;
+
+    constructor(private store: DocumentContract<Content>, private schema: Collection | null, private id?: string) {
+    }
 
     get name() {
         return this.schema?.name;
@@ -44,13 +48,10 @@ export class ContentService {
         return this.contentTypes;
     }
 
-    constructor(private store: DocumentContract<Content>, private schema: Collection | null, private id?: string) {
-    }
-
-    update(document: Content, partial: Partial<Content>) {
-        if (partial && document) {
-            Object.entries(partial).forEach(([field, value]) => document[field] = value);
-            this.saveChanges(document);
+    update<T>(document: Content, { data, merge }: UpdateArgs<T>) {
+        if (data && document) {
+            Object.entries(data).forEach(([field, value]) => document[field] = value);
+            this.saveChanges(document, { merge });
         }
     }
 
@@ -68,41 +69,41 @@ export class ContentService {
 
                 if (index !== undefined && isUnique(document[contentKey], item)
                     && document[contentKey].insert(item, index)) {
-                    this.saveChanges(document, index);
+                    this.saveChanges(document, { index });
                 }
             },
-            update: async (document: Content, partial: object) => {
+            update: async <T>(document: Content, { data, merge }: UpdateArgs<T>) => {
                 const section = document && document[contentKey][index];
-                if (section && section.value !== partial) {
-                    section.value = mergeObject(section.value, partial);
-                    await this.saveChanges(document, index);
+                if (section && section.value !== data) {
+                    section.value = merge ? mergeObject(section.value, data) : data;
+                    await this.saveChanges(document, { index, merge });
                 }
             },
             remove: (document: Content) => {
                 if (index !== undefined && document[contentKey].remove(index)) {
-                    this.saveChanges(document, index);
+                    this.saveChanges(document, { index });
                 }
             },
             moveUp: (document: Content) => {
                 if (document[contentKey].swap(index, index - 1)) {
-                    this.saveChanges(document, index);
+                    this.saveChanges(document, { index });
                 }
             },
             moveDown: (document: Content) => {
                 if (document[contentKey].swap(index, index + 1)) {
-                    this.saveChanges(document, index);
+                    this.saveChanges(document, { index });
                 }
             }
         };
     }
 
-    private async saveChanges(document: Content, index?: number) {
-        if (await this.store.setDocuments(document)) {
+    private async saveChanges(data: Content, { index, merge }: SaveOptions) {
+        if (await this.store.setDocuments({ data, merge: merge ?? true })) {
             if (index !== undefined) {
-                const section = document && document[contentKey][index];
-                showInfo(`Contents of section #${index} [${section.type}] updated.`);
+                const section = data && data[contentKey][index];
+                showInfo(`Contents of section #${index} [${section.type}] ${merge ? 'merged' : 'updated'}.`);
             } else {
-                showInfo(`Contents of ${this.name} updated.`);
+                showInfo(`Contents of ${this.name} ${merge ? 'merged' : 'updated'}.`);
             }
         }
     }

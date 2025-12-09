@@ -16,3 +16,15 @@ export type Entity = {
     id: string;
     title?: string;
 } & DocumentData;
+
+export type UpdateArgs<T = DocumentData> = {
+    data: Partial<T>;
+    merge: boolean;
+};
+
+export const isUpdateArgs = <T>(value: any): value is UpdateArgs<T> => (
+    value &&
+    typeof value === "object" &&
+    "data" in value &&
+    "merge" in value
+);

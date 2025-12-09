@@ -1,6 +1,6 @@
 import type { Collection } from "../models/schema.type";
-import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty } from "../packages/firecms_core/types/properties.simple";
-import type { SectionType, ValueType } from "../models/content.type";
+import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty, CMSType } from "../packages/firecms_core/types/properties.simple";
+import type { SectionType } from "../models/content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -11,15 +11,20 @@ export function createDefault<T extends Record<string, unknown>>(collection: Pic
     return obj as T;
 }
 
-export function defaultValueByType(property: AnyProperty): ValueType {
+export function defaultValueByType(property: AnyProperty): CMSType | null {
     switch (property.dataType) {
         case 'string':
+        case 'file':
+        case 'url':
             return '';
         case 'number':
             return 0;
+        case 'date':
+            return property.autoValue ? new Date() : null;
         case 'boolean':
             return false;
         case 'array':
+        case 'set':
             return [];
         case 'map':
             return createDefault(property);
@@ -53,7 +58,9 @@ export function isArrayProperty(property: AnyProperty, type?: DataType): propert
 
 export const isMapProperty = (prop?: AnyProperty): prop is MapProperty => prop?.dataType === "map";
 
-export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty => prop?.dataType === "set";
+export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty => prop?.dataType === "set" 
+    // backward compatibility to FireCMS
+    || prop?.dataType === "array" && (prop as any)?.oneOf !== undefined;
 
 export function arrayPropertyToMapProperty<T extends AnyProperty>(
     property: AnyProperty, 
@@ -70,14 +77,31 @@ export function arrayPropertyToMapProperty<T extends AnyProperty>(
     return {};
 }
 
-export function arrayToSectionMap(array?: SectionType[]): Record<string, unknown> {
-    const result = {} as Record<string, unknown>;
-    return array ? array
-        .filter(item => typeof item?.value === 'string')
-        .reduce((acc, { type, value }: SectionType) => {
-            acc[type] = value;
-            return acc;
-        }, result) : result;
+export const arrayToSectionMap = (array: SectionType[] | undefined): Record<string, CMSType | null> => 
+    arrayToRecord(array?.filter(item => typeof item['value'] === 'string'), 'type', 'value');
+
+export function arrayToRecord<
+    T extends Record<K, string> & Record<V, T[V]>,
+    K extends keyof T & string, 
+    V extends keyof T & string
+>(array: T[] | undefined, keyName: K, valName: V): Record<string, T[V]> {
+    const result: Record<string, T[V]> = {};
+    return array ? array.reduce((acc, { [keyName]: key, [valName]: value }: T) => {
+        acc[key] = value;
+        return acc;
+    }, result) : result;
+}
+
+export function objectToIterableArray(record: Record<string, CMSType>, keyName = 'key'): Array<{}> {
+    return Object.entries(record).reduce((acc, [field, value]) => {
+        acc.push({ [keyName]: field, type: typeOf(value), value });
+        return acc;
+    }, [] as Array<{}>);
+}
+
+function typeOf<T>(value: T): string {
+    const type = typeof value;
+    return Array.isArray(value) ? 'array' : type;
 }
 
 export function mergeObject<T>(old: T, value: T) {
