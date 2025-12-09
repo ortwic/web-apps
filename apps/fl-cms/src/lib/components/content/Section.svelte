@@ -65,7 +65,7 @@
             on:change={({ detail }) => change(detail)}/>
         {:else if typeof value === 'object'}
         <PropertyMap document={value} properties={getProperties(property)} 
-            on:update={({ detail }) => change(detail)}/>
+            on:update={({ detail }) => change(detail.data)}/>
         {:else}
         <Expand>
             <span slot="header" class="emphasis" title="Not implemented">

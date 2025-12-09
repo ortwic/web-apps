@@ -33,7 +33,7 @@
   import type { Readable } from 'svelte/store';
   import { Observable, fromEvent, map, take } from 'rxjs';
   import { orientation, type Orientation } from './stores/media.store.js';
-  import { tableView } from './stores/table-view.store.js';
+  import { tableView, type TableView } from './stores/table-view.store.js';
   import responsiveCollapse from './tabulator/modules/formatters/responsiveCollapse.js';
 
   window['luxon'] = luxon;
@@ -87,7 +87,7 @@
   let tableContainer: HTMLElement;
   let endOrientation = () => {};
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{ init: TableView }>();
   const groupContextMenu = [
     {
       label: 'Open all', // TODO not working

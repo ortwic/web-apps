@@ -462,5 +462,26 @@ export const templates: Record<string, EntityCollection> = {
                 name: 'Status',
             },
         },
+    },
+    'resources': {
+        id: 'resources',
+        name: 'Resources',
+        path: 'resources',
+        properties: {
+            id: {
+                editable: false,
+                dataType: 'string',
+                name: 'Id',
+                readOnly: true,
+                validation: {
+                    required: true,
+                },
+            },
+            resources: {
+                name: 'Resources',
+                dataType: 'map',
+                keyValue: true,
+            },
+        }
     }
 }

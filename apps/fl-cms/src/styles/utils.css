@@ -85,6 +85,10 @@
     white-space: nowrap;
 }
 
+.wrap {
+    white-space: pre-wrap;
+}
+
 .fa-square::before {
   content: '☐ ';
 }

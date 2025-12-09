@@ -75,14 +75,31 @@ export function arrayPropertyToMapProperty<T extends AnyProperty>(
     return {};
 }
 
-export function arrayToSectionMap(array?: SectionType[]): Record<string, unknown> {
-    const result = {} as Record<string, unknown>;
-    return array ? array
-        .filter(item => typeof item?.value === 'string')
-        .reduce((acc, { type, value }: SectionType) => {
-            acc[type] = value;
-            return acc;
-        }, result) : result;
+export const arrayToSectionMap = (array: SectionType[] | undefined): Record<string, ValueType> => 
+    arrayToRecord(array?.filter(item => typeof item['value'] === 'string'), 'type', 'value');
+
+export function arrayToRecord<
+    T extends Record<K, string> & Record<V, T[V]>,
+    K extends keyof T & string, 
+    V extends keyof T & string
+>(array: T[] | undefined, keyName: K, valName: V): Record<string, T[V]> {
+    const result: Record<string, T[V]> = {};
+    return array ? array.reduce((acc, { [keyName]: key, [valName]: value }: T) => {
+        acc[key] = value;
+        return acc;
+    }, result) : result;
+}
+
+export function objectToIterableArray(record: Record<string, ValueType>, keyName = 'key'): Array<{}> {
+    return Object.entries(record).reduce((acc, [field, value]) => {
+        acc.push({ [keyName]: field, type: typeOf(value), value });
+        return acc;
+    }, [] as Array<{}>);
+}
+
+function typeOf<T>(value: T): string {
+    const type = typeof value;
+    return Array.isArray(value) ? 'array' : type;
 }
 
 export function mergeObject<T>(old: T, value: T) {
