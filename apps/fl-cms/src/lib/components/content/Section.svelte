@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import type { AnyProperty } from '../../packages/firecms_core/types/properties.simple';
+    import type { AnyProperty, CMSType } from '../../packages/firecms_core/types/properties.simple';
+    import type { UpdateArgs } from "../../models/schema.type";
     import JSONEditor from '../ui/JSONEditor.svelte';
     import Expand from '../ui/Expand.svelte';
     import Input from '../ui/Input.svelte';
@@ -10,7 +11,7 @@
     import PropertyMap from "./PropertyMap.svelte";
     import SectionCards from './SectionCards.svelte';
 
-    type T = $$Generic<ValueType>;
+    type T = $$Generic<CMSType>;
     export let open = true;
     export let title = '';
     export let type: string | undefined;
@@ -18,7 +19,7 @@
     export let property: AnyProperty;
     export let disabled = false;
 
-    const dispatch = createEventDispatcher<{ change: any }>();
+    const dispatch = createEventDispatcher<{ changed: UpdateArgs<T> }>();
 
     function getProperties(prop: AnyProperty): Record<string, AnyProperty> {
         if (prop) {
@@ -32,9 +33,9 @@
         return {};
     }
 
-    function change<U>(value: U) {
-        if (value) {
-            dispatch('change', value);
+    function changed<U>(data: U, merge = true) {
+        if (data !== undefined && data !== null) {
+            dispatch('changed', { data, merge });
         }
     }
 
@@ -48,30 +49,30 @@
         </div>
     </span>
     <div class="section">
-        {#if typeof value === 'string' &&  isMarkdown(property)}
+        {#if typeof value === 'string' && isMarkdown(property)}
         <MarkdownEditor {value} placeholder={type} disabled="{disabled || property.editable === false}"
-            on:change={({ detail }) => change(detail)} />
-        {:else if typeof value === 'string' && property?.dataType === 'string'}
-        <Input type="text" {value} placeholder={type} disabled="{disabled || property.editable === false}" 
-            on:changed={({ detail }) => change(detail)} multiline={property.multiline}/>
-        {:else if isUrlProperty(property)}
+            on:changed={({ detail }) => changed(detail)} />
+        {:else if typeof value === 'string' && isUrlProperty(property)}
         <Input type="url" {value} placeholder={type} disabled="{disabled || property.editable === false}" 
-            on:changed={({ detail }) => change(detail)} />
-        {:else if isFileType(property, 'image')}
+            on:changed={({ detail }) => changed(detail)} />
+        {:else if typeof value === 'string' && isFileType(property, 'image')}
         <ImageSelect {value} alt={type} storage={property.storage} disabled="{disabled || property.editable === false}" 
-            on:changed={({ detail }) => change(detail)} />
+            on:changed={({ detail }) => changed(detail)} />
+        {:else if typeof value === 'string'}
+        <Input type="text" {value} placeholder={type} disabled="{disabled || property.editable === false}" 
+            on:changed={({ detail }) => changed(detail)} multiline={property?.dataType === 'string' ? property.multiline : false}/>
         {:else if Array.isArray(value)}
         <SectionCards {property} items={value} 
-            on:change={({ detail }) => change(detail)}/>
-        {:else if typeof value === 'object'}
+            on:changed={({ detail }) => changed(detail.data, detail.merge)}/>
+        {:else if typeof value === 'object' && value !== null}
         <PropertyMap document={value} properties={getProperties(property)} 
-            on:update={({ detail }) => change(detail.data)}/>
+            on:update={({ detail }) => changed(detail.data, detail.merge)}/>
         {:else}
         <Expand>
             <span slot="header" class="emphasis" title="Not implemented">
                 Missing '{property?.dataType}' for {typeof value} type
             </span>
-            <JSONEditor {value} on:changed={({ detail }) => change(detail)} />
+            <JSONEditor {value} on:changed={({ detail }) => changed(detail, false)} />
         </Expand>
         <Expand open={false}>
             <span slot="header" class="emphasis">Details of '{property?.dataType}'</span>

@@ -1,19 +1,19 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import { Table, Tabulator, type CellComponent, type ColumnDefinition, type TableView } from "@web-apps/svelte-tabulator";
     import { of } from "rxjs";
-    import type { ValueType } from '../../models/content.type';
+    import { Table, Tabulator, type CellComponent, type ColumnDefinition, type TableView } from "@web-apps/svelte-tabulator";
+    import type { CMSType } from '../../packages/firecms_core/types/properties.simple';
     import { currentClientUser } from "../../stores/app.store";
     import { arrayToRecord, objectToIterableArray } from "../../utils/content.helper";
     import Expand from "../ui/Expand.svelte";
 
-    export let record: Record<string, ValueType>;
+    export let record: Record<string, CMSType>;
     export let title: string;
 
     $: disabled = !$currentClientUser;
     
     let addElementButton: HTMLButtonElement;
-    const dispatch = createEventDispatcher<{ update: Record<string, ValueType> }>();
+    const dispatch = createEventDispatcher<{ update: Record<string, CMSType> }>();
     
     const keyName = 'key';
     const valName = 'value';

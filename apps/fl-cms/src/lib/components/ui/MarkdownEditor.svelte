@@ -17,8 +17,8 @@
     let imageSelect: ImageSelectDialog;
     let showImageSelector = false;
 
-    const dispatch = createEventDispatcher<{ change: string }>();
-	const handleChange = debounce((value) => dispatch("change", value), debounceInMs);
+    const dispatch = createEventDispatcher<{ changed: string }>();
+	const handleChange = debounce((value) => dispatch("changed", value), debounceInMs);
 
     function selectImage(): Promise<string> {
         showImageSelector = true;

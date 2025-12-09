@@ -45,7 +45,7 @@
     {#if $document$ && $content$}
         <Section open={!$content$.length} value={$document$} title="Details of {$contentService$?.name}"
             property={{ dataType: 'map', properties: $contentService$.properties }} type="details"
-            on:change={({ detail }) => $contentService$.update($document$, detail)}>
+            on:changed={({ detail }) => $contentService$.update($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" disabled={disabled || !$contentService$.hasContentDefinition} title="Add section"
                     on:click={(ev) => showPopupMenu(ev, 'add', 0)}>
@@ -58,7 +58,7 @@
         <div animate:flip={{ duration: 300 }}>
         {#if $contentService$.types[type]}
         <Section {value} {type} property={$contentService$.types[type]} {disabled}
-            on:change={({ detail }) => $contentService$.section(i).update($document$, detail)}>
+            on:changed={({ detail }) => $contentService$.section(i).update($document$, detail)}>
             <span slot="commands">
                 <button class="icon clear" {disabled} title="Add section"
                     on:click={(ev) => showPopupMenu(ev, 'add', i)}>

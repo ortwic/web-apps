@@ -2,20 +2,21 @@
     import { createEventDispatcher } from "svelte";
     import { flip } from "svelte/animate";
     import type { AnyProperty, Properties } from "../../packages/firecms_core/types/properties.simple";
-    import { arrayPropertyToMapProperty, defaultValueByType, isArrayProperty, isBlockSetProperty, mergeObject } from "../../utils/content.helper";
     import type { SectionType } from "../../models/content.type";
+    import type { UpdateArgs } from "../../models/schema.type";
+    import { arrayPropertyToMapProperty, defaultValueByType, isArrayProperty, isBlockSetProperty, mergeObject } from "../../utils/content.helper";
     import { withKey } from "../../utils/ui.helper";
     import Loading from "../ui/Loading.svelte";
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Section from "./Section.svelte";
 
-    type T = $$Generic<ValueType>;
+    type T = $$Generic<CMSType>;
     export let title = '';
     export let items: T[];
     export let property: AnyProperty;
     export let disabled = false;
     
-    const dispatch = createEventDispatcher<{ change: any }>();
+    const dispatch = createEventDispatcher<{ changed: UpdateArgs<T[]> }>();
     let addElementMenu: PopupMenu;
     
     $: repeatProperty = isArrayProperty(property) && property.of;
@@ -41,7 +42,7 @@
                     const prop = resolveProperty({ type, value: null });
                     const value = defaultValueByType(prop) as T;
                     items = [...items, { type, value, __id: Date.now() } as T];
-                    change(items as T);
+                    changed(items);
                 } else {
                     addElementMenu.showPopupMenu(event);
                 }
@@ -53,21 +54,21 @@
                 } else {
                     items = [...items, value];
                 }
-                change(items as T);
+                changed(items);
             }
         }
     }
 
-    function updateElement<U>(partial: U | T, index: number, type?: string) {
+    function updateElement({ data }: UpdateArgs<T>, index: number, type?: string) {
         if (items) {
             if (type && blockSetProperties) {
-                const value = mergeObject(items[index].value, partial);
+                const value = mergeObject(items[index].value, data);
                 items = items.toSpliced(index, 1, { type, value } as T);
-                change(items);
+                changed(items);
             } else {
-                const value = mergeObject(items[index], partial) as T;
+                const value = mergeObject(items[index], data) as T;
                 items = items.toSpliced(index, 1, value);
-                change(items);
+                changed(items);
             }
         }
     }
@@ -75,18 +76,18 @@
     function removeElement(index: number) {
         if (items) {
             items = items.toSpliced(index, 1);
-            change(items);
+            changed(items);
         }
     }
 
     function swap(i: number, j: number) {
         items.swap(i, j);
-        change([...items]);
+        changed([...items]);
     }
 
-    function change<U>(value: U) {
-        if (value) {
-            dispatch('change', value);
+    function changed(data: T[], merge = true) {
+        if (data !== undefined && data !== null) {
+            dispatch('changed', { data, merge });
         }
     }
 </script>
@@ -99,7 +100,7 @@
             {#if isTyped(item)}
             <Section value={item.value} {disabled} {title} 
                 property={resolveProperty(item)} type={item.type}
-                on:change={({ detail }) => updateElement(detail, i, item.type)}>
+                on:changed={({ detail }) => updateElement(detail, i, item.type)}>
                 <div slot="commands">
                     <button class="icon clear" {disabled} title="Move up"
                         on:click={() => swap(i, i - 1)}>
@@ -117,7 +118,7 @@
             {:else}
             <Section value={item} {disabled} {title} 
                 property={resolveProperty(item)} type="#{i + 1}"
-                on:change={({ detail }) => updateElement(detail, i)}>
+                on:changed={({ detail }) => updateElement(detail, i)}>
                 <div slot="commands">
                     <button class="icon clear" {disabled} title="Move up"
                         on:click={() => swap(i, i - 1)}>

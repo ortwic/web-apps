@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import type { DocumentData } from 'firebase/firestore';
     import type { AnyProperty } from '../../packages/firecms_core/types/properties.simple';
+    import type { UpdateArgs } from '../../models/schema.type';
     import {
         isFileType,
         isUrlProperty,
@@ -24,9 +25,7 @@
     export let document: DocumentData;
     export let properties: Record<string, AnyProperty>;
 
-    const dispatch = createEventDispatcher<{ 
-        update: { data: Partial<DocumentData>, merge: boolean } 
-    }>();
+    const dispatch = createEventDispatcher<{ update: UpdateArgs }>();
 
     $: disabled = !$currentClientUser;
 
@@ -49,7 +48,8 @@
 
     function updateNested(old: object, value: object, field: string, merge: boolean) {
         if (old !== value) {
-            dispatch('update', { data: { [field]: mergeObject(old, value) }, merge });
+            const data = { [field]: merge ? mergeObject(old, value) : value };
+            dispatch('update', { data, merge });
         }
     }
 </script>
@@ -76,14 +76,13 @@
                         </div>
                     </Expand>
                     {:else if prop.dataType === 'string' && prop.markdown === true}
-                        <span class="colspan">
-                            <MarkdownEditor
-                                value={document[field] ?? ''}
-                                {disabled}
-                                placeholder={prop.name}
-                                on:change={({ detail }) => update(detail, field)}
-                            />
-                        </span>
+                        <label for="{field}">{prop.name ?? field}</label>
+                        <MarkdownEditor
+                            value={document[field] ?? ''}
+                            {disabled}
+                            placeholder={prop.name}
+                            on:changed={({ detail }) => update(detail, field)}
+                        />
                     {:else}
                         <div class="grid">
                             <label for={field}>{prop.name ?? field}</label>

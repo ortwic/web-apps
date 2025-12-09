@@ -1,6 +1,6 @@
 import type { Collection } from "../models/schema.type";
-import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty } from "../packages/firecms_core/types/properties.simple";
-import type { SectionType, ValueType } from "../models/content.type";
+import type { AnyProperty, ArrayProperty, UrlProperty, MapProperty, StringProperty, FileProperty, PreviewType, DataType, BlockSetProperty, CMSType } from "../packages/firecms_core/types/properties.simple";
+import type { SectionType } from "../models/content.type";
 
 export function createDefault<T extends Record<string, unknown>>(collection: Pick<Collection, 'properties'> | null) {
     const obj: Record<string, unknown> = { };
@@ -11,7 +11,7 @@ export function createDefault<T extends Record<string, unknown>>(collection: Pic
     return obj as T;
 }
 
-export function defaultValueByType(property: AnyProperty): ValueType {
+export function defaultValueByType(property: AnyProperty): CMSType | null {
     switch (property.dataType) {
         case 'string':
         case 'file':
@@ -75,7 +75,7 @@ export function arrayPropertyToMapProperty<T extends AnyProperty>(
     return {};
 }
 
-export const arrayToSectionMap = (array: SectionType[] | undefined): Record<string, ValueType> => 
+export const arrayToSectionMap = (array: SectionType[] | undefined): Record<string, CMSType | null> => 
     arrayToRecord(array?.filter(item => typeof item['value'] === 'string'), 'type', 'value');
 
 export function arrayToRecord<
@@ -90,7 +90,7 @@ export function arrayToRecord<
     }, result) : result;
 }
 
-export function objectToIterableArray(record: Record<string, ValueType>, keyName = 'key'): Array<{}> {
+export function objectToIterableArray(record: Record<string, CMSType>, keyName = 'key'): Array<{}> {
     return Object.entries(record).reduce((acc, [field, value]) => {
         acc.push({ [keyName]: field, type: typeOf(value), value });
         return acc;
