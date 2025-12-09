@@ -56,7 +56,7 @@
         
         {#each $content$ as { type, value, __id }, i (__id ?? json.stringify({ type, value }))}
         <div animate:flip={{ duration: 300 }}>
-        {#if $contentService$.types[type]}
+        {#if value !== null && $contentService$.types[type]}
         <Section {value} {type} property={$contentService$.types[type]} {disabled}
             on:changed={({ detail }) => $contentService$.section(i).update($document$, detail)}>
             <span slot="commands">

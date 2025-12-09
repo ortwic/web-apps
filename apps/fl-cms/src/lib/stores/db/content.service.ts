@@ -97,14 +97,13 @@ export class ContentService {
         };
     }
 
-    private async saveChanges(document: Content, { index, merge }: SaveOptions) {
-        // TODO pass merge to setDocuments()
-        if (await this.store.setDocuments(document)) {
+    private async saveChanges(data: Content, { index, merge }: SaveOptions) {
+        if (await this.store.setDocuments({ data, merge: merge ?? true })) {
             if (index !== undefined) {
-                const section = document && document[contentKey][index];
-                showInfo(`Contents of section #${index} [${section.type}] updated.`);
+                const section = data && data[contentKey][index];
+                showInfo(`Contents of section #${index} [${section.type}] ${merge ? 'merged' : 'updated'}.`);
             } else {
-                showInfo(`Contents of ${this.name} updated.`);
+                showInfo(`Contents of ${this.name} ${merge ? 'merged' : 'updated'}.`);
             }
         }
     }

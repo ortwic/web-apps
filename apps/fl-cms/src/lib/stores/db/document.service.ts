@@ -5,7 +5,7 @@ import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import type { DocumentContract } from '../../contracts/document.contract';
-import type { Entity } from '../../models/schema.type';
+import { isUpdateArgs, type Entity, type UpdateArgs } from '../../models/schema.type';
 import { showError } from '../notification.store';
 
 // firestore does not like undefined values so omit them
@@ -89,14 +89,21 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return of(null);
     }
 
-    async setDocuments(...documents: T[]): Promise<boolean> {
+    async setDocuments(args: UpdateArgs<T>): Promise<boolean>;
+    async setDocuments(...documents: T[]): Promise<boolean>;
+    async setDocuments(...args: any[]): Promise<boolean> {
+        const [documents, merge] = isUpdateArgs(args[0])
+            ? [[args[0].data as T], args[0].merge]
+            : [(args as T[])];
+        const options = merge !== undefined ? { merge } : this.setOptions;
+
         if (this.store && this.path && documents.length) {
             const batch = writeBatch(this.store);
 
             const commitedData = documents.map((data) => {
                 const dataWithoutNullValues = omitUndefinedFields(data);
                 const docRef = doc(this.store!, this.path, data.id);
-                batch.set(docRef, dataWithoutNullValues, this.setOptions);
+                batch.set(docRef, dataWithoutNullValues, options);
                 return dataWithoutNullValues;
             });
 
