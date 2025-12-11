@@ -30,9 +30,11 @@
             const params = new URLSearchParams($querystring);
             const projectId = params.get('projectId');
             const apiKey = params.get('apiKey');
+            const authDomain = params.get('authDomain') ?? `${projectId}.firebaseapp.com`;
+            const databaseURL = params.get('databaseURL') ?? undefined;
+            const storageBucket = params.get('storageBucket') ?? undefined;
             if (projectId && apiKey) {
-                const authDomain = `${projectId}.firebaseapp.com`;
-                config = { projectId, apiKey, authDomain };
+                config = { projectId, apiKey, authDomain, databaseURL, storageBucket };
                 setCurrentConfig(config);
             }
         }
@@ -57,9 +59,9 @@
 
     function share() {
         if (config?.projectId) {
-            const baseUrl = window.location.toString().split('?').at(0);
-            const url = `${baseUrl}?projectId=${config.projectId}&apiKey=${config.apiKey}`;
-            navigator.clipboard.writeText(url);
+            const url = new URL(window.location.toString().split('?').at(0)!);
+            Object.entries(config).forEach(([key, value]) => url.searchParams.append(key, value));
+            navigator.clipboard.writeText(url.toString());
             showInfo(`Copied ${url} to clipboard`);
         }
     }

@@ -2,6 +2,7 @@
     import { derived } from 'svelte/store';
     import { push, querystring } from 'svelte-spa-router';
     import { colorScheme } from '@web-apps/svelte-tabulator';
+    import { APP_FUNDING, APP_TITLE } from '../app.info';
     import Login from '../lib/components/common/Login.svelte';
     import Logout from '../lib/components/common/Logout.svelte';
     import Expand from '../lib/components/ui/Expand.svelte';
@@ -23,8 +24,7 @@
 </script>
 
 <svelte:head>
-    <title>Settings</title>
-    <meta name="description" content="Settings of this app" />
+    <title>{APP_TITLE} | Settings</title>
 </svelte:head>
 
 <section class="text-column">
@@ -66,7 +66,7 @@
             </span>
             <div class="content">
                 <p>
-                    <img src="icon.svg" alt="logo" style:width="16px"> Fl-CMS is designed as a lightweight and simplified alternative inspired by 
+                    <img src="icon.svg" alt="logo" style:width="16px"> {APP_TITLE} is designed as a lightweight and simplified alternative inspired by 
                     <a href="https://app.firecms.co" target="_blank" rel="noopener noreferrer">FireCMS</a>, 
                     while still relying on its familiar data models. The focus lies on offering a 
                     streamlined experience with an interface that stays out of the user’s way and keeps 
@@ -103,7 +103,7 @@
                     </li>
                 </ul>
                 <p>
-                    <img src="icon.svg" alt="logo" style:width="16px"> Fl-CMS aims to provide a smooth workflow for anyone who prefers clarity over 
+                    <img src="icon.svg" alt="logo" style:width="16px"> {APP_TITLE} aims to provide a smooth workflow for anyone who prefers clarity over 
                     complexity while still enjoying the flexibility of a Firebase-based setup.
                 </p>
             </div>
@@ -117,7 +117,7 @@
             <div class="content" style="display: grid; grid-template-columns: 1fr auto; gap: 1em">
                 <span>
                     <p>
-                        <img src="icon.svg" alt="logo" style:width="16px"> Fl-CMS is offered for free, with no subscriptions or premium tiers. Development 
+                        <img src="icon.svg" alt="logo" style:width="16px"> {APP_TITLE} is offered for free, with no subscriptions or premium tiers. Development 
                         and maintenance are carried out independently, and contributions are welcomed 
                         to support ongoing improvements.
                     </p>
@@ -126,7 +126,7 @@
                         for its fair conditions and community-friendly approach.
                     </p>
                     <p class="center">
-                        <a class="emphasis highlight" role="button" target="_blank" href="https://liberapay.com/OCSoft42/donate">
+                        <a class="emphasis highlight" role="button" target="_blank" href={APP_FUNDING}>
                             <span>
                                 <img class="logo" src="/images/liberapay.svg" alt="Donate with Liberapay" width="16" /> Donate
                             </span>

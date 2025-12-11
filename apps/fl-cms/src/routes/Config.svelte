@@ -2,6 +2,7 @@
     import { params } from "svelte-spa-router";
     import { combineLatest, of, switchMap } from "rxjs";
     import CollectionEditor from "../lib/components/schema/CollectionEditor.svelte";
+    import { APP_TITLE } from "../app.info";
     import { createSchemaStore } from "../lib/stores/db/firestore.helper";
     import { fromStore } from "../lib/utils/rx.store";
 
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-    <title>Firebase CMS | Config</title>
+    <title>{APP_TITLE} | Config</title>
 </svelte:head>
 
 {#if $schema}

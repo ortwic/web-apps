@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { link } from 'svelte-spa-router';
     import { derived, writable } from 'svelte/store';
+    import { APP_TITLE } from '../app.info';
     import type { Collection } from '../lib/models/schema.type';
     import { showError, showWarn } from '../lib/stores/notification.store';
     import { currentClientUser } from '../lib/stores/app.store';
@@ -62,8 +63,7 @@
 </script>
 
 <svelte:head>
-    <title>Firebase CMS | Index</title>
-    <meta name="description" content="Custom Firebase Content Management System" />
+    <title>{APP_TITLE} | Index</title>
 </svelte:head>
 
 <section class="content-64">
