@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "random-b853b"
+  },
+  "targets": {
+    "random-b853b": {
+      "hosting": {
+        "beta": [
+          "random-b853b"
+        ],
+        "prod": [
+          "ran-dom"
+        ]
+      }
+    }
+  }
+}

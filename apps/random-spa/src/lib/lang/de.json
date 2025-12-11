@@ -1,0 +1,33 @@
+{
+  "start": {
+    "all": "Alle",
+    "loading": "Wird geladen...",
+    "level": "Level auswählen",
+    "start": "Start",
+    "privacy": "Datenschutzerklärung",
+    "termsofuse": "Nutzungsbedingungen"
+  },
+  "notfound": {
+    "title": "Nicht gefunden",
+    "messages": [
+      "Hoppla, etwas ist schief gelaufen.",
+      "Es tut uns leid, aber wir können die Seite, die Sie suchen, nicht finden.",
+      "Es sieht so aus, als ob diese Seite fehlt. Vielleicht wurde sie verschoben oder gelöscht.",
+      "Diese Seite ist gerade nicht verfügbar. Bitte schauen Sie später noch einmal vorbei.",
+      "Wir haben einige technische Schwierigkeiten. Bitte versuchen Sie es später noch einmal.",
+      "Es tut uns leid, aber etwas scheint bei uns schief zu laufen.",
+      "Wir arbeiten hart daran, dieses Problem zu beheben. Bitte haben Sie Geduld mit uns.",
+      "Diese Seite wird gerade gewartet. Wir entschuldigen uns für etwaige Unannehmlichkeiten.",
+      "Es tut uns leid, aber wir haben Probleme beim Laden dieser Seite.",
+      "Ein unerwarteter Fehler ist aufgetreten. Wir sind dran."
+    ]
+  },
+  "random": {
+    "next": "Nächstes",
+    "prev": "Zurück"
+  },
+  "Social": "Sozial",
+  "Sayings": "Sprüche",
+  "Games": "Spiel",
+  "Quotes": "Zitate"
+}

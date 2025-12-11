@@ -3,4 +3,5 @@
     "terminal.integrated.env.linux": {
         "LD_PRELOAD": null,
     }, 
+    "i18n-ally.keystyle": "nested"
 }
