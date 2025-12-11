@@ -1,8 +1,28 @@
 {
-  "name": "random-spa",
+  "name": "randomizer",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "author": "OCSoft42",
+  "description": "A lightweight SPA that generates random quotes, questions, jokes, and other custom content, fully managed through Fl-CMS and deployed as a Firebase PWA.",
+  "license": "BSD 3-Clause",
+  "homepage": "https://github.com/ortwic/web-apps/tree/main/apps/random-spa",
+  "funding": "https://liberapay.com/OCSoft42/donate",
+  "bugs": {
+    "url": "https://github.com/ortwic/web-apps/issues"
+  },
+  "keywords": [
+    "randomizer",
+    "random-generator",
+    "content-randomizer",
+    "quote-generator",
+    "questions",
+    "jokes",
+    "suggestions",
+    "svelte-app",
+    "random-content",
+    "lightweight-app"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

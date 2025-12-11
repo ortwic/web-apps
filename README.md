@@ -1,4 +1,4 @@
-# OCSoft42 Web Apps Repo
+# OCSoft42 - Web Apps Repo with Svelte
 
 All apps in this mono repo are built with Svelte and Typescript.
 
@@ -18,12 +18,30 @@ with Svelte 4 and delivered as a PWA.
 
 An [PWA app](https://song-repo.web.app) for musicians to keep an overview of their personal song repertoire.
 
-Do you occasionally forget which song you could play? Would you like to share your repertoire with friends? 
-Or do you just want to keep track of your progress and know which song you could refresh? 
-Then this app is right for you to keep an overview.
+- Do you occasionally forget which song you could play? 
+- Would you like to share your repertoire with friends? 
+- Or do you just want to keep track of your progress and know which song you could refresh? 
 
+Then this app is right for you to keep an overview of your progress. 📶
+
+Also contains a small blog 📚️ with tipps & best practices as well an event calendar map 🗺️ for open pianos 🎹.
 
 [Learn more](./apps/song-repo/README.md)
+
+## <img src="apps/random-spa//public/logo.svg" width="24" /> Randomizer : : Shaking it all up!
+
+A lightweight randomizer app that instantly serves up fun or thought-provoking content such as:
+
+- ❔ Social questions
+- ✨ Quotes
+- 💡 Suggestions
+- 😂 Jokes
+- ...and more
+
+All content is fully editable through [**Fl-CMS**](./apps/fl-cms/README.md), making the app easy to customize and extend.
+
+
+[Learn more](./apps/random-spa/README.md)
 
 ## <img src="https://tabulator.info/images/logos/t_hollow.png" width="16" /> Svelte-Tabulator
 
