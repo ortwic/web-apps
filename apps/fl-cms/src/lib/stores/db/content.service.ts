@@ -98,7 +98,7 @@ export class ContentService {
     }
 
     private async saveChanges(data: Content, { index, merge }: SaveOptions) {
-        if (await this.store.setDocuments({ data, merge: merge ?? true })) {
+        if (await this.store.setDocument(data, merge)) {
             if (index !== undefined) {
                 const section = data && data[contentKey][index];
                 showInfo(`Contents of section #${index} [${section.type}] ${merge ? 'merged' : 'updated'}.`);

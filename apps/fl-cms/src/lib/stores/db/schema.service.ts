@@ -70,7 +70,7 @@ export class SchemaStore implements Readable<Collection[]> {
             .pipe(map(d => lastNode(d, [...schemaPathSegments])));
     }
 
-    async createCollections(path: string): Promise<void> {
+    async createCollections(path: string, mergeDoc = true): Promise<void> {
         function createTree(segments: string[], parentIds: string[]): Collection {
             const id = segments.shift()!;
             const subcollections = segments.length > 0 ? [createTree(segments, [...parentIds, id])] : [];
@@ -85,11 +85,11 @@ export class SchemaStore implements Readable<Collection[]> {
         if (path) {
             const segments = path.toLowerCase().split('/').filter(Boolean);
             const document = createTree(segments, []);
-            await this.store.setDocuments(document);
+            await this.store.setDocument(document, mergeDoc);
         }
     }
 
-    async updateProperties(target: Collection): Promise<void> {
+    async updateProperties(target: Collection, mergeDoc: boolean, mergeProps = true): Promise<void> {
         if (!target.path?.trim()) {
             throw new Error('document has no path');
         }
@@ -98,7 +98,7 @@ export class SchemaStore implements Readable<Collection[]> {
             if (node) {
                 const id = segments.shift();
                 if (target.id === id) {
-                    if ('merge' in this.store.setOptions && this.store.setOptions.merge) {
+                    if (mergeProps) {
                         node.properties = { ...node.properties, ...target.properties };
                     } else {
                         node.properties = target.properties;
@@ -118,7 +118,7 @@ export class SchemaStore implements Readable<Collection[]> {
         const root = await firstValueFrom(this.getCollectionFromSchemaPath(segments[0]));
         if (root) {
             setProperties(root);
-            await this.store.setDocuments(root);
+            await this.store.setDocument(root, mergeDoc);
         }
     }
 
@@ -142,7 +142,7 @@ export class SchemaStore implements Readable<Collection[]> {
         if (segments.length > 1) {
             const root = await firstValueFrom(this.getCollectionFromSchemaPath(segments.shift()!));
             if(root && removeSubcollection(root)) {
-                await this.store.setDocuments(root);
+                await this.store.setDocument(root, false);
             }
         } else if (segments.length) {
             await this.store.removeDocuments(segments[0]);

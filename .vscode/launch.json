@@ -12,6 +12,16 @@
             "cwd": "${workspaceFolder}/apps/song-repo-jobs",
             "command": "pnpm dev",
             "outFiles": ["${workspaceFolder}/**/*.js"]
+        },
+        {
+            "name": "[fl-cms] Debug tests",
+            "type": "node-terminal",
+            "request": "launch",
+            "autoAttachChildProcesses": true,
+            "skipFiles": ["<node_internals>/**"],
+            "cwd": "${workspaceFolder}/apps/fl-cms",
+            "command": "pnpm test:debug",
+            "smartStep": true
         }
     ]
 }

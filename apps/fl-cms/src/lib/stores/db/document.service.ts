@@ -1,11 +1,11 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
 import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, SetOptions, SnapshotOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, writeBatch, query, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc } from 'firebase/firestore';
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, type Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import type { DocumentContract } from '../../contracts/document.contract';
-import { isUpdateArgs, type Entity, type UpdateArgs } from '../../models/schema.type';
+import type { Entity, UpdateArgs } from '../../models/schema.type';
 import { showError } from '../notification.store';
 
 // firestore does not like undefined values so omit them
@@ -20,9 +20,7 @@ const omitUndefinedFields = (data: Record<string, unknown>) => {
     return data;
 };
 
-const defaultSetOptions: SetOptions = {
-    merge: true
-};
+const MERGE_DEFAULT = true;
 const snapshotOptions: SnapshotOptions = {
     serverTimestamps: 'none'
 };
@@ -32,8 +30,7 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
     readonly unsubscribe: () => void = () => {};
 
     constructor(private store: Firestore | null, 
-        public readonly path: string | undefined, 
-        public readonly setOptions: SetOptions = defaultSetOptions
+        public readonly path: string | undefined
     ) {
         const pathValid = path && path.split('/').length % 2 > 0;
         if (!pathValid) {
@@ -89,21 +86,23 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return of(null);
     }
 
-    async setDocuments(args: UpdateArgs<T>): Promise<boolean>;
-    async setDocuments(...documents: T[]): Promise<boolean>;
-    async setDocuments(...args: any[]): Promise<boolean> {
-        const [documents, merge] = isUpdateArgs(args[0])
-            ? [[args[0].data as T], args[0].merge]
-            : [(args as T[])];
-        const options = merge !== undefined ? { merge } : this.setOptions;
+    public async setDocument(document: T, merge = MERGE_DEFAULT): Promise<boolean> {
+        if (this.store && this.path) {
+            const docRef = doc(this.store, this.path, document.id);
+            await setDoc(docRef, omitUndefinedFields(document), { merge });
+            return true;
+        }
+        return false;
+    }
 
+    async setDocuments(...documents: T[]): Promise<boolean> {
         if (this.store && this.path && documents.length) {
             const batch = writeBatch(this.store);
 
             const commitedData = documents.map((data) => {
                 const dataWithoutNullValues = omitUndefinedFields(data);
                 const docRef = doc(this.store!, this.path, data.id);
-                batch.set(docRef, dataWithoutNullValues, options);
+                batch.set(docRef, dataWithoutNullValues, { merge: MERGE_DEFAULT });
                 return dataWithoutNullValues;
             });
 

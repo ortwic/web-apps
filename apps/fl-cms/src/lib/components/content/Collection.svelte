@@ -65,16 +65,16 @@
     })));
 
     async function addEntry(schema: Collection | null) {
-        const document = createDefault<Entity>(schema);
-        document.id = newEntryId;
-        await $documentStore$.setDocuments(document);
+        const doc = createDefault<Entity>(schema);
+        doc.id = newEntryId;
+        await $documentStore$.setDocument(doc, true);
         showAddEntry = false;
         newEntryId = '';
     }
 
     async function update<T extends Entity>(doc: T) {
         try {
-            if (await $documentStore$.setDocuments(doc)) {
+            if (await $documentStore$.setDocument(doc, true)) {
                 showInfo(`Updated document ${JSON.stringify(doc)}`);
             } else {
                 showError(`Unable to update document ${JSON.stringify(doc)}`);

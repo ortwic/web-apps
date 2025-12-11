@@ -13,16 +13,16 @@ export const SCHEMA_DEFAULT_NAME = '__schema';
 
 export const currentFirestore = derived(appStore, (app) => app.getFirestore());
 
-export function createSchemaStore(options?: SetOptions, name = SCHEMA_DEFAULT_NAME): Readable<SchemaStore> {
+export function createSchemaStore(name = SCHEMA_DEFAULT_NAME): Readable<SchemaStore> {
     return derived<Readable<Firestore | null>, SchemaStore>(currentFirestore, (store, set) =>
-        set(new SchemaStore(new DocumentStore<Collection>(store, name, options)))
+        set(new SchemaStore(new DocumentStore<Collection>(store, name)))
     );
 }
 
-export function createDocumentStore<T extends Entity>(path: Observable<string | undefined> | string | undefined, options?: SetOptions): Observable<DocumentStore<T>> {
+export function createDocumentStore<T extends Entity>(path: Observable<string | undefined> | string | undefined): Observable<DocumentStore<T>> {
     const path$ = path instanceof Observable ? path : of(path);
     return combineLatest([fromStore(currentFirestore), path$]).pipe(
-        map(([store, path]) => new DocumentStore<T>(store, path, options))
+        map(([store, path]) => new DocumentStore<T>(store, path))
     );
 }
 

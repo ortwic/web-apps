@@ -24,10 +24,10 @@
     "host:prod": "firebase -P firelighter-cms deploy --only hosting:prod",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
     "spec": "pnpm vitest spec --testTimeout 0",
-    "test": "firebase emulators:exec --only firestore:8088 'pnpm vitest'",
-    "test:browser": "firebase emulators:exec --only firestore:8088 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
-    "test:debug": "firebase emulators:exec --only firestore:8088 'pnpm vitest --testTimeout 0'",
-    "test:once": "firebase emulators:exec --only firestore:8088 'pnpm vitest run'",
+    "test": "firebase emulators:exec --only firestore 'pnpm vitest'",
+    "test:browser": "firebase emulators:exec --only firestore 'pnpm vitest --inspect-brk --browser --no-file-parallelism'",
+    "test:debug": "firebase emulators:exec --only firestore 'pnpm vitest --testTimeout 0'",
+    "test:once": "firebase emulators:exec --only firestore 'pnpm vitest run'",
     "schema:properties": "ts-json-schema-generator -p src/lib/packages/firecms_core/types/properties.explicit.ts -t PropertyRecord -o src/lib/schema/generated/property-record.schema.json"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "@codemirror/state": "^6.5.2",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.19.0",
-    "@firebase/rules-unit-testing": "^3.0.4",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/svelte": "^5.2.0",

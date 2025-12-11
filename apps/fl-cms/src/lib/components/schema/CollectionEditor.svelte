@@ -23,14 +23,14 @@
 
     $: disabled = !$currentClientUser;
 
-    const schemaStore = createSchemaStore({ merge: false });
-    const service = createDocumentStore(item.path, { merge: false });
+    const schemaStore = createSchemaStore();
+    const service = createDocumentStore(item.path);
     const documents = service.pipe(switchMap(s => s.getDocumentStream()));
     const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {
         try {
-            await $schemaStore.updateProperties(item);
+            await $schemaStore.updateProperties(item, false);
             showInfo(`${item.path} saved`);
             dirty = false;
             if (window.history.length) {

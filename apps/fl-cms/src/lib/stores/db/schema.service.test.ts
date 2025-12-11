@@ -79,24 +79,29 @@ describe('schema store CRUD firebase tests', () => {
 
         // act #2
         await scheme.createCollections('foo/bar/baz');
+        // await scheme.createCollections('foo/baz');
         let foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
-        let bar = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar'));
-        let baz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar', 'baz'));
-
+        let foobar = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar'));
+        let foobarbaz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar', 'baz'));
+        // let foobaz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'baz'));
+        
         // assert #2
         expect(foo?.path).equals('foo');
-        expect(bar?.path).equals('foo/bar');
-        expect(baz?.path).equals('foo/bar/baz');
+        expect(foobar?.path).equals('foo/bar');
+        expect(foobarbaz?.path).equals('foo/bar/baz');
+        // expect(foobaz?.path).equals('foo/baz');
 
         // act #3
         foo = await firstValueFrom(scheme.getCollectionFromFullPath('foo'));
-        bar = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/bar'));
-        baz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/2/bar/3/baz'));
+        foobar = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/bar'));
+        foobarbaz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/2/bar/3/baz'));
+        // foobaz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/baz'));
 
         // assert #3
         expect(foo?.id).equals('foo');
-        expect(bar?.id).equals('bar');
-        expect(baz?.id).equals('baz');
+        expect(foobar?.id).equals('bar');
+        expect(foobarbaz?.id).equals('baz');
+        // expect(foobaz?.id).equals('baz');
     });
 
     it('should update properties without override', async () => {
@@ -104,13 +109,13 @@ describe('schema store CRUD firebase tests', () => {
         const [fooExt] = get(scheme);
         
         // act
-        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } });
+        await scheme.updateProperties({ ...fooExt!, properties: { num: { dataType: 'number' } } }, false);
         await scheme.createCollections('foo/bar/baz');
 
         // assert
         const foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
         expect(foo?.path).equals('foo', 'foo should not be removed');
-        expect((<Properties>foo?.properties).foo?.dataType).equals('number');
+        expect((<Properties>foo?.properties)?.num?.dataType).equals('number');
 
         const bar = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar'));
         expect(bar?.path).equals('foo/bar');
@@ -124,7 +129,7 @@ describe('schema store CRUD firebase tests', () => {
         const [fooExt] = get(scheme);
 
         // act #1
-        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } });
+        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } }, false);
 
         // assert #1
         let foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
@@ -133,7 +138,7 @@ describe('schema store CRUD firebase tests', () => {
         expect((<Properties>foo?.properties).foo?.dataType).equals('number');
 
         // act #2
-        await scheme.updateProperties({ ...foo!, properties: { bar: { dataType: 'date' } } });
+        await scheme.updateProperties({ ...foo!, properties: { bar: { dataType: 'date' } } }, false);
         
         // assert #2
         foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
@@ -148,8 +153,8 @@ describe('schema store CRUD firebase tests', () => {
         let [fooExt, barExt] = get(scheme);
 
         // act #1
-        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } });
-        await scheme.updateProperties({ ...barExt!, properties: { bar: { dataType: 'date' } } });
+        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } }, false);
+        await scheme.updateProperties({ ...barExt!, properties: { bar: { dataType: 'date' } } }, false);
         
         // assert #1
         let foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
@@ -162,8 +167,8 @@ describe('schema store CRUD firebase tests', () => {
         [fooExt, barExt] = get(scheme);
 
         // act #2
-        await scheme.updateProperties({ ...fooExt!, properties: { baz: { dataType: 'string' } } });
-        await scheme.updateProperties({ ...barExt!, properties: { baz: { dataType: 'string' } } });
+        await scheme.updateProperties({ ...fooExt!, properties: { baz: { dataType: 'string' } } }, false);
+        await scheme.updateProperties({ ...barExt!, properties: { baz: { dataType: 'string' } } }, false);
         
         // assert #2
         foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
@@ -180,7 +185,7 @@ describe('schema store CRUD firebase tests', () => {
         const [fooExt, barExt, bazExt] = get(scheme);
 
         // act #1
-        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } });
+        await scheme.updateProperties({ ...fooExt!, properties: { foo: { dataType: 'number' } } }, false);
 
         // assert #2
         const foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
@@ -189,7 +194,7 @@ describe('schema store CRUD firebase tests', () => {
         expect((<Properties>foo?.properties).foo?.dataType).equals('number');
 
         // act #2
-        await scheme.updateProperties({ ...barExt!, properties: { bar: { dataType: 'date' } } });
+        await scheme.updateProperties({ ...barExt!, properties: { bar: { dataType: 'date' } } }, false);
         
         // assert #2
         const bar = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar'));
@@ -199,7 +204,7 @@ describe('schema store CRUD firebase tests', () => {
         expect((<Properties>bar?.properties).bar?.dataType).equals('date');
 
         // act #3
-        await scheme.updateProperties({ ...bazExt!, properties: { baz: { dataType: 'string' } } });
+        await scheme.updateProperties({ ...bazExt!, properties: { baz: { dataType: 'string' } } }, false);
         
         // assert #3
         const docs = get(store);
