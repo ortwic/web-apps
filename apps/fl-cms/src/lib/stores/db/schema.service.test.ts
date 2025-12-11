@@ -79,29 +79,29 @@ describe('schema store CRUD firebase tests', () => {
 
         // act #2
         await scheme.createCollections('foo/bar/baz');
-        // await scheme.createCollections('foo/baz');
+        await scheme.createCollections('foo/baz');
         let foo = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo'));
         let foobar = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar'));
         let foobarbaz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'bar', 'baz'));
-        // let foobaz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'baz'));
+        let foobaz = await firstValueFrom(scheme.getCollectionFromSchemaPath('foo', 'baz'));
         
         // assert #2
         expect(foo?.path).equals('foo');
         expect(foobar?.path).equals('foo/bar');
         expect(foobarbaz?.path).equals('foo/bar/baz');
-        // expect(foobaz?.path).equals('foo/baz');
+        expect(foobaz?.path).equals('foo/baz');
 
         // act #3
         foo = await firstValueFrom(scheme.getCollectionFromFullPath('foo'));
         foobar = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/bar'));
         foobarbaz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/2/bar/3/baz'));
-        // foobaz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/baz'));
+        foobaz = await firstValueFrom(scheme.getCollectionFromFullPath('foo/1/baz'));
 
         // assert #3
         expect(foo?.id).equals('foo');
         expect(foobar?.id).equals('bar');
         expect(foobarbaz?.id).equals('baz');
-        // expect(foobaz?.id).equals('baz');
+        expect(foobaz?.id).equals('baz');
     });
 
     it('should update properties without override', async () => {

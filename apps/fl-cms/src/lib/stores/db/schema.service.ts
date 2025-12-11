@@ -1,7 +1,8 @@
 import { derived, type Readable } from "svelte/store";
+import { firstValueFrom, map, of, Observable } from "rxjs";
+import { merge as deepmerge } from 'ts-deepmerge';
 import type { Collection } from "../../models/schema.type";
 import type { DocumentStore } from "./document.service";
-import { firstValueFrom, map, of, Observable } from "rxjs";
 
 export class SchemaStore implements Readable<Collection[]> {
     subscribe: Readable<Collection[]>['subscribe'];
@@ -84,7 +85,9 @@ export class SchemaStore implements Readable<Collection[]> {
 
         if (path) {
             const segments = path.toLowerCase().split('/').filter(Boolean);
-            const document = createTree(segments, []);
+            const existing = await firstValueFrom(this.store.getDocument(segments[0]));
+            const newDoc = createTree(segments, []);
+            const document = existing && mergeDoc ? deepmerge(existing, newDoc) : newDoc;
             await this.store.setDocument(document, mergeDoc);
         }
     }

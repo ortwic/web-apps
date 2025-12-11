@@ -108,7 +108,7 @@
                 placeholder="New collection"
             />
             <br/>
-            <button {disabled} class="clear" on:click={add}>
+            <button disabled={disabled || !pathInput?.value} class="clear" on:click={add}>
                 <i class="bx bx-plus"></i>
             </button>
         </div>
