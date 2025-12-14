@@ -6,7 +6,7 @@
     export let duration = 0.2;
     export let easing = 'ease';
 
-    const dispatch = createEventDispatcher()
+    const dispatch = createEventDispatcher<{ open: void; close: void }>()
 
     function handleToggle () {
         open = !open

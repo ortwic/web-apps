@@ -1,7 +1,7 @@
 {
   "name": "Fl-CMS",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A minimal and lean browser-based headless CMS for Firebase",
   "author": "OCSoft42",
   "license": "BSD 3-Clause",

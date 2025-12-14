@@ -20,6 +20,8 @@
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
     let validationMessages: string[] = [];
+    // TODO fix validation https://github.com/ortwic/web-apps/issues/9
+    let skipValidation = false; 
 
     $: disabled = !$currentClientUser;
 
@@ -57,7 +59,7 @@
     }
 
     function setProperties<T>(props: T) {
-        if (validate(props) || import.meta.env.DEV) {
+        if (validate(props) || skipValidation) {
             item.properties = props as Properties;
             validationMessages = [];
             dirty = true;
@@ -92,7 +94,7 @@
 </div>
 
 <div class="validation">
-    <Expand>
+    <Expand on:open={() => skipValidation = false} on:close={() => skipValidation = true}>
         <span slot="header" class="emphasis">Validation output</span>
         <textarea readonly>{validationMessages.join('\n')}</textarea>
     </Expand>
