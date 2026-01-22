@@ -93,10 +93,10 @@ export function arrayToRecord<
 }
 
 export function objectToIterableArray(record: Record<string, CMSType>, keyName = 'key'): Array<{}> {
-    return Object.entries(record).reduce((acc, [field, value]) => {
+    return record ? Object.entries(record).reduce((acc, [field, value]) => {
         acc.push({ [keyName]: field, type: typeOf(value), value });
         return acc;
-    }, [] as Array<{}>);
+    }, [] as Array<{}>) : [];
 }
 
 function typeOf<T>(value: T): string {
