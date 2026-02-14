@@ -4,10 +4,11 @@
     import { Table, Tabulator, type CellComponent, type ColumnDefinition, type TableView } from "@web-apps/svelte-tabulator";
     import type { CMSType } from '../../packages/firecms_core/types/properties.simple';
     import { currentClientUser } from "../../stores/app.store";
-    import { arrayToRecord, objectToIterableArray } from "../../utils/content.helper";
+    import { arrayToNestedRecord, arrayToRecord, objectToIterableArray } from "../../utils/content.helper";
     import Expand from "../ui/Expand.svelte";
 
-    export let record: Record<string, CMSType>;
+    export let record: Record<string, string | Record<string, string>>;
+    export let columns: boolean | string[];
     export let title: string;
 
     $: disabled = !$currentClientUser;
@@ -15,58 +16,39 @@
     let addElementButton: HTMLButtonElement;
     const dispatch = createEventDispatcher<{ update: Record<string, CMSType> }>();
     
-    const keyName = 'key';
-    const valName = 'value';
-    const typeName = 'type';
-    const data$ = of(objectToIterableArray(record, keyName));
-    const column = (field: string, title?: string, definition: Partial<ColumnDefinition> = {}): ColumnDefinition => ({ 
+    const KEY_NAME = 'key';
+    const VAL_NAME = 'value';
+    const data$ = of(objectToIterableArray(record, Array.isArray(columns) ? columns : VAL_NAME, KEY_NAME));
+    const column = (field: string, definition: Partial<ColumnDefinition> = {}): ColumnDefinition => ({ 
         field,
-        title: title ?? field,
+        title: field,
         resizable: true, 
         sorter: 'string',
         ...definition
     });
 
-    const columns: ColumnDefinition[] = [
-        { title: '', field: '', formatter: removeItemElement },
-        column(keyName, 'Key', {
-            editor: 'input',
-            editable(cell: CellComponent) {
-                return !cell.getValue();
-            }
-        }),
-        column(typeName, 'Type', {
-            visible: false,
-            editor: 'list',
-            editable: (cell) => !hasValue(cell),
-            editorParams: {
-                values: ['object', 'array', 'string', 'number', 'boolean']
-            }
-        }),
-        column(valName, 'Value', {
-            width: '60%',
-            editor: 'input',
-            editable: (cell) => hasValidKey(cell) && typeof cell.getValue() !== 'object',
-            cellEdited: (cell: CellComponent) => update(cell.getTable()),
-            formatter(cell: CellComponent) {
-                const value = cell.getValue();
-                if (Array.isArray(value)) {
-                    return (value as []).join(',');
+    function getColumns(): ColumnDefinition[] {
+        const valueMap = Array.isArray(columns) ? columns : [VAL_NAME];
+        const width = `${72 / valueMap.length}%`;
+        return [
+            { title: '', field: '', formatter: removeItemElement },
+            column(KEY_NAME, {
+                editor: 'input',
+                editable(cell: CellComponent) {
+                    return !cell.getValue();
                 }
-                if (typeof value === 'object') {
-                    return `<pre>${JSON.stringify(value, null, 2)}</pre>`;
-                } 
-                return `<span style='white-space:pre-wrap'>${value}</span>`;
-            }
-        }),
-    ];
-
-    function hasValidKey(cell: CellComponent): boolean {
-        return Boolean(cell.getRow().getData()[keyName]);
+            }),
+            ...valueMap.map(key => column(key, { 
+                width,
+                editor: 'input',
+                editable: (cell) => hasValidKey(cell),
+                cellEdited: (cell: CellComponent) => update(cell.getTable())
+            }))
+        ];
     }
 
-    function hasValue(cell: CellComponent): boolean {
-        return Boolean(cell.getRow().getData()[valName]);
+    function hasValidKey(cell: CellComponent): boolean {
+        return Boolean(cell.getRow().getData()[KEY_NAME]);
     }
 
     function init({ table }: TableView) {
@@ -74,10 +56,10 @@
     }
 
     async function addElement(table: Tabulator) {
-        const alreadyAdded = table.getData().some(d => !d[keyName]);
+        const alreadyAdded = table.getData().some(d => !d[KEY_NAME]);
         const row = alreadyAdded ? table.getRows().at(-1)
-            : await table.addRow({ [keyName]: '', [valName]: '', [typeName]: 'string' });
-        setTimeout(() => row?.getCell(keyName).getElement().focus());
+            : await table.addRow({ [KEY_NAME]: '' });
+        setTimeout(() => row?.getCell(KEY_NAME).getElement().focus());
     }
 
     function removeItemElement(cell: CellComponent) {
@@ -103,7 +85,9 @@
 
     function update(table: Tabulator) {
         const data = table.getData();
-        const map = arrayToRecord(data, keyName, valName);
+        const map = Array.isArray(columns) 
+            ? arrayToNestedRecord(data, KEY_NAME, columns)
+            : arrayToRecord(data, KEY_NAME, VAL_NAME);
         dispatch('update', map);
     }
 
@@ -117,7 +101,7 @@
         </button>
     </span>
     <div class="input">
-        <Table data={data$} {columns} idField={keyName} persistenceID={title}
+        <Table data={data$} columns={getColumns()} idField={KEY_NAME} persistenceID={title}
             on:init={({ detail }) => init(detail)} />
     </div>
 </Expand>

@@ -417,10 +417,11 @@ export interface MapProperty<T extends Record<string, CMSType> = Record<string, 
     expanded?: boolean;
 
     /**
-     * Render this map as a key-value table that allows to use
-     * arbitrary keys. You don't need to define the properties in this case.
+     * Render this map as a key-value table that allows to use arbitrary keys. 
+     * You can define column names to make the values multidimensional.
+     * You don't need to define the properties in this case.
      */
-    keyValue?: boolean;
+    keyValue?: boolean | [];
 
 }
 

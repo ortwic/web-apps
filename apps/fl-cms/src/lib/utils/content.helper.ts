@@ -92,16 +92,43 @@ export function arrayToRecord<
     }, result) : result;
 }
 
-export function objectToIterableArray(record: Record<string, CMSType>, keyName = 'key'): Array<{}> {
-    return record ? Object.entries(record).reduce((acc, [field, value]) => {
-        acc.push({ [keyName]: field, type: typeOf(value), value });
+export function arrayToNestedRecord<T extends Record<K, string>, K extends keyof T & string>(
+    array: T[] | undefined, 
+    keyName: K, 
+    columns: string[]
+): Record<string, Record<string, string>> {
+    if (!array) return {};
+    
+    return array.reduce((acc, row) => {
+        const key = row[keyName];
+        const record: Record<string, string> = {};
+        
+        columns.forEach(col => {
+            record[col] = row[col as keyof T] as string;
+        });
+        
+        acc[key] = record;
         return acc;
-    }, [] as Array<{}>) : [];
+    }, {} as Record<string, Record<string, string>>);
 }
 
-function typeOf<T>(value: T): string {
-    const type = typeof value;
-    return Array.isArray(value) ? 'array' : type;
+export function objectToIterableArray(
+    record: Record<string, string | Record<string, string>>, 
+    columns: string[] | string, 
+    keyName = 'key'
+): Array<{}> {
+    return record ? Object.entries(record).reduce((acc, [key, value]) => {
+        const row: Record<string, any> = { [keyName]: key };
+        if (Array.isArray(columns) && typeof value === 'object') {
+            columns.forEach(k => row[k] = value[k]);
+        } else if (typeof columns === 'string') {
+            row[columns] = value;
+        } else {
+            throw new Error('Column parameter does not match with record');
+        }
+        acc.push(row);
+        return acc;
+    }, [] as Array<{}>) : [];
 }
 
 export function mergeObject<T>(old: T, value: T) {

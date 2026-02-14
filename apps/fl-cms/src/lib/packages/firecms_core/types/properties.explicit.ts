@@ -146,7 +146,7 @@ export interface MapProperty extends BaseProperty {
   pickOnlySomeKeys?: boolean;
   spreadChildren?: boolean;
   expanded?: boolean;
-  keyValue?: boolean;
+  keyValue?: boolean | [];
 }
 
 /**

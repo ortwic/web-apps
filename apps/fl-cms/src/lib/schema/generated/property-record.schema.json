@@ -398,7 +398,16 @@
           "type": "boolean"
         },
         "keyValue": {
-          "type": "boolean"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "maxItems": 0,
+              "minItems": 0,
+              "type": "array"
+            }
+          ]
         },
         "longDescription": {
           "description": "Longer description displayed in popover",

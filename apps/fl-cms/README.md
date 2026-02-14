@@ -136,6 +136,7 @@ Fl-CMS uses mostly the same datamodels as those defined in the [FireCMS API](htt
   * FileProberty `file` containing the storage config
 * The ArrayProperty can be from one type only
   * The ArrayProperty with oneOf properties is a BlockSetProperty of `set` now
+* The KeyValue-Type (MapProperty) can define an array of column definitions
 * Check out `properties.simple.ts` from the sources for more details
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -160,6 +161,6 @@ conventions.
 
 ## License
 
-[MIT License](./LICENSE.md)
+[License](./LICENSE.md)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

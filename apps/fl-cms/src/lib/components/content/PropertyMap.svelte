@@ -60,7 +60,7 @@
         {#each Object.entries(properties) as [field, prop]}
             <li title={prop.dataType}>
                 {#if prop.dataType === 'map' && prop.keyValue}
-                <DynamicMap record={document[field]} title={prop.name ?? field}
+                <DynamicMap record={document[field]} title={prop.name ?? field} columns={prop.keyValue}
                     on:update={({ detail }) => update(detail, field, false)}
                 />
                 {:else if prop.dataType === 'map'}
