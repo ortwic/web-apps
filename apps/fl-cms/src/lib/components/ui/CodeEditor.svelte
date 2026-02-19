@@ -1,11 +1,12 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import { codemirror } from '../../directives/json5Editor';
+    import { codemirror, type SchemaType } from '../../directives/schemaEditor';
     import type { Extension } from '@codemirror/state';
     import { colorScheme } from '@web-apps/svelte-tabulator';
 
     type T = $$Generic<any>;
     export let value = {} as T;
+    export let type: SchemaType = 'yaml';
     export let debounceInMs = 500;
     export let extensions: Extension[] = [];
     export let schema: {} = {
@@ -34,6 +35,7 @@
     use:codemirror={{
         value,
         theme: $colorScheme,
+        type,
         schema,
         extensions,
         debounceInMs,

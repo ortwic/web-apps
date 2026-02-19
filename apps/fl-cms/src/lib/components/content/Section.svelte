@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     import type { AnyProperty, CMSType } from '../../packages/firecms_core/types/properties.simple';
     import type { UpdateArgs } from "../../models/schema.type";
-    import JSONEditor from '../ui/JSONEditor.svelte';
+    import CodeEditor from '../ui/CodeEditor.svelte';
     import Expand from '../ui/Expand.svelte';
     import Input from '../ui/Input.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
@@ -72,11 +72,11 @@
             <span slot="header" class="emphasis" title="Not implemented">
                 Missing '{property?.dataType}' for {typeof value} type
             </span>
-            <JSONEditor {value} on:changed={({ detail }) => changed(detail, false)} />
+            <CodeEditor {value} on:changed={({ detail }) => changed(detail, false)} />
         </Expand>
         <Expand open={false}>
             <span slot="header" class="emphasis">Details of '{property?.dataType}'</span>
-            <JSONEditor value={property} />
+            <CodeEditor value={property} />
         </Expand>
         {/if}
     </div>

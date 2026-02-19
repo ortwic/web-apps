@@ -16,7 +16,7 @@
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
     import TagCloud from '../ui/TagCloud.svelte';
     import Input from '../ui/Input.svelte';
-    import JSONEditor from '../ui/JSONEditor.svelte';
+    import CodeEditor from '../ui/CodeEditor.svelte';
     import Select from '../ui/Select.svelte';
     import ImageSelect from './ImageSelect.svelte';
     import SectionCards from './SectionCards.svelte';
@@ -157,7 +157,7 @@
                         {:else}
                             <Expand>
                                 <span slot="header" class="emphasis no-wrap center">{prop.name ?? field}</span>
-                                <JSONEditor
+                                <CodeEditor
                                     value={document[field]}
                                     on:changed={({ detail }) => update(detail, field)}
                                 />

@@ -11,7 +11,7 @@
     import Expand from '../ui/Expand.svelte';
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
-    import JSONEditor from '../ui/JSONEditor.svelte';
+    import CodeEditor from '../ui/CodeEditor.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import schema from '../../schema/generated/property-record.schema.json';
 
@@ -88,7 +88,7 @@
 </header>
 
 <div class="input">
-    <JSONEditor value={properties} {schema}
+    <CodeEditor value={properties} {schema}
         on:changed={({ detail }) => setProperties(detail)} 
         on:error={({ detail }) => validationMessages = [detail]} />
 </div>

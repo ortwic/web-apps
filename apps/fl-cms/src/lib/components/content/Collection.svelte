@@ -1,5 +1,5 @@
 <script lang="ts">
-    import json from 'json5';
+    import yaml from 'js-yaml';
     import { push } from 'svelte-spa-router';
     import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
@@ -15,7 +15,7 @@
     import Toolbar from '../ui/Toolbar.svelte';
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
-    import JSONEditor from '../ui/JSONEditor.svelte';
+    import CodeEditor from '../ui/CodeEditor.svelte';
     import '../../../styles/tabulator.css';
     
     export let schema$ = of<Collection | null>(null);
@@ -24,8 +24,8 @@
     let showAddEntry = false;
     let newEntryId: string;
     let uploadInput: HTMLInputElement;
-    let importJsonData: Entity[] | null;
-    let invalidJsonMessage: string | undefined;
+    let importData: Entity[] | null;
+    let errorMessage: string | undefined;
 
     $: disabled = !$currentClientUser;
 
@@ -95,36 +95,40 @@
             const file = uploadInput.files[0];
             const content = await file.text();
             try {            
-                importJsonData = json.parse<Entity[]>(content);
+                importData = yaml.load(content, { filename: file.name }) as Entity[];
             } catch (error) {
-                showError("Unable to parse JSON file");
+                showError(`Failed to parse file ${file.name}: ${error}`);
             }
         }
     }
     
-    async function importAsJson() {
-        if (!importJsonData) {
+    async function importDocuments() {
+        if (!importData) {
             showError("No data to import");
             return;
         }
 
         try {
-            $documentStore$.setDocuments(...importJsonData);
+            $documentStore$.setDocuments(...importData);
         } catch (error: any) {
             showError("Failed to import documents:", error.message);
         } finally {
-            importJsonData = null;
+            importData = null;
         }
     }
 
-    function exportAsJson() {
+    function exportDocuments() {
         try {
-            const jsonStr = JSON.stringify($documents$, (k, v) => timestampToIsoDate(v), 2); 
-            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const str = yaml.dump($documents$, {
+                noArrayIndent: true,
+                indent: 2,
+                replacer: (k, v) => timestampToIsoDate(v),
+            }); 
+            const blob = new Blob([str], { type: 'application/x-yaml' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${$documentStore$.path}.json`; 
+            link.download = `${$documentStore$.path}.yaml`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -139,10 +143,10 @@
         <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
             <i class="bx bx-plus hl"></i>
         </button>
-        <button title="Import as JSON" {disabled} class="icon clear" on:click={selectFile}>
+        <button title="Import from YAML" {disabled} class="icon clear" on:click={selectFile}>
             <i class="bx bx-import"></i>
         </button>
-        <button title="Export to JSON" class="icon clear" on:click={exportAsJson}>
+        <button title="Export to YAML" class="icon clear" on:click={exportDocuments}>
             <i class="bx bx-export"></i>
         </button>
         <slot name="commands"></slot>
@@ -177,25 +181,26 @@
 </Modal>
 {/await}
 
-<Modal open={!!importJsonData} width="100%" on:close={() => (importJsonData = null)}>
-    {#if importJsonData}
+<Modal open={!!importData} width="100%" on:close={() => (importData = null)}>
+    {#if importData}
     <Toolbar>
-        <span slot="title">Import JSON</span>
-        {#if invalidJsonMessage}
-        <span>{invalidJsonMessage}</span>
+        <span slot="title">Import</span>
+        {#if errorMessage}
+        <span>{errorMessage}</span>
         {:else}
-        <button on:click={importAsJson}>
+        <button on:click={importDocuments}>
             <i class="bx bx-check"></i> Confirm
         </button>
         {/if}
     </Toolbar>
     <div class="input">
-        <JSONEditor value={importJsonData} on:error={({ detail }) => invalidJsonMessage = detail} />
+        <CodeEditor value={importData} on:error={({ detail }) => errorMessage = detail} />
     </div>
     {/if}
 </Modal>
 
-<input type="file" bind:this={uploadInput} on:change="{showImportDialog}" accept="application/json" />
+<input type="file" bind:this={uploadInput} on:change="{showImportDialog}" 
+    accept=".json,.yaml,.yml,application/json,application/x-yaml,text/yaml" />
 
 <style>
     input[type="file"] {
