@@ -62,7 +62,6 @@
     "bytemd": "^1.22.0",
     "codemirror": "^6.0.2",
     "codemirror-json-schema": "^0.8.1",
-    "codemirror-json5": "^1.0.3",
     "firebase": "^12.6.0",
     "js-yaml": "^4.1.1",
     "jsdom": "^22.1.0",

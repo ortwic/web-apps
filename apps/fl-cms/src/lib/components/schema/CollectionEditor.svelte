@@ -12,7 +12,10 @@
     import Toolbar from '../ui/Toolbar.svelte';
     import CodeEditor from '../ui/CodeEditor.svelte';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
-    import schema from '../../schema/generated/property-record.schema.json';
+    
+    // TODO this auto generated schema is yet too complex for codemirror-json-schema lib to interpret!
+    // import schema from '../../schema/generated/property-record.schema.json';
+    import schema from '../../schema/generated/property-claude-ai.schema.json';
 
     export let item: Collection;
     let dirty = false;

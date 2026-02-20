@@ -16,7 +16,7 @@ export default defineConfig({
                         'codemirror',
                         '@codemirror/view',
                         '@codemirror/state',
-                        '@codemirror/lang-json',
+                        '@codemirror/lang-yaml',
                         '@codemirror/theme-one-dark',
                     ],
                     bytemd: ['bytemd'],

@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": ["string", "number", "boolean", "date", "array", "map", "set", "url"]
+      },
+      "name": { "type": "string" },
+      "description": { "type": "string" },
+      "longDescription": { "type": "string" },
+      "defaultValue": {},
+      "readOnly": { "type": "boolean" },
+      "editable": { "type": "boolean" },
+      "disabled": { "type": "boolean" },
+      "expanded": { "type": "boolean" },
+      "hideFromCollection": { "type": "boolean" },
+      "columnWidth": { "type": "number" },
+      "markdown": { "type": "boolean" },
+      "multiline": { "type": "boolean" },
+      "clearable": { "type": "boolean" },
+      "previewAsTag": { "type": "boolean" },
+      "pickOnlySomeKeys": { "type": "boolean" },
+      "spreadChildren": { "type": "boolean" },
+      "keyValue": { "type": "boolean" },
+      "url": { "type": "boolean" },
+      "email": { "type": "boolean" },
+      "storeUrl": { "type": "boolean" },
+      "preview": {
+        "type": "string",
+        "enum": ["image", "video", "audio", "file"]
+      },
+      "autoValue": {
+        "type": "string",
+        "enum": ["on_create", "on_update"]
+      },
+      "mode": {
+        "type": "string",
+        "enum": ["date", "date_time"]
+      },
+      "validation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "required": { "type": "boolean" },
+          "requiredMessage": { "type": "string" },
+          "unique": { "type": "boolean" },
+          "uniqueInArray": { "type": "boolean" }
+        }
+      },
+      "storage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "storagePath": { "type": "string" },
+          "acceptedFiles": { "type": "array", "items": { "type": "string" } },
+          "fileName": { "type": "string" },
+          "maxSize": { "type": "number" },
+          "storeUrl": { "type": "boolean" },
+          "metadata": { "type": "object" }
+        }
+      },
+      "of": {
+        "type": "object"
+      },
+      "properties": {
+        "type": "object"
+      },
+      "propertiesOrder": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "previewProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "enumValues": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" }
+          }
+        }
+      },
+      "oneOf": {
+        "type": "object",
+        "properties": {
+          "typeField": { "type": "string" },
+          "valueField": { "type": "string" },
+          "properties": { "type": "object" }
+        }
+      }
+    }
+  }
+}
