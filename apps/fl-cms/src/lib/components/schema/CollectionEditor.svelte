@@ -3,7 +3,6 @@
     import { push } from 'svelte-spa-router';
     import type { Properties } from '../../packages/firecms_core/types/properties.simple';
     import { templates } from '../../schema/predefined-collections';
-    import { createValidator } from '../../schema/schema-validation';
     import type { Collection, Entity } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
     import { createSchemaStore, createDocumentStore } from '../../stores/db/firestore.helper';
@@ -20,15 +19,12 @@
     let properties = item.properties || {};
     let templateMenu: PopupMenu;
     let validationMessages: string[] = [];
-    // TODO fix validation https://github.com/ortwic/web-apps/issues/9
-    let skipValidation = false; 
 
     $: disabled = !$currentClientUser;
 
     const schemaStore = createSchemaStore();
     const service = createDocumentStore(item.path);
     const documents = service.pipe(switchMap(s => s.getDocumentStream()));
-    const { validate, validationErrors } = createValidator(schema);
 
     async function saveCollection() {
         try {
@@ -59,13 +55,9 @@
     }
 
     function setProperties<T>(props: T) {
-        if (validate(props) || skipValidation) {
-            item.properties = props as Properties;
-            validationMessages = [];
-            dirty = true;
-        } else if (validate.errors) {
-            validationMessages = validationErrors(props);
-        }
+        item.properties = props as Properties;
+        validationMessages = [];
+        dirty = true;
     }
 </script>
 
@@ -94,7 +86,7 @@
 </div>
 
 <div class="validation">
-    <Expand on:open={() => skipValidation = false} on:close={() => skipValidation = true}>
+    <Expand open={!!validationMessages.length}>
         <span slot="header" class="emphasis">Validation output</span>
         <textarea readonly>{validationMessages.join('\n')}</textarea>
     </Expand>
