@@ -30,6 +30,7 @@
     $: disabled = !$currentClientUser;
 
     const documents$ = documentStore$.pipe(switchMap(s => s.getDocumentStream()));
+    const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));
     const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
         maxWidth: 800, 
@@ -163,7 +164,7 @@
     {#if $documents$}
     <!-- on path change columns must be invalidated to keep them in sync -->
     {#key $columns$}
-    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$documentStore$.path}
+    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$persistenceID$}
         on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
     {/key}
     {/if}
