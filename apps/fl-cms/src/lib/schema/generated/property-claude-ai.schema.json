@@ -10,6 +10,7 @@
         "enum": ["string", "number", "boolean", "date", "array", "map", "set", "url"]
       },
       "name": { "type": "string" },
+      "order": { "type": "number" },
       "description": { "type": "string" },
       "longDescription": { "type": "string" },
       "defaultValue": {},

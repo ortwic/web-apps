@@ -24,6 +24,9 @@ export interface BaseProperty {
   /** Property name */
   name?: string;
 
+  /** Property order */
+  order?: number;
+
   /** Short description displayed under the field */
   description?: string;
 

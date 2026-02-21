@@ -4,7 +4,7 @@ import type { ColumnDefinition, CellComponent, Editor, MenuObject } from "@web-a
 import type { Collection } from "../models/schema.type";
 import type { AnyProperty, BlockSetProperty, MapProperty } from "../packages/firecms_core/types/properties.simple";
 import type { ColumnOptions } from "../models/column.type";
-import { arrayToSectionMap, isFileType, isUrlProperty, isMarkdown } from "./content.helper";
+import { arrayToSectionMap, isFileType, isUrlProperty, isMarkdown, sortByOrder } from "./content.helper";
 import { currentStorage } from "../stores/storage/storage.service";
 import type { SectionType } from "../models/content.type";
 import { isRelativeUrl } from "./string.helper";
@@ -13,7 +13,8 @@ import { get } from "svelte/store";
 export function prepareColumnDefinitions<T>(schema: Collection | null, options: ColumnOptions<T>): ColumnDefinition[] {
     const storage = get(currentStorage);
     const columns = actionColumns(options);
-    return Object.entries(schema?.properties as Record<string, AnyProperty> ?? [])
+    return sortByOrder(schema?.properties as Record<string, AnyProperty> ?? [])
+        .sort(([, a], [, b]) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .reduce((acc, [field, prop]) => {
             const custom = getCustomDefinitionByType(field, prop, options);
             columns.push({
@@ -21,6 +22,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 title: field,
                 resizable: true,
                 sorter: 'string',
+                width: prop.columnWidth,
                 maxWidth: options?.maxWidth,
                 headerMenu: [],
                 headerFilter: 'input',

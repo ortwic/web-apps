@@ -87,6 +87,11 @@ export interface BaseProperty<T extends CMSType> {
     name?: string;
 
     /**
+     * Order in which the properties are displayed.
+     */
+    order?: number;
+
+    /**
      * Property description, always displayed under the field
      */
     description?: string;

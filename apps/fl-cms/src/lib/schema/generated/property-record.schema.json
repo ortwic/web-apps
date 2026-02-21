@@ -46,6 +46,10 @@
         "of": {
           "$ref": "#/definitions/Property"
         },
+        "order": {
+          "description": "Property order",
+          "type": "number"
+        },
         "readOnly": {
           "type": "boolean"
         },
@@ -128,6 +132,10 @@
           ],
           "type": "object"
         },
+        "order": {
+          "description": "Property order",
+          "type": "number"
+        },
         "readOnly": {
           "type": "boolean"
         },
@@ -179,6 +187,10 @@
         "name": {
           "description": "Property name",
           "type": "string"
+        },
+        "order": {
+          "description": "Property order",
+          "type": "number"
         },
         "readOnly": {
           "type": "boolean"
@@ -247,6 +259,10 @@
         "name": {
           "description": "Property name",
           "type": "string"
+        },
+        "order": {
+          "description": "Property order",
+          "type": "number"
         },
         "readOnly": {
           "type": "boolean"
@@ -345,6 +361,10 @@
           "description": "Property name",
           "type": "string"
         },
+        "order": {
+          "description": "Property order",
+          "type": "number"
+        },
         "preview": {
           "$ref": "#/definitions/PreviewType"
         },
@@ -416,6 +436,10 @@
         "name": {
           "description": "Property name",
           "type": "string"
+        },
+        "order": {
+          "description": "Property order",
+          "type": "number"
         },
         "pickOnlySomeKeys": {
           "type": "boolean"
@@ -497,6 +521,10 @@
         "name": {
           "description": "Property name",
           "type": "string"
+        },
+        "order": {
+          "description": "Property order",
+          "type": "number"
         },
         "readOnly": {
           "type": "boolean"
@@ -661,6 +689,10 @@
           "description": "Property name",
           "type": "string"
         },
+        "order": {
+          "description": "Property order",
+          "type": "number"
+        },
         "previewAsTag": {
           "type": "boolean"
         },
@@ -717,6 +749,10 @@
         "name": {
           "description": "Property name",
           "type": "string"
+        },
+        "order": {
+          "description": "Property order",
+          "type": "number"
         },
         "readOnly": {
           "type": "boolean"

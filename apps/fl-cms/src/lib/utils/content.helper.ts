@@ -62,6 +62,9 @@ export const isBlockSetProperty = (prop?: AnyProperty): prop is BlockSetProperty
     // backward compatibility to FireCMS
     || prop?.dataType === "array" && (prop as any)?.oneOf !== undefined;
 
+export const sortByOrder = (props: Record<string, AnyProperty>) =>
+    Object.entries(props).sort(([, a], [, b]) => (a.order ?? Infinity) - (b.order ?? Infinity));
+
 export function arrayPropertyToMapProperty<T extends AnyProperty>(
     property: AnyProperty, 
     typeGuard?: (prop: AnyProperty) => prop is T

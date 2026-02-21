@@ -6,7 +6,7 @@
     import Expand from '../ui/Expand.svelte';
     import Input from '../ui/Input.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
-    import { isBlockSetProperty, isFileType, isUrlProperty, isMapProperty, isMarkdown } from "../../utils/content.helper";
+    import { isBlockSetProperty, isFileType, isUrlProperty, isMapProperty, isMarkdown, sortByOrder } from "../../utils/content.helper";
     import ImageSelect from './ImageSelect.svelte';
     import PropertyMap from "./PropertyMap.svelte";
     import SectionCards from './SectionCards.svelte';
@@ -24,10 +24,10 @@
     function getProperties(prop: AnyProperty): Record<string, AnyProperty> {
         if (prop) {
             if (isMapProperty(prop)) {
-                return prop.properties as Record<string, AnyProperty>;
+                return Object.fromEntries(sortByOrder(prop.properties as Record<string, AnyProperty>));
             }
             if (isBlockSetProperty(prop)) {
-                return prop.oneOf?.properties as Record<string, AnyProperty>;
+                return Object.fromEntries(sortByOrder(prop.oneOf?.properties as Record<string, AnyProperty>));
             }
         }
         return {};
