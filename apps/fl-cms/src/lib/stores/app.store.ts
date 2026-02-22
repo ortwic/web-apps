@@ -4,7 +4,7 @@ import type { Auth, User, UserCredential } from "firebase/auth";
 import { connectAuthEmulator, EmailAuthProvider, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut } from "firebase/auth";
 import { Firestore, connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
-import { showInfo } from "./notification.store";
+import { showError, showInfo, showWarn } from "./notification.store";
 import type { AppSettings } from "./settings.type";
 import { EMULATOR_KEY, settingsStore } from "./settings.store";
 
@@ -23,11 +23,14 @@ const userForEmulator = {
 class FirebaseAppAdapter {
     private app: FirebaseApp | null;
     private config: FirebaseOptions;
+    private editRole: string | undefined;
     readonly useEmulator: boolean;
 
     constructor(settings: AppSettings) {
-        this.config = settings.firebaseConfigs[settings.selectedProjectId];
+        const { customEditRole, ...config } = settings.firebaseConfigs[settings.selectedProjectId];
+        this.config = config;
         this.useEmulator = settings.selectedProjectId === EMULATOR_KEY;
+        this.editRole = !this.useEmulator ? customEditRole : undefined;
         this.app = this.getClientApp(this.config);
     }
 
@@ -35,7 +38,7 @@ class FirebaseAppAdapter {
         return this.config && 'apiKey' in this.config && 'authDomain' in this.config && 'projectId' in this.config;
     }
 
-    private getClientApp(config: FirebaseOptions) {
+    private getClientApp(config: FirebaseOptions): FirebaseApp | null {
         if (config) {
             const name = config.projectId ?? '[DEFAULT]';
             return getApps().find((app) => app.name === name) ?? initializeApp(config, name);
@@ -84,7 +87,7 @@ class FirebaseAppAdapter {
         if (this.app) {
             const auth = getAuth(this.app);
             if (!currentAuths.has(auth)) {
-                onAuthStateChanged(auth, currentClientUser.set);
+                onAuthStateChanged(auth, this.setSufficientUser);
                 if (this.useEmulator) {
                     if (!this.config.authDomain) {
                         this.config.authDomain = 'http://localhost:9099';
@@ -106,9 +109,23 @@ class FirebaseAppAdapter {
                 ? await this.signInToEmulator(auth)
                 : await signInWithPopup(auth, new GoogleAuthProvider());
 
-            currentClientUser.set(credentials.user);
-            showInfo(`User logged in as ${credentials.user.displayName}!`);
+            await this.setSufficientUser(credentials.user);
         }
+    }
+
+    private async setSufficientUser(user: User | null): Promise<void> {
+        if (user) {
+            const { claims } = await user.getIdTokenResult(false);
+            if (!this.editRole || claims.role === this.editRole) {
+                showWarn(`Logged in as ${this.editRole ?? user.displayName}!`);
+                currentClientUser.set(user);
+                return;
+            } 
+            
+            showError(`You are not an ${this.editRole}!
+Set role to "${this.editRole}" with set-admin script and this uid: ${user.uid}`, 10);
+        }
+        currentClientUser.set(null);
     }
 
     private async signInToEmulator(auth: Auth): Promise<UserCredential> {

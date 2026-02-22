@@ -83,9 +83,12 @@ const firebaseConfig = {
     storageBucket: 'myapp-project-123.appspot.com',
     messagingSenderId: '123456789',
     appId: '1:123456789:web:ec2e...94d0',
-    measurementId: 'G-12345'
+    measurementId: 'G-12345',
+    customEditRole: 'admin'
 };
 ```
+
+**Please note that editRole is an additional feature of Fl-CMS.**
 
 ![settings](./docs/images/fl-cms_settings.png)
 
@@ -140,6 +143,57 @@ Fl-CMS uses mostly the same datamodels as those defined in the [FireCMS API](htt
 * Check out `properties.simple.ts` from the sources for more details
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+## Access Control (RBAC)
+
+Fl-CMS relies on your Firebase project's own Firestore and Storage Security Rules to restrict write access. By default, any authenticated user can read and write data. To limit write access to specific users, Firebase [Custom Claims](https://firebase.google.com/docs/auth/admin/custom-claims) are used. 
+
+**Fl-CMS checks the `admin` role by default to grant write access.**
+
+### Prerequisites
+
+- Node.js installed locally
+- A Firebase **Service Account Key** for your project  
+  → Firebase Console → Project Settings → Service Accounts → *Generate new private key*  
+  ⚠️ Keep this file outside your repository and never commit it.
+
+### 1. Set your admin role (once per project)
+
+Create a `.env.local` file in the project root (already in `.gitignore`):
+```env
+SERVICE_ACCOUNT_PATH=/absolute/path/to/serviceAccountKey.json
+TARGET_UID=your-firebase-user-uid
+```
+
+> Your UID can be found in Firebase Console → Authentication → Users.
+
+Then run:
+```bash
+pnpm setup:admin
+```
+
+### 2. Verify the claim was set
+
+Check in **Firebase Console → Authentication → Users** → click your user → confirm "Custom claims" shows:
+```json
+{"role": "admin"}
+```
+
+After signing out and back in (or after token refresh), the new role takes effect.
+
+### 3. Deploy Firestore & Storage Security Rules
+
+The rules are located in `firestore.rules` and `storage.rules`. Deploy them via Firebase CLI:
+```bash
+firebase deploy --only firestore:rules,storage
+```
+
+Or paste the rules manually in **Firebase Console → Firestore → Rules** and **Storage → Rules**.
+
+### Note
+
+Since Fl-CMS runs fully in the browser without a backend, role assignment is done once via a local script. The Security Rules are the actual enforcement layer — the UI only reflects the permissions already granted by Firebase.
 
 ## Known Bugs and Limitations
 

@@ -6,7 +6,7 @@
     const dispatcher = createEventDispatcher();
 
     async function login() {
-        await $appStore.signIn()
+        await $appStore.signIn();
         dispatcher('login');
     }
 </script>

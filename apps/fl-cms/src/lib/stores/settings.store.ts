@@ -15,7 +15,8 @@ export const DefaultAppSettings: AppSettings = {
             projectId: EMULATOR_KEY,
             storageBucket: 'http://localhost:8188',
             messagingSenderId: 'default',
-            appId: 'default'
+            appId: 'default',
+            customEditRole: 'admin'
         }
     }
 };
