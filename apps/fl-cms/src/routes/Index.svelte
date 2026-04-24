@@ -15,9 +15,9 @@
 
     $: disabled = !$currentClientUser;
 
-    let showSelect = false;
-    let current = writable<Collection>();
-    let currentPath = derived(current, (item) => item && item.pathSegments && item.pathSegments[0] || '');
+    let showSelectCollection = false;
+    let currentSubScheme = writable<Collection>();
+    let currentSubSchemePath = derived(currentSubScheme, (item) => item && item.pathSegments && item.pathSegments[0] || '');
     let pathInput: HTMLInputElement;
 
     onMount(() => {
@@ -46,8 +46,8 @@
     }
 
     function select(item: Collection) {
-        showSelect = true;
-        current.set(item);
+        showSelectCollection = true;
+        currentSubScheme.set(item);
     }
 
     async function remove(item: Collection) {
@@ -115,9 +115,9 @@
     </div>
 </section>
 
-<Modal open={showSelect} width="14em" on:close={() => (showSelect = false)}>
-    {#if showSelect}
-    <SelectCollection item={$current} path={$currentPath} />
+<Modal open={showSelectCollection} width="14em" on:close={() => (showSelectCollection = false)}>
+    {#if showSelectCollection}
+    <SelectCollection item={$currentSubScheme} path={$currentSubSchemePath} />
     {/if}
 </Modal>
 

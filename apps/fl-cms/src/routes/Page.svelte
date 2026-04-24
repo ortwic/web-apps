@@ -8,6 +8,7 @@
     import { fromStore } from '../lib/utils/rx.store';
     import List from '../lib/components/content/Collection.svelte';
     import Details from '../lib/components/content/Document.svelte';
+    import PopupMenu from '../lib/components/ui/PopupMenu.svelte';
 
     type PathInfo = {
         type: 'Collection' | 'Document';
@@ -16,14 +17,16 @@
         id?: string;
     };
 
-    const pathInfo = fromStore(params).pipe(map((p) => parsePath(p?.wild)));
-    const documentStore$ = createDocumentStore<Content>(pathInfo.pipe(map((p) => p?.path)));
-    const schema$ = combineLatest([fromStore(createSchemaStore()), pathInfo]).pipe(
+    const pathInfo$ = fromStore(params).pipe(map((p) => parsePath(p?.wild)));
+    const documentStore$ = createDocumentStore<Content>(pathInfo$.pipe(map((p) => p?.path)));
+    const schema$ = combineLatest([fromStore(createSchemaStore()), pathInfo$]).pipe(
         switchMap(([store, info]) => store.getCollectionFromFullPath(info?.path)),
     );
-    const contentService$ = combineLatest([documentStore$, schema$, pathInfo]).pipe(
+    const contentService$ = combineLatest([documentStore$, schema$, pathInfo$]).pipe(
         map(([store, schema, path]) => new ContentService(store, schema, path?.id)),
     );
+
+    let selectCollectionMenu: PopupMenu;
 
     function parsePath(wild: string | undefined): PathInfo | undefined {
         const segments = wild?.split('/') || [];
@@ -47,16 +50,16 @@
 </script>
 
 <svelte:head>
-    <title>{APP_TITLE} | {$pathInfo?.type}</title>
+    <title>{APP_TITLE} | {$pathInfo$?.type}</title>
 </svelte:head>
 
-{#if $pathInfo?.type === 'Collection'}
-    <List {schema$} {documentStore$}>
+{#if $pathInfo$?.type === 'Collection'}
+    <List schema$={schema$} {documentStore$}>
         <span slot="commands">
             <a
                 role="button"
-                href="/config/{$pathInfo.schemaPath}"
-                use:link={`/config/${$pathInfo.schemaPath}`}
+                href="/config/{$pathInfo$.schemaPath}"
+                use:link={`/config/${$pathInfo$.schemaPath}`}
                 class="icon clear"
                 title="Edit schema"
             >
@@ -64,18 +67,40 @@
             </a>
         </span>
     </List>
-{:else if $pathInfo?.type === 'Document'}
-    <Details {contentService$} path={`${$pathInfo.path}/${$pathInfo.id}`}>
+{:else if $pathInfo$?.type === 'Document'}
+    <Details {contentService$} path={`${$pathInfo$.path}/${$pathInfo$.id}`}>
         <span slot="commands">
             <a
                 role="button"
-                href="/config/{$pathInfo.schemaPath}"
-                use:link={`/config/${$pathInfo.schemaPath}`}
+                href="/config/{$pathInfo$.schemaPath}"
+                use:link={`/config/${$pathInfo$.schemaPath}`}
                 class="icon clear"
                 title="Edit schema"
             >
                 <i class="bx bx-wrench"></i>
             </a>
+            {#if $schema$?.subcollections?.length}
+            <button title="Select subcollection" class="icon clear" 
+                on:click={(ev) => selectCollectionMenu.showPopupMenu(ev)}>
+                <i class="bx bx-list-ul"></i>
+            </button>
+            {/if}
         </span>
     </Details>
+
+    <PopupMenu bind:this={selectCollectionMenu}>
+        <div class="small popup-menu no-wrap y-flex">
+        {#each $schema$?.subcollections || [] as col}
+            <a
+                role="button"
+                href="/page/{$pathInfo$.path}/{$pathInfo$?.id}/{col.name}"
+                use:link={`/page/${$pathInfo$.path}/${$pathInfo$?.id}/${col.name}`}
+                class="icon clear"
+                title="Edit schema"
+            >
+                <i class="bx bx-right-arrow-alt"></i> <span class="emphasis">{col.name}</span>
+            </a>
+        {/each}
+        </div>
+    </PopupMenu>
 {/if}
