@@ -27,7 +27,7 @@ class FirebaseAppAdapter {
     readonly useEmulator: boolean;
 
     constructor(settings: AppSettings) {
-        const { customEditRole, ...config } = settings.firebaseConfigs[settings.selectedProjectId];
+        const { customEditRole, ...config } = settings.firebaseConfigs[settings.selectedProjectId] || {};
         this.config = config;
         this.useEmulator = settings.selectedProjectId === EMULATOR_KEY;
         this.editRole = !this.useEmulator ? customEditRole : undefined;
