@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
-  import { confirmed } from "../../utils/ui.helper";
+  import { confirmed } from "../../utils/input.helper";
 
   export let labels: string[];
 

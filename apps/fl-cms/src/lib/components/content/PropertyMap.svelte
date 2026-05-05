@@ -14,7 +14,7 @@
     import { timestampToIsoDate } from '../../stores/db/firestore.helper';
     import Expand from '../ui/Expand.svelte';
     import MarkdownEditor from '../ui/MarkdownEditor.svelte';
-    import TagCloud from '../ui/TagCloud.svelte';
+    import TagEditor from '../ui/TagEditor.svelte';
     import Input from '../ui/Input.svelte';
     import CodeEditor from '../ui/CodeEditor.svelte';
     import Select from '../ui/Select.svelte';
@@ -103,7 +103,7 @@
                             />
                         {:else if isArrayProperty(prop, 'string')}
                             {#key document[field]}
-                                <TagCloud
+                                <TagEditor
                                     labels={document[field]}
                                     on:change={({ detail }) => update(detail, field)}
                                 />

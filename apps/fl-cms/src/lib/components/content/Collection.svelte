@@ -29,7 +29,7 @@
 
     $: disabled = !$currentClientUser;
 
-    const documents$ = documentStore$.pipe(switchMap(s => s.getDocumentStream()));
+    const documents$ = documentStore$.pipe(switchMap(s => s.getDocuments()));
     const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));
     const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',

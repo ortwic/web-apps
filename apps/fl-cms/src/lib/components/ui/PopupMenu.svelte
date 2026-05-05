@@ -6,6 +6,7 @@
 
   export let width: string | number = "auto";
   let menu: HTMLDivElement;
+  let clientX = 0, clientY = 0;
   let left: string | number, top: string | number, offsetWidth: number, offsetHeight: number;
   let visible = false;
     
@@ -15,18 +16,19 @@
 
   document.addEventListener('click', clickOutside, true);
 
-  export const showPopupMenu = ({ clientX, clientY }: MouseEvent) => {
-    const setPosition = () => {
-      const maxTop = document.body.offsetHeight - offsetHeight;
-      const maxLeft = document.body.offsetWidth - offsetWidth;
-      top = `${clientY > maxTop ? clientY - offsetHeight : clientY}px`;
-      left = `${clientX > maxLeft ? clientX - offsetWidth : clientX}px`;
-    };
-
+  export const showPopupMenu = (e: { clientX: number, clientY: number }) => {
+    clientX = e.clientX;
+    clientY = e.clientY;
     visible = true;
-    setPosition();
   };
 
+  $: top = clientY + offsetHeight > window.innerHeight 
+    ? `${clientY - offsetHeight}px`
+    : `${clientY}px`;
+    
+  $: left = clientX + offsetWidth > window.innerWidth 
+      ? `${clientX - offsetWidth}px`
+      : `${clientX}px`;
 
   function clickOutside({ target }: { target: any }) {
     if (!menu.contains(target)) {

@@ -5,7 +5,7 @@
     import ImageSelectDialog from '../media/ImageDialog.svelte';
     import { currentStorage } from '../../stores/storage/storage.service';
     import { imageSelectPlugin, resolveImagesPlugin } from '../../extensions/bytemd.plugins';
-    import { debounce } from '../../utils/ui.helper';
+    import { debounce } from '../../utils/input.helper';
 
     export let value = '';
     export let placeholder = '';

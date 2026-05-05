@@ -143,6 +143,9 @@ importers:
       svelte-i18n:
         specifier: ^3.7.0
         version: 3.7.4(svelte@4.2.18)
+      svelte-portal:
+        specifier: ^2.2.1
+        version: 2.2.1
       svelte-spa-router:
         specifier: ^3.3.0
         version: 3.3.0

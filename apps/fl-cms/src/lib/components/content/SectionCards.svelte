@@ -5,7 +5,7 @@
     import type { SectionType } from "../../models/content.type";
     import type { UpdateArgs } from "../../models/schema.type";
     import { arrayPropertyToMapProperty, defaultValueByType, isArrayProperty, isBlockSetProperty, mergeObject } from "../../utils/content.helper";
-    import { withKey } from "../../utils/ui.helper";
+    import { withKey } from "../../utils/input.helper";
     import Loading from "../ui/Loading.svelte";
     import PopupMenu from '../ui/PopupMenu.svelte';
     import Section from "./Section.svelte";

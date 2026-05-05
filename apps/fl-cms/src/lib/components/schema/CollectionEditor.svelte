@@ -27,7 +27,7 @@
 
     const schemaStore = createSchemaStore();
     const service = createDocumentStore(item.path);
-    const documents = service.pipe(switchMap(s => s.getDocumentStream()));
+    const documents = service.pipe(switchMap(s => s.getDocuments()));
 
     async function saveCollection() {
         try {

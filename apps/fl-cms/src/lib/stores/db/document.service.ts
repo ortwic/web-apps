@@ -50,7 +50,7 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return this.documents.subscribe(run, invalidate);
     }
 
-    public getDocumentStream(...constraints: QueryConstraint[]): Observable<T[]> {
+    public getDocuments(...constraints: QueryConstraint[]): Observable<T[]> {
         if (this.store && this.path) {
             const query = this.createQuery<T>(...constraints);
             return collectionData<T>(query, { idField: 'id' }).pipe(startWith([]));
@@ -58,7 +58,7 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return of([]);
     }
 
-    public async getDocuments<T extends DocumentData>(...constraints: QueryConstraint[]): Promise<T[]> {
+    public async getDocumentsAsync<T extends DocumentData>(...constraints: QueryConstraint[]): Promise<T[]> {
         if (this.store && this.path) {
             const query = this.createQuery<T>(...constraints);
             return getDocs<T, DocumentData>(query).then((snapshot) => {

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
     import type { HTMLInputTypeAttribute } from "svelte/elements";
-    import { confirmed } from "../../utils/ui.helper";
+    import { confirmed } from "../../utils/input.helper";
 
     export let id = '';
     export let type: HTMLInputTypeAttribute = 'text';

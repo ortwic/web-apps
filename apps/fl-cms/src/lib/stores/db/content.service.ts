@@ -4,7 +4,7 @@ import type { DocumentContract } from "../../contracts/document.contract";
 import type { Content, SectionType } from "../../models/content.type";
 import type { Collection, UpdateArgs } from "../../models/schema.type";
 import { arrayPropertyToMapProperty, defaultValueByType, mergeObject } from "../../utils/content.helper";
-import { isUnique } from "../../utils/ui.helper";
+import { isUnique } from "../../utils/input.helper";
 import { showInfo } from "../notification.store";
 
 type SaveOptions = { index?: number, merge?: boolean };

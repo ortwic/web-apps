@@ -4,7 +4,7 @@
     import Modal from "../ui/Modal.svelte";
     import Toolbar from "../ui/Toolbar.svelte";
     import type { StorageFile } from "../../models/storage.type";
-    import { confirmed } from "../../utils/ui.helper";
+    import { confirmed } from "../../utils/input.helper";
     import MediaBrowser from "./MediaBrowser.svelte";
 
     export let path: string | undefined;

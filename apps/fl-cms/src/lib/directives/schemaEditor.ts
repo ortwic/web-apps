@@ -10,7 +10,7 @@ import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { highlightActiveLine, hoverTooltip, keymap } from '@codemirror/view';
 import type { ActionReturn } from 'svelte/action';
-import { debounce } from '../utils/ui.helper';
+import { debounce } from '../utils/input.helper';
 
 type EditorParams<T> = {
     value: T;

@@ -80,6 +80,7 @@
     "svelte-check": "^3.8.5",
     "svelte-collapse": "^0.1.4",
     "svelte-i18n": "^3.7.0",
+    "svelte-portal": "^2.2.1",
     "svelte-spa-router": "^3.3.0",
     "ts-deepmerge": "^7.0.3",
     "ts-json-schema-generator": "^2.4.0",
