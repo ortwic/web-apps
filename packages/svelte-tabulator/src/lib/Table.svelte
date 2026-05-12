@@ -234,18 +234,32 @@
 
   async function setData(table: Tabulator, data: T[]): Promise<void> {
     const areEquivalent = (source: T[]) => {
-      return source.length === data.length
-        && source.every(item => data.map((v: T) => v[idField]).indexOf(item[idField]) > -1);
-    }
+        if (source.length !== data.length) return false;
+        // Better performance with Set instead indexOf
+        const newIds = new Set(data.map((v: T) => v[idField]));
+        return source.every(item => newIds.has(item[idField]));
+    };
+  
+    const isAppendOnly = (source: T[]) => {
+        const existingIds = new Set(source.map(item => item[idField]));
+        const newIds = data.map((v: T) => v[idField]);
+        return data.length > source.length 
+            && [...existingIds].every(id => newIds.indexOf(id) > -1);
+    };
 
     if (table && data) {
-      if (data.length && idField && areEquivalent(table.getData())) {
-        await table.updateData(data);
-        console.debug('upd', data.length);
-      } else {
-        await table.setData(data);
-        console.debug('set', data.length);
-      }
+        if (data.length && idField && areEquivalent(table.getData())) {
+            await table.updateData(data);
+            console.debug('upd', data.length);
+        } else if (data.length && idField && isAppendOnly(table.getData())) {
+            const existingIds = new Set(table.getData().map(item => item[idField]));
+            const newRows = data.filter(item => !existingIds.has(item[idField]));
+            await table.addData(newRows);
+            console.debug('add', newRows.length);
+        } else {
+            await table.setData(data);
+            console.debug('set', data.length);
+        }
     }
   }
 </script>

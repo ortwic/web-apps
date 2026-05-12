@@ -1,9 +1,10 @@
 <script lang="ts">
     import yaml from 'js-yaml';
+    import { onDestroy } from 'svelte';
     import { push } from 'svelte-spa-router';
-    import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
+    import { firstValueFrom, map, Observable, of, shareReplay } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
-    import type { CellComponent } from '@web-apps/svelte-tabulator';
+    import type { CellComponent, TableView } from '@web-apps/svelte-tabulator';
     import { createDefault } from '../../utils/content.helper';
     import type { Entity, Collection } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
@@ -22,14 +23,55 @@
     export let documentStore$: Observable<DocumentStore<Entity>>;
     
     let showAddEntry = false;
+    let initialized = false;
     let newEntryId: string;
     let uploadInput: HTMLInputElement;
     let importData: Entity[] | null;
     let errorMessage: string | undefined;
+    let observer: IntersectionObserver | null = null;
+    let appendDataSentinel: HTMLElement;
 
     $: disabled = !$currentClientUser;
 
-    const documents$ = documentStore$.pipe(switchMap(s => s.getDocuments()));
+    const PAGE_SIZE = 80;
+    
+    const dataSource$ = documentStore$.pipe(
+        map(s => s.getPaginatedDocumentsAsync(PAGE_SIZE)),
+        shareReplay(1)
+    );
+
+    $: documents = $dataSource$;
+
+    /**
+     * TECH DEBT: Tabulator requires a fixed height to enable its Virtual DOM renderer.
+     * Without it, all rows are rendered as real DOM nodes, causing noticeable performance
+     * degradation beyond ~250-500 rows. The current infinite scroll approach accumulates
+     * all loaded rows in the DOM, making this worse over time.
+     *
+     * Fix: Set a fixed height on the table (e.g. calc(100vh - headerHeight)).
+     * This activates Tabulator's Virtual DOM, eliminates the IntersectionObserver/
+     * infinite scroll logic, and allows native progressive loading via scrollVertical event.
+     */
+    $: if(appendDataSentinel && initialized) {
+        observer?.disconnect();
+        observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    $dataSource$.loadNextPage();
+                }
+            },
+            { 
+                // appends rows when Sentinel is 400px above the bottom of the viewport
+                rootMargin: '400px' 
+            }
+        );
+        observer.observe(appendDataSentinel);
+    }
+
+    onDestroy(() => {
+        observer?.disconnect();
+    });
+
     const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));
     const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
         idField: 'id',
@@ -65,6 +107,11 @@
         ]
     })));
 
+    function tableInit(view: TableView) {
+        appendColumnSelectorMenu(view);
+        initialized = true;
+    }
+
     async function addEntry(schema: Collection | null) {
         const doc = createDefault<Entity>(schema);
         doc.id = newEntryId;
@@ -84,7 +131,7 @@
             showError(`Failed to update document: ${error?.message}`);
         }
     }
-
+    
     function selectFile() {
         // ensure onchange fires for same file again
         uploadInput.value = '';
@@ -120,7 +167,7 @@
 
     function exportDocuments() {
         try {
-            const str = yaml.dump($documents$, {
+            const str = yaml.dump($documents, {
                 noArrayIndent: true,
                 indent: 2,
                 replacer: (k, v) => timestampToIsoDate(v),
@@ -154,6 +201,9 @@
         <span slot="title">
             <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
+        {#if documents !== null} 
+        Item count: {$documents?.length}
+        {/if}
     </Toolbar>
 </header>
 
@@ -161,12 +211,13 @@
 <Loading title="schema"/>
 {:then schema}
 <section>
-    {#if $documents$}
-    <!-- on path change columns must be invalidated to keep them in sync -->
-    {#key $columns$}
-    <Table idField="id" columns={$columns$} data={documents$} persistenceID={$persistenceID$}
-        on:init={({ detail }) => appendColumnSelectorMenu(detail)}/>
-    {/key}
+    {#if documents && $documents}
+        <!-- on path change columns must be invalidated to keep them in sync -->
+        {#key $columns$}
+        <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
+            on:init={({ detail }) => tableInit(detail)} />
+        {/key}
+        <div bind:this={appendDataSentinel} style="height: 1px" />
     {/if}
 </section>
 

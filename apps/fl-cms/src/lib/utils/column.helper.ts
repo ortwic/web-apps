@@ -178,7 +178,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
     function aggregate(prop: AnyProperty, value: object): HTMLElement[] {
         if (typeof value === 'string' && (isUrlProperty(prop, 'image') || isFileType(prop, 'image'))) {
             return [previewImage(value, prop.name)];
-        } else if (typeof value === 'string') {
+        } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
             const span = document.createElement('span');
             if (isMarkdown(prop)) {
                 span.innerHTML = marked(value, { mangle: false, headerIds: false });

@@ -1,12 +1,13 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
-import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, SetOptions, SnapshotOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc } from 'firebase/firestore';
+import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc, orderBy, startAfter, limit } from 'firebase/firestore';
 import { collectionData, docData } from 'rxfire/firestore';
-import { of, type Observable } from 'rxjs';
+import { of, Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import type { DocumentContract } from '../../contracts/document.contract';
-import type { Entity, UpdateArgs } from '../../models/schema.type';
+import type { Entity } from '../../models/schema.type';
 import { showError } from '../notification.store';
+import { createDataSource, type DataSourceStore, type PageResult } from '../data-source.store';
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -58,17 +59,49 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return of([]);
     }
 
+    public getPaginatedDocumentsAsync<T extends DocumentData>(
+        pageSize: number,
+        ...constraints: QueryConstraint[]
+    ): DataSourceStore<T> {
+        const fetchPage = async (
+            cursor: QueryDocumentSnapshot<T> | null
+        ): Promise<PageResult<T, QueryDocumentSnapshot<T>>> => {
+            if (!this.store || !this.path) {
+                return { docs: [], nextCursor: null };
+            }
+
+            const pageConstraints: QueryConstraint[] = [
+                ...constraints,
+                limit(pageSize),
+                ...(cursor ? [startAfter(cursor)] : []),
+            ];
+
+            const query = this.createQuery<T>(...pageConstraints);
+            const snapshot = await getDocs(query);
+            const docs = snapshot.docs.map((doc) => ({ 
+                id: doc.id,
+                ...doc.data(snapshotOptions) 
+            }));
+
+            const nextCursor =
+                snapshot.docs.length > 0 && snapshot.docs.length >= pageSize
+                    ? snapshot.docs[snapshot.docs.length - 1]
+                    : null;
+
+            return { docs, nextCursor };
+        };
+
+        return createDataSource<T, QueryDocumentSnapshot<T>>(fetchPage);
+    }
+
     public async getDocumentsAsync<T extends DocumentData>(...constraints: QueryConstraint[]): Promise<T[]> {
         if (this.store && this.path) {
             const query = this.createQuery<T>(...constraints);
-            return getDocs<T, DocumentData>(query).then((snapshot) => {
-                const result: T[] = [];
-                snapshot.forEach((doc) => result.push({
-                    id: doc.id,
-                    ...doc.data(snapshotOptions)
-                }));
-                return result;
-            });
+            const snapshot = await getDocs(query);
+            return snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(snapshotOptions)
+            }));
         }
         return [];
     }
@@ -100,6 +133,10 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
             const batch = writeBatch(this.store);
 
             const commitedData = documents.map((data) => {
+                if (!data.id) {
+                    throw new Error('Document id field is required!');
+                }
+
                 const dataWithoutNullValues = omitUndefinedFields(data);
                 const docRef = doc(this.store!, this.path, data.id);
                 batch.set(docRef, dataWithoutNullValues, { merge: MERGE_DEFAULT });
