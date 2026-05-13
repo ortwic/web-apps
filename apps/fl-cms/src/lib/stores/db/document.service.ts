@@ -1,6 +1,6 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
 import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc, orderBy, startAfter, limit } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc, orderBy, startAfter, limit, getCountFromServer } from 'firebase/firestore';
 import { collectionData, docData } from 'rxfire/firestore';
 import { of, Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
@@ -49,6 +49,13 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
 
     subscribe(run: Subscriber<T[]>, invalidate?: Invalidator<T[]> | undefined): Unsubscriber {
         return this.documents.subscribe(run, invalidate);
+    }
+
+    async countDocuments(): Promise<number> {
+        const ref = collection(this.store, this.path);
+        const snapshot = await getCountFromServer(ref);
+        const data = snapshot.data();
+        return data.count;
     }
 
     public getDocuments(...constraints: QueryConstraint[]): Observable<T[]> {

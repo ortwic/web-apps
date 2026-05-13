@@ -2,7 +2,7 @@
     import yaml from 'js-yaml';
     import { onDestroy } from 'svelte';
     import { push } from 'svelte-spa-router';
-    import { firstValueFrom, map, Observable, of, shareReplay } from 'rxjs';
+    import { firstValueFrom, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent, TableView } from '@web-apps/svelte-tabulator';
     import { createDefault } from '../../utils/content.helper';
@@ -10,6 +10,7 @@
     import { currentClientUser } from '../../stores/app.store';
     import { DocumentStore } from '../../stores/db/document.service';
     import { timestampToIsoDate } from '../../stores/db/firestore.helper';
+    import type { DataSource } from '../../stores/data-source.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
     import { parseDocument as parseDocs } from '../../utils/parse-doc.helper';
@@ -20,17 +21,23 @@
     import DropZone from '../ui/DropZone.svelte';
     import CodeEditor from '../ui/CodeEditor.svelte';
     import '../../../styles/tabulator.css';
+    import { toStore } from '../../utils/rx.store';
     
     export let schema$ = of<Collection | null>(null);
     export let documentStore$: Observable<DocumentStore<Entity>>;
     
+    // for adding entries
     let showAddEntry = false;
-    let initialized = false;
     let newEntryId: string;
+    
+    // for import data
     let uploadInput: HTMLInputElement;
     let importData: Entity[] | null;
     let importWarnings: string[] | undefined;
     let errorMessage: string | undefined;
+    
+    // for pagination
+    let initialized = false;
     let observer: IntersectionObserver | null = null;
     let appendDataSentinel: HTMLElement;
 
@@ -38,13 +45,21 @@
 
     const ACCEPTED_FORMATS = ['application/json', 'application/yaml', 'application/yml', 'text/yaml', 'text/yml'];
     const PAGE_SIZE = 80;
+    const REALTIME_THRESHOLD = PAGE_SIZE * 3;
     
     const dataSource$ = documentStore$.pipe(
-        map(s => s.getPaginatedDocumentsAsync(PAGE_SIZE)),
+        switchMap(async (store): Promise<DataSource<Entity>> => {
+            const count = await store.countDocuments();
+            return count > REALTIME_THRESHOLD
+                ? { kind: 'paginated', data: store.getPaginatedDocumentsAsync<Entity>(PAGE_SIZE) }
+                : { kind: 'realtime',  data: toStore(store.getDocuments()) };
+        }),
+        tap(({ kind }) => console.debug(`DataSource: ${kind}`)),
         shareReplay(1)
     );
 
-    $: documents = $dataSource$;
+    $: source = $dataSource$;
+    $: documents = source?.kind === 'paginated' ? source.data : source?.data ?? of([]);
 
     /**
      * TECH DEBT: Tabulator requires a fixed height to enable its Virtual DOM renderer.
@@ -56,12 +71,12 @@
      * This activates Tabulator's Virtual DOM, eliminates the IntersectionObserver/
      * infinite scroll logic, and allows native progressive loading via scrollVertical event.
      */
-    $: if(appendDataSentinel && initialized) {
+    $: if(source?.kind === 'paginated' && initialized && appendDataSentinel) {
         observer?.disconnect();
         observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
-                    $dataSource$.loadNextPage();
+                    source.data.loadNextPage();
                 }
             },
             { 

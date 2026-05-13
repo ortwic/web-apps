@@ -1,10 +1,13 @@
 import { writable, readonly, type Readable } from 'svelte/store';
 
+type RealtimeSource<T> = { kind: 'realtime'; data: Readable<T[]> };
+type PaginatedSource<T> = { kind: 'paginated'; data: DataSourceStore<T> };
+export type DataSource<T> = RealtimeSource<T> | PaginatedSource<T>;
+
 export interface PageResult<T, TCursor> {
     docs: T[];
     nextCursor: TCursor | null;
 }
-
 export type FetchPage<T, TCursor> = (
     cursor: TCursor | null
 ) => Promise<PageResult<T, TCursor>>;
