@@ -239,13 +239,16 @@ img.preview {
 .image-caption {
     font-size: small;
     font-style: italic;
+}
+
+.caption,
+.image-caption {
     color: var(--color-text-disabled);
 }
 
 .label {
     border: 1px solid var(--color-bg-0);
     background-color: var(--color-bg-2);
-    box-shadow: 2px 2px 4px #80808060;
     margin: .4rem .2rem;
     padding: .2rem .6rem;
     border-radius: 1rem;

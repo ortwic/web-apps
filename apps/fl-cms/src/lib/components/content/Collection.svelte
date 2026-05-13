@@ -1,6 +1,7 @@
 <script lang="ts">
     import yaml from 'js-yaml';
     import { onDestroy } from 'svelte';
+    import { readable } from 'svelte/store';
     import { push } from 'svelte-spa-router';
     import { firstValueFrom, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
@@ -38,6 +39,8 @@
     
     // for pagination
     let initialized = false;
+    let isLoading = false;
+    let total = 0;
     let observer: IntersectionObserver | null = null;
     let appendDataSentinel: HTMLElement;
 
@@ -49,17 +52,22 @@
     
     const dataSource$ = documentStore$.pipe(
         switchMap(async (store): Promise<DataSource<Entity>> => {
-            const count = await store.countDocuments();
-            return count > REALTIME_THRESHOLD
-                ? { kind: 'paginated', data: store.getPaginatedDocumentsAsync<Entity>(PAGE_SIZE) }
-                : { kind: 'realtime',  data: toStore(store.getDocuments()) };
+            try {
+                isLoading = true;
+                total = await store.countDocuments();
+                return total > REALTIME_THRESHOLD
+                    ? { kind: 'paginated', data: store.getPaginatedDocumentsAsync<Entity>(PAGE_SIZE) }
+                    : { kind: 'realtime',  data: toStore(store.getDocuments()) };
+            } finally {
+                isLoading = false;
+            }
         }),
         tap(({ kind }) => console.debug(`DataSource: ${kind}`)),
         shareReplay(1)
     );
 
     $: source = $dataSource$;
-    $: documents = source?.kind === 'paginated' ? source.data : source?.data ?? of([]);
+    $: documents = source?.kind === 'paginated' ? source.data : source?.data ?? readable([]);
 
     /**
      * TECH DEBT: Tabulator requires a fixed height to enable its Virtual DOM renderer.
@@ -88,6 +96,9 @@
     }
 
     onDestroy(() => {
+        if (source) {
+            source.data = readable([]);
+        }
         observer?.disconnect();
     });
 
@@ -190,9 +201,12 @@
         }
     }
 
-    function exportDocuments() {
+    async function exportDocuments() {
         try {
-            const str = yaml.dump($documents, {
+            const obj = source.kind === 'paginated'
+                ? await $documentStore$.getDocumentsAsync()
+                : $documents;
+            const str = yaml.dump(obj, {
                 noArrayIndent: true,
                 indent: 2,
                 replacer: (k, v) => timestampToIsoDate(v),
@@ -227,7 +241,7 @@
             <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
         {#if documents !== null} 
-        Item count: {$documents?.length}
+        <span class="no-wrap">Σ {$documents?.length}/{total}</span>
         {/if}
     </Toolbar>
 </header>
@@ -235,18 +249,20 @@
 {#await firstValueFrom(schema$)}
 <Loading title="schema"/>
 {:then schema}
-<section>
-    {#if documents && $documents}
-    <DropZone on:drop={({ detail: d }) => showImportDialog(d.data, d.file)} accept={ACCEPTED_FORMATS}>
-        <!-- on path change columns must be invalidated to keep them in sync -->
-        {#key $columns$}
-        <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
-            on:init={({ detail }) => tableInit(detail)} />
-        {/key}
-        <div bind:this={appendDataSentinel} style="height: 1px" />
-    </DropZone>
-    {/if}
-</section>
+<Loading title="datasource" isLoading={isLoading && !!documents}>
+    <section>
+        {#if $documents}
+        <DropZone on:drop={({ detail: d }) => showImportDialog(d.data, d.file)} accept={ACCEPTED_FORMATS}>
+            <!-- on path change columns must be invalidated to keep them in sync -->
+            {#key $columns$}
+            <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
+                on:init={({ detail }) => tableInit(detail)} />
+            {/key}
+            <div bind:this={appendDataSentinel} style="height: 1px" />
+        </DropZone>
+        {/if}
+    </section>
+</Loading>
 
 <Modal open={showAddEntry} width="0" on:close={() => showAddEntry = false}>
     <p>Enter unique id for {schema?.name}</p>

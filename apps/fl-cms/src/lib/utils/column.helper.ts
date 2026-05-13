@@ -108,7 +108,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                     formatter(cell: CellComponent) {
                         const value = previewFormatter(cell) as SectionType[];
                         const map = arrayToSectionMap(value);
-                        return aggregateAsSpan(prop.of, map);
+                        return aggregateReduce(prop.of, map);
                     }
                 }
             
@@ -117,7 +117,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                     formatter(cell: CellComponent) {
                         const value = previewFormatter(cell) as SectionType[];
                         const map = arrayToSectionMap(value);
-                        return aggregateAsSpan(prop, map);
+                        return aggregateReduce(prop, map);
                     }
                 }
                 
@@ -125,7 +125,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 return {
                     formatter(cell: CellComponent) {
                         const value = previewFormatter(cell);
-                        return aggregateAsSpan(prop, value);
+                        return aggregateReduce(prop, value);
                     }
                 };
 
@@ -167,15 +167,18 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
         }
     }
 
-    function aggregateAsSpan(prop: AnyProperty, value: Record<string, unknown>): HTMLElement {
+    function aggregateReduce(prop: AnyProperty, value: Record<string, unknown>): HTMLElement {
+        const span = document.createElement('div');
+        span.classList.add('x-flex');
+        span.style.gap = '.1em';
         return aggregate(prop, value)
             .reduce((acc, e) => {
                 acc.appendChild(e);
                 return acc;
-            }, document.createElement('span'));
+            }, span);
     }
 
-    function aggregate(prop: AnyProperty, value: object): HTMLElement[] {
+    function aggregate(prop: AnyProperty, value: object, key?: string): HTMLElement[] {
         if (typeof value === 'string' && (isUrlProperty(prop, 'image') || isFileType(prop, 'image'))) {
             return [previewImage(value, prop.name)];
         } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -183,9 +186,11 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
             if (isMarkdown(prop)) {
                 span.innerHTML = marked(value, { mangle: false, headerIds: false });
             } else {
-                span.classList.add('no-wrap');
+                span.classList.add('no-wrap', 'label');
                 span.setAttribute('title', prop?.name ?? '');
-                span.innerText = value;
+                span.innerHTML = key 
+                    ? `<span class="caption">${key}:</span> ${value}` 
+                    : value;
             }
             return [span];
         } else if (value && Array.isArray(value)) {
@@ -195,7 +200,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 ?? (prop as MapProperty)?.properties;
             return Object.entries(value)
                 .reduce((acc, [k, v]) => {
-                    acc.push(...aggregate(props?.[k] as AnyProperty, v));
+                    acc.push(...aggregate(props?.[k] as AnyProperty, v, k));
                     return acc;
                 }, [] as Array<HTMLElement>)
                 .filter(Boolean);
