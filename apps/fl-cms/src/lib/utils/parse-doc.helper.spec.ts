@@ -8,7 +8,7 @@ describe('parseDocument', () => {
     describe('valid YAML', () => {
         it('parses entries with existing ids without warnings', () => {
             const yaml = `- id: intro\n  name: Introduction\n- id: basics\n  name: Basics`;
-            const { doc, warnings } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { doc, warnings } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(doc).toHaveLength(2);
             expect(warnings).toBeUndefined();
@@ -16,7 +16,7 @@ describe('parseDocument', () => {
 
         it('generates id from name when id is missing', () => {
             const yaml = `- name: Hello World`;
-            const { doc, warnings } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { doc, warnings } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(doc[0].id).toBe('hello-world');
             expect(warnings).toBeUndefined();
@@ -24,14 +24,14 @@ describe('parseDocument', () => {
 
         it('transliterates German umlauts in generated id', () => {
             const yaml = `- name: "Über Uns & Co."`;
-            const { doc } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { doc } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(doc[0].id).toBe('ueber-uns-co');
         });
 
         it('strips leading and trailing hyphens from generated id', () => {
             const yaml = `- name: "---Hello---"`;
-            const { doc } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { doc } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(doc[0].id).toBe('hello');
         });
@@ -40,7 +40,7 @@ describe('parseDocument', () => {
     describe('warnings', () => {
         it('warns once for all entries missing id and name', () => {
             const yaml = `- title: no id\n- title: also no id`;
-            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(warnings).toHaveLength(1);
             expect(warnings![0]).toMatch(/Missing id.*0, 1/);
@@ -48,7 +48,7 @@ describe('parseDocument', () => {
 
         it('warns once for all duplicate ids', () => {
             const yaml = `- id: dup\n- id: dup\n- id: other\n- id: other`;
-            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(warnings).toHaveLength(1);
             expect(warnings![0]).toMatch(/Duplicate ids.*dup.*other/);
@@ -56,7 +56,7 @@ describe('parseDocument', () => {
 
         it('collects both warning types in one pass', () => {
             const yaml = `- title: no id\n- id: dup\n- id: dup`;
-            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml');
+            const { warnings } = parseDocument<Entry>(yaml, 'test.yaml', ['name']);
 
             expect(warnings).toHaveLength(2);
         });
@@ -64,7 +64,7 @@ describe('parseDocument', () => {
 
     describe('invalid YAML', () => {
         it('returns empty doc and error on malformed YAML', () => {
-            const { doc, error } = parseDocument<Entry>('invalid: [yaml: content', 'test.yaml');
+            const { doc, error } = parseDocument<Entry>('invalid: [yaml: content', 'test.yaml', ['name']);
 
             expect(doc).toHaveLength(0);
             expect(error).toBeInstanceOf(Error);

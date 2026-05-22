@@ -14,15 +14,13 @@
     import type { DataSource } from '../../stores/data-source.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
-    import { parseDocument as parseDocs } from '../../utils/parse-doc.helper';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
-    import DropZone from '../ui/DropZone.svelte';
-    import CodeEditor from '../ui/CodeEditor.svelte';
     import '../../../styles/tabulator.css';
     import { toStore } from '../../utils/rx.store';
+    import CollectionImport from './CollectionImport.svelte';
     
     export let schema$ = of<Collection | null>(null);
     export let documentStore$: Observable<DocumentStore<Entity>>;
@@ -30,12 +28,8 @@
     // for adding entries
     let showAddEntry = false;
     let newEntryId: string;
-    
-    // for import data
-    let uploadInput: HTMLInputElement;
-    let importData: Entity[] | null;
-    let importWarnings: string[] | undefined;
-    let errorMessage: string | undefined;
+
+    let showImportDialog = () => {};
     
     // for pagination
     let initialized = false;
@@ -46,7 +40,6 @@
 
     $: disabled = !$currentClientUser;
 
-    const ACCEPTED_FORMATS = ['application/json', 'application/yaml', 'application/yml', 'text/yaml', 'text/yml'];
     const PAGE_SIZE = 80;
     const REALTIME_THRESHOLD = PAGE_SIZE * 3;
     
@@ -161,44 +154,9 @@
             showError(`Failed to update document: ${error?.message}`);
         }
     }
-    
-    function selectFile() {
-        // ensure onchange fires for same file again
-        uploadInput.value = '';
-        uploadInput.click();
-    }
-    
-    async function handleImportClick() {
-        if (uploadInput.files?.length) {
-            const file = uploadInput.files[0];
-            showImportDialog(await file.text(), file);
-        }
-    }
 
-    function showImportDialog(content: string, file: File) {
-        const { doc, warnings, error } = parseDocs<Entity>(content, file.name);
-        if (!error) {
-            importWarnings = warnings;
-            importData = doc;
-            return;
-        }
-
-        showError(`Failed to parse file ${file.name}: ${error}`);
-    }
-    
-    async function importDocuments() {
-        if (!importData?.length) {
-            showError("No data to import");
-            return;
-        }
-
-        try {
-            $documentStore$.setDocuments(...importData);
-        } catch (error: any) {
-            showError("Failed to import documents:", error.message);
-        } finally {
-            importData = null;
-        }
+    function importDocuments(importData: Entity[]) {
+        $documentStore$.setDocuments(...importData);
     }
 
     async function exportDocuments() {
@@ -230,7 +188,7 @@
         <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
             <i class="bx bx-plus hl"></i>
         </button>
-        <button title="Import from YAML" {disabled} class="icon clear" on:click={selectFile}>
+        <button title="Import from YAML" {disabled} class="icon clear" on:click={showImportDialog}>
             <i class="bx bx-import"></i>
         </button>
         <button title="Export to YAML" class="icon clear" on:click={exportDocuments}>
@@ -252,14 +210,14 @@
 <Loading title="datasource" isLoading={isLoading && !!documents}>
     <section>
         {#if $documents}
-        <DropZone on:drop={({ detail: d }) => showImportDialog(d.data, d.file)} accept={ACCEPTED_FORMATS}>
+        <CollectionImport bind:showSelectFile={showImportDialog} on:confirmed={({ detail }) => importDocuments(detail)}>
             <!-- on path change columns must be invalidated to keep them in sync -->
             {#key $columns$}
             <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
                 on:init={({ detail }) => tableInit(detail)} />
             {/key}
             <div bind:this={appendDataSentinel} style="height: 1px" />
-        </DropZone>
+        </CollectionImport>
         {/if}
     </section>
 </Loading>
@@ -276,48 +234,3 @@
 </Modal>
 {/await}
 
-<Modal open={!!importData} width="100%" on:close={() => (importData = null)}>
-    {#if importData}
-    <Toolbar>
-        <span slot="title">Import</span>
-        {#if errorMessage}
-        <span>{errorMessage}</span>
-        {:else}
-        <button on:click={importDocuments}>
-            <i class="bx bx-check"></i> Confirm
-        </button>
-        {/if}
-    </Toolbar>
-    {#if importWarnings?.length}
-        {#each importWarnings as warning}
-        <div class="warn">{warning}</div>
-        {/each}
-    {/if}
-    <div class="input">
-        <CodeEditor value={importData} on:error={({ detail }) => errorMessage = detail} />
-    </div>
-    {/if}
-</Modal>
-
-<input type="file" bind:this={uploadInput} on:change="{handleImportClick}" 
-    accept=".json,.yaml,.yml,{ACCEPTED_FORMATS.join(',')}" />
-
-<style>
-    input[type="file"] {
-        display: none;
-    }
-
-    .input {
-        padding: 0;
-        height: calc(100% - 3.8rem);
-        overflow: auto;
-    }
-
-    .warn {
-        padding: 1em;
-        width: 100%;
-        text-align: center;
-        color: white;
-        background-color: var(--color-theme-2);
-    }
-</style>
