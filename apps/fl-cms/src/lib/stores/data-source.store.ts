@@ -1,71 +1,102 @@
-import { writable, readonly, type Readable } from 'svelte/store';
+import type { QueryDocumentSnapshot } from 'firebase/firestore';
+import { BehaviorSubject, Observable, distinctUntilChanged, map, of, shareReplay, switchMap } from 'rxjs';
+import type { DocumentStore } from '../stores/db/document.service';
+import type { Entity } from '../models/schema.type';
 
-type RealtimeSource<T> = { kind: 'realtime'; data: Readable<T[]> };
-type PaginatedSource<T> = { kind: 'paginated'; data: DataSourceStore<T> };
-export type DataSource<T> = RealtimeSource<T> | PaginatedSource<T>;
+const DEFAULT_PAGE_SIZE = 80;
+const DEFAULT_REALTIME_THRESHOLD = DEFAULT_PAGE_SIZE * 3;
 
-export interface PageResult<T, TCursor> {
-    docs: T[];
-    nextCursor: TCursor | null;
-}
-export type FetchPage<T, TCursor> = (
-    cursor: TCursor | null
-) => Promise<PageResult<T, TCursor>>;
-
-export interface DataSourceStore<T> extends Readable<T[]> {
-    readonly isLoading: Readable<boolean>;
-    readonly hasMore: Readable<boolean>;
+export interface DocumentSource<T> extends Observable<T[]> {
+    readonly isLoading: Observable<boolean>;
+    readonly hasMore: Observable<boolean>;
     loadNextPage(): Promise<void>;
-    reset(): void;
+    destroy(): void;
 }
 
-export function createDataSource<T, TCursor = unknown>(
-    fetchPage: FetchPage<T, TCursor>
-): DataSourceStore<T> {
-    const docs = writable<T[]>([]);
-    const isLoading = writable<boolean>(false);
-    const hasMore = writable<boolean>(true);
+export interface DocumentSourceOptions {
+    pageSize: number;
+    realtimeThreshold: number;
+}
 
-    let currentCursor: TCursor | null = null;
-    let currentIsLoading = false;
-    let currentHasMore = true;
+function createRealtimeSource<T extends Entity>(
+    service: DocumentStore<T>
+): DocumentSource<T> {
+    // Object.assign preserves the Observable prototype (pipe, subscribe, etc.)
+    // while adding DocumentSource members directly on the instance.  
+    const docs$ = service.getDocuments();
+    return Object.assign(docs$, {
+        isLoading: of(false),
+        hasMore: of(false),
+        loadNextPage: () => Promise.resolve(),
+        destroy: () => {},
+    });
+}
 
-    isLoading.subscribe(v => currentIsLoading = v);
-    hasMore.subscribe(v => currentHasMore = v);
+function createPaginatedSource<T extends Entity>(
+    service: DocumentStore<T>,
+    pageSize: number
+): DocumentSource<T> {
+    const docs = new BehaviorSubject<T[]>([]);
+    const isLoading = new BehaviorSubject(false);
+    const hasMore = new BehaviorSubject(true);
+
+    let currentCursor: QueryDocumentSnapshot<T> | null = null;
+    let isCurrentlyLoading = false;
+    let hasMorePages = true;
+
+    isLoading.subscribe((value) => (isCurrentlyLoading = value));
+    hasMore.subscribe((value) => (hasMorePages = value));
 
     async function loadNextPage(): Promise<void> {
-        if (!currentIsLoading && currentHasMore) {
-            isLoading.set(true);
-
+        if (!isCurrentlyLoading && hasMorePages) {
+            isLoading.next(true);
             try {
-                const result = await fetchPage(currentCursor);
+                const result = await service.getDocumentsAsync<T>(currentCursor, pageSize);
                 currentCursor = result.nextCursor;
-                hasMore.set(result.nextCursor !== null);
-                
+                hasMore.next(result.nextCursor !== null);
+
                 if (result.docs.length > 0) {
-                    docs.update(acc => [...acc, ...result.docs]);
+                    docs.next([...docs.getValue(), ...result.docs]);
                 }
             } finally {
-                isLoading.set(false);
+                isLoading.next(false);
             }
         }
-
     }
 
-    function reset(): void {
-        currentCursor = null;
-        hasMore.set(true);
-        docs.set([]);
-        loadNextPage();
+    function destroy(): void {
+        docs.complete();
+        isLoading.complete();
+        hasMore.complete();
     }
 
     loadNextPage();
 
-    return {
-        subscribe: docs.subscribe,
-        isLoading: readonly(isLoading),
-        hasMore: readonly(hasMore),
+    return Object.assign(docs, {
+        isLoading,
+        hasMore,
         loadNextPage,
-        reset,
-    };
+        destroy,
+    });
+}
+
+export function createDocumentSource<T extends Entity>(
+    documentStore$: Observable<DocumentStore<T>>,
+    options: DocumentSourceOptions = {
+        pageSize: DEFAULT_PAGE_SIZE,
+        realtimeThreshold: DEFAULT_REALTIME_THRESHOLD
+    }
+): Observable<DocumentSource<T>> {
+    return documentStore$.pipe(
+        switchMap((store) =>
+            store.countDocuments().pipe(
+                distinctUntilChanged(),
+                map((count) => count > options.realtimeThreshold 
+                    ? createPaginatedSource(store, options.pageSize)
+                    : createRealtimeSource(store)
+                )
+            )
+        ),
+        shareReplay(1)
+    );
 }

@@ -5,8 +5,8 @@ export function fromStore<T>(store: Readable<T>): Observable<T> {
     return new Observable((observer) => store.subscribe(value => observer.next(value)));
 }
 
-export function toStore<T>(source: Observable<T> | Promise<T>): Readable<T> {
-  return readable<T>(undefined as T, (set) => {
+export function toStore<T>(source: Observable<T> | Promise<T>, initialValue?: T): Readable<T> {
+  return readable<T>(initialValue, (set) => {
     if (source instanceof Observable) {
       const sub = source.subscribe({
         next: set,

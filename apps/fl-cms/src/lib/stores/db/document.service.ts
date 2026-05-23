@@ -1,13 +1,17 @@
 import { type Invalidator, type Readable, type Subscriber, type Unsubscriber, writable } from 'svelte/store';
 import type { CollectionReference, DocumentData, Firestore, Query, QueryConstraint, QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore';
-import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc, orderBy, startAfter, limit, getCountFromServer } from 'firebase/firestore';
-import { collectionData, docData } from 'rxfire/firestore';
+import { collection, onSnapshot, doc, writeBatch, query, getDocs, setDoc, startAfter, limit, getCountFromServer } from 'firebase/firestore';
+import { collectionData, docData, collectionCount } from 'rxfire/firestore';
 import { of, Observable } from 'rxjs';
-import { startWith } from 'rxjs/operators';
+import { shareReplay, startWith } from 'rxjs/operators';
 import type { DocumentContract } from '../../contracts/document.contract';
 import type { Entity } from '../../models/schema.type';
 import { showError } from '../notification.store';
-import { createDataSource, type DataSourceStore, type PageResult } from '../data-source.store';
+
+export interface PageResult<T, TCursor> {
+    docs: T[];
+    nextCursor: TCursor | null;
+}
 
 // firestore does not like undefined values so omit them
 const omitUndefinedFields = (data: Record<string, unknown>) => {
@@ -51,11 +55,9 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return this.documents.subscribe(run, invalidate);
     }
 
-    async countDocuments(): Promise<number> {
+    countDocuments(): Observable<number> {
         const ref = collection(this.store, this.path);
-        const snapshot = await getCountFromServer(ref);
-        const data = snapshot.data();
-        return data.count;
+        return collectionCount(ref).pipe(shareReplay(1));
     }
 
     public getDocuments(...constraints: QueryConstraint[]): Observable<T[]> {
@@ -66,28 +68,23 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
         return of([]);
     }
 
-    public getPaginatedDocumentsAsync<T extends DocumentData>(
+    public async getDocumentsAsync<T extends DocumentData>(
+        cursor: QueryDocumentSnapshot<T> | null,
         pageSize: number,
         ...constraints: QueryConstraint[]
-    ): DataSourceStore<T> {
-        const fetchPage = async (
-            cursor: QueryDocumentSnapshot<T> | null
-        ): Promise<PageResult<T, QueryDocumentSnapshot<T>>> => {
-            if (!this.store || !this.path) {
-                return { docs: [], nextCursor: null };
-            }
-
+    ): Promise<PageResult<T, QueryDocumentSnapshot<T>>> {
+        if (this.store && this.path) {
             const pageConstraints: QueryConstraint[] = [
                 ...constraints,
                 limit(pageSize),
                 ...(cursor ? [startAfter(cursor)] : []),
             ];
-
+            
             const query = this.createQuery<T>(...pageConstraints);
             const snapshot = await getDocs(query);
-            const docs = snapshot.docs.map((doc) => ({ 
+            const docs = snapshot.docs.map((doc) => ({
                 id: doc.id,
-                ...doc.data(snapshotOptions) 
+                ...doc.data(snapshotOptions)
             }));
 
             const nextCursor =
@@ -96,21 +93,8 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
                     : null;
 
             return { docs, nextCursor };
-        };
-
-        return createDataSource<T, QueryDocumentSnapshot<T>>(fetchPage);
-    }
-
-    public async getDocumentsAsync<T extends DocumentData>(...constraints: QueryConstraint[]): Promise<T[]> {
-        if (this.store && this.path) {
-            const query = this.createQuery<T>(...constraints);
-            const snapshot = await getDocs(query);
-            return snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(snapshotOptions)
-            }));
         }
-        return [];
+        return { docs: [], nextCursor: null };
     }
     
     private createQuery<T extends DocumentData>(...constraints: QueryConstraint[]): Query<T> {

@@ -1,9 +1,8 @@
 <script lang="ts">
     import yaml from 'js-yaml';
     import { onDestroy } from 'svelte';
-    import { readable } from 'svelte/store';
     import { push } from 'svelte-spa-router';
-    import { firstValueFrom, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
+    import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
     import type { CellComponent, TableView } from '@web-apps/svelte-tabulator';
     import { createDefault } from '../../utils/content.helper';
@@ -11,7 +10,7 @@
     import { currentClientUser } from '../../stores/app.store';
     import { DocumentStore } from '../../stores/db/document.service';
     import { timestampToIsoDate } from '../../stores/db/firestore.helper';
-    import type { DataSource } from '../../stores/data-source.store';
+    import { createDocumentSource } from '../../stores/data-source.store';
     import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
@@ -19,12 +18,12 @@
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
     import '../../../styles/tabulator.css';
-    import { toStore } from '../../utils/rx.store';
     import CollectionImport from './CollectionImport.svelte';
+    import { toStore } from '../../utils/rx.store';
     
     export let schema$ = of<Collection | null>(null);
     export let documentStore$: Observable<DocumentStore<Entity>>;
-    
+
     // for adding entries
     let showAddEntry = false;
     let newEntryId: string;
@@ -33,34 +32,16 @@
     
     // for pagination
     let initialized = false;
-    let isLoading = false;
-    let total = 0;
     let observer: IntersectionObserver | null = null;
     let appendDataSentinel: HTMLElement;
 
     $: disabled = !$currentClientUser;
 
-    const PAGE_SIZE = 80;
-    const REALTIME_THRESHOLD = PAGE_SIZE * 3;
-    
-    const dataSource$ = documentStore$.pipe(
-        switchMap(async (store): Promise<DataSource<Entity>> => {
-            try {
-                isLoading = true;
-                total = await store.countDocuments();
-                return total > REALTIME_THRESHOLD
-                    ? { kind: 'paginated', data: store.getPaginatedDocumentsAsync<Entity>(PAGE_SIZE) }
-                    : { kind: 'realtime',  data: toStore(store.getDocuments()) };
-            } finally {
-                isLoading = false;
-            }
-        }),
-        tap(({ kind }) => console.debug(`DataSource: ${kind}`)),
-        shareReplay(1)
-    );
-
-    $: source = $dataSource$;
-    $: documents = source?.kind === 'paginated' ? source.data : source?.data ?? readable([]);
+    const source$ = createDocumentSource(documentStore$);
+    const documents = toStore(source$.pipe(switchMap(s => s)));
+    const isLoading = toStore(source$.pipe(switchMap(s => s.isLoading)));
+    const hasMore = toStore(source$.pipe(switchMap(s => s.hasMore)));
+    const totalCount = toStore(documentStore$.pipe(switchMap(s => s.countDocuments())));
 
     /**
      * TECH DEBT: Tabulator requires a fixed height to enable its Virtual DOM renderer.
@@ -72,12 +53,12 @@
      * This activates Tabulator's Virtual DOM, eliminates the IntersectionObserver/
      * infinite scroll logic, and allows native progressive loading via scrollVertical event.
      */
-    $: if(source?.kind === 'paginated' && initialized && appendDataSentinel) {
+    $: if($hasMore && initialized && appendDataSentinel) {
         observer?.disconnect();
         observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
-                    source.data.loadNextPage();
+                    $source$.loadNextPage();
                 }
             },
             { 
@@ -89,9 +70,7 @@
     }
 
     onDestroy(() => {
-        if (source) {
-            source.data = readable([]);
-        }
+        $source$.destroy();
         observer?.disconnect();
     });
 
@@ -161,10 +140,8 @@
 
     async function exportDocuments() {
         try {
-            const obj = source.kind === 'paginated'
-                ? await $documentStore$.getDocumentsAsync()
-                : $documents;
-            const str = yaml.dump(obj, {
+            const docs = await firstValueFrom($documentStore$.getDocuments());
+            const str = yaml.dump(docs, {
                 noArrayIndent: true,
                 indent: 2,
                 replacer: (k, v) => timestampToIsoDate(v),
@@ -198,16 +175,16 @@
         <span slot="title">
             <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
-        {#if documents !== null} 
-        <span class="no-wrap">Σ {$documents?.length}/{total}</span>
-        {/if}
+        <span class="no-wrap">
+            Σ {$documents?.length ?? ''}/{$totalCount ?? ''}
+        </span>
     </Toolbar>
 </header>
 
 {#await firstValueFrom(schema$)}
 <Loading title="schema"/>
 {:then schema}
-<Loading title="datasource" isLoading={isLoading && !!documents}>
+<Loading title="datasource" isLoading={$isLoading} overlay={initialized}>
     <section>
         {#if $documents}
         <CollectionImport bind:showSelectFile={showImportDialog} on:confirmed={({ detail }) => importDocuments(detail)}>
