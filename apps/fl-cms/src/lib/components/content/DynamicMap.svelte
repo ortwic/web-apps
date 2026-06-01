@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { of } from "rxjs";
+    import yaml from 'js-yaml';
     import { Table, Tabulator, type CellComponent, type ColumnDefinition, type TableView } from "@web-apps/svelte-tabulator";
     import type { CMSType } from '../../packages/firecms_core/types/properties.simple';
     import { currentClientUser } from "../../stores/app.store";
@@ -41,8 +42,15 @@
             ...valueMap.map(key => column(key, { 
                 width,
                 editor: 'input',
-                editable: (cell) => hasValidKey(cell),
-                cellEdited: (cell: CellComponent) => update(cell.getTable())
+                editable: (cell) => hasValidKey(cell) && typeof cell.getValue() !== 'object',
+                cellEdited: (cell: CellComponent) => update(cell.getTable()),
+                formatter: (cell: CellComponent) => {
+                    const value = cell.getValue();
+                    if (typeof value === 'object' && !Array.isArray(value)) {
+                        return yaml.dump(value).replace(/\n/g, '<br>');
+                    }
+                    return value ? value : '';
+                }
             }))
         ];
     }
