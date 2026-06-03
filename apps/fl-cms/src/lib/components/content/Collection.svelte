@@ -32,46 +32,19 @@
     
     // for pagination
     let initialized = false;
-    let observer: IntersectionObserver | null = null;
-    let appendDataSentinel: HTMLElement;
+    let headerEl: HTMLElement;
 
     $: disabled = !$currentClientUser;
 
+    const INFINITE_SCROLL_THRESHOLD_PX = 400;
     const source$ = createDocumentSource(documentStore$);
     const documents = toStore(source$.pipe(switchMap(s => s)));
     const isLoading = toStore(source$.pipe(switchMap(s => s.isLoading)));
     const hasMore = toStore(source$.pipe(switchMap(s => s.hasMore)));
     const totalCount = toStore(documentStore$.pipe(switchMap(s => s.countDocuments())));
 
-    /**
-     * TECH DEBT: Tabulator requires a fixed height to enable its Virtual DOM renderer.
-     * Without it, all rows are rendered as real DOM nodes, causing noticeable performance
-     * degradation beyond ~250-500 rows. The current infinite scroll approach accumulates
-     * all loaded rows in the DOM, making this worse over time.
-     *
-     * Fix: Set a fixed height on the table (e.g. calc(100vh - headerHeight)).
-     * This activates Tabulator's Virtual DOM, eliminates the IntersectionObserver/
-     * infinite scroll logic, and allows native progressive loading via scrollVertical event.
-     */
-    $: if($hasMore && initialized && appendDataSentinel) {
-        observer?.disconnect();
-        observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting) {
-                    $source$.loadNextPage();
-                }
-            },
-            { 
-                // appends rows when Sentinel is 400px above the bottom of the viewport
-                rootMargin: '400px' 
-            }
-        );
-        observer.observe(appendDataSentinel);
-    }
-
     onDestroy(() => {
         $source$.destroy();
-        observer?.disconnect();
     });
 
     const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));
@@ -79,7 +52,7 @@
         idField: 'id',
         maxWidth: 800, 
         maxHeight: 300,
-        updateHandler: update, 
+        updateHandler: updateEntry, 
         actions: [
             {
                 disabled,
@@ -87,11 +60,7 @@
                 menu: [
                     { 
                         label: '<i class="bx bx-check"></i> Confirm', 
-                        action: (e: MouseEvent, cell: CellComponent) => {
-                            const id = cell.getData()['id'];
-                            $documentStore$.removeDocuments(id)
-                                .then((ok) => ok ? showInfo(`Entity ${id} was removed!`) : showError(`Unable to remove entity ${id}`));
-                        } 
+                        action: removeEntry
                     },
                     {
                         label: '<i class="bx bx-x"></i> Cancel'
@@ -99,7 +68,6 @@
                 ]
             },
             {
-                disabled,
                 label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
                     const id = cell.getData()['id'];
@@ -109,9 +77,45 @@
         ]
     })));
 
+    /**
+     * Sets a fixed height to enable Tabulator's Virtual DOM.
+     * - eliminates the IntersectionObserver infinite scroll logic, 
+     * - allows native progressive loading via scrollVertical event.
+     */
+    function fitToViewportHeight(element: HTMLElement) {
+        const footer = document.querySelector('footer');
+        if (footer) {
+            const updateHeight = () => {
+                const used = headerEl.clientHeight + footer.clientHeight;
+                element.style.height = `calc(100dvh - ${used}px)`;
+            };
+
+            const observer = new ResizeObserver(updateHeight);
+            observer.observe(headerEl);
+            observer.observe(footer);
+            updateHeight();
+
+            return {
+                destroy() {
+                    observer.disconnect();
+                }
+            }
+        }
+    }
+
     function tableInit(view: TableView) {
         appendColumnSelectorMenu(view);
+        const holder = view.table.rowManager.element;
+        view.table.on('scrollVertical', (top) => handleInfiniteScroll(holder, top));
+        view.table.on('dataFiltered', () => handleInfiniteScroll(holder, holder.scrollTop));
+
         initialized = true;
+    }
+
+    function handleInfiniteScroll(element: HTMLElement, top: number) {
+        if ($hasMore && top + element.clientHeight >= element.scrollHeight - INFINITE_SCROLL_THRESHOLD_PX) {
+            $source$.loadNextPage();
+        }
     }
 
     async function addEntry(schema: Collection | null) {
@@ -122,7 +126,7 @@
         newEntryId = '';
     }
 
-    async function update<T extends Entity>(doc: T) {
+    async function updateEntry<T extends Entity>(doc: T) {
         try {
             if (await $documentStore$.setDocument(doc, true)) {
                 showInfo(`Updated document ${JSON.stringify(doc)}`);
@@ -134,13 +138,24 @@
         }
     }
 
+    async function removeEntry(e: MouseEvent, cell: CellComponent) {
+        const id = cell.getData()['id'];
+        if (await $documentStore$.removeDocuments(id)) {
+            showInfo(`Entity ${id} was removed!`);
+            cell.getRow().delete();
+        } else {
+            showError(`Unable to remove entity ${id}`);
+        }
+                        
+    }
+
     function importDocuments(importData: Entity[]) {
         $documentStore$.setDocuments(...importData);
     }
 
     async function exportDocuments() {
         try {
-            const docs = await firstValueFrom($documentStore$.getDocuments());
+            const { docs } = await $documentStore$.getDocumentsAsync();
             const str = yaml.dump(docs, {
                 noArrayIndent: true,
                 indent: 2,
@@ -160,7 +175,7 @@
     }
 </script>
 
-<header>
+<header bind:this={headerEl}>
     <Toolbar showNav={true}>
         <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
             <i class="bx bx-plus hl"></i>
@@ -185,7 +200,7 @@
 <Loading title="schema"/>
 {:then schema}
 <Loading title="datasource" isLoading={$isLoading} overlay={initialized}>
-    <section>
+    <section use:fitToViewportHeight>
         {#if $documents}
         <CollectionImport bind:showSelectFile={showImportDialog} on:confirmed={({ detail }) => importDocuments(detail)}>
             <!-- on path change columns must be invalidated to keep them in sync -->
@@ -193,7 +208,6 @@
             <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
                 on:init={({ detail }) => tableInit(detail)} />
             {/key}
-            <div bind:this={appendDataSentinel} style="height: 1px" />
         </CollectionImport>
         {/if}
     </section>

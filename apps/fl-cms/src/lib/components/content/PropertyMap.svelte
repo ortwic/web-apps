@@ -104,7 +104,7 @@
                         {:else if isArrayProperty(prop, 'string')}
                             {#key document[field]}
                                 <TagEditor
-                                    labels={document[field]}
+                                    labels={document[field] ?? []}
                                     on:change={({ detail }) => update(detail, field)}
                                 />
                             {/key}

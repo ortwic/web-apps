@@ -69,26 +69,30 @@ export class DocumentStore<T extends Entity> implements DocumentContract<T>, Rea
     }
 
     public async getDocumentsAsync<T extends DocumentData>(
-        cursor: QueryDocumentSnapshot<T> | null,
-        pageSize: number,
+        cursor?: QueryDocumentSnapshot<T> | null,
+        pageSize?: number,
         ...constraints: QueryConstraint[]
     ): Promise<PageResult<T, QueryDocumentSnapshot<T>>> {
         if (this.store && this.path) {
+            if (cursor && !pageSize) {
+                throw new Error('Cursor requires page size');
+            }
+
             const pageConstraints: QueryConstraint[] = [
                 ...constraints,
-                limit(pageSize),
+                ...(pageSize ? [limit(pageSize)] : []),
                 ...(cursor ? [startAfter(cursor)] : []),
             ];
             
             const query = this.createQuery<T>(...pageConstraints);
             const snapshot = await getDocs(query);
             const docs = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(snapshotOptions)
+                ...doc.data(snapshotOptions),
+                id: doc.id
             }));
 
             const nextCursor =
-                snapshot.docs.length > 0 && snapshot.docs.length >= pageSize
+                pageSize && snapshot.docs.length > 0 && snapshot.docs.length >= pageSize
                     ? snapshot.docs[snapshot.docs.length - 1]
                     : null;
 

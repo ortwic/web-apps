@@ -81,7 +81,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                             options.updateHandler({
                                 [options.idField]: id, 
                                 [field]: value 
-                            } as T);
+                            } as T, cell);
                         }
                     }
                 };
