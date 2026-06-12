@@ -11,14 +11,19 @@
     import Modal from "../ui/Modal.svelte";
     import Toolbar from "../ui/Toolbar.svelte";
     import ImagePreview from "./ImagePreview.svelte";
+    import MediaList from "./MediaList.svelte";
+    import MediaGrid from "./MediaGrid.svelte";
 
     $: disabled = !$currentClientUser;
-    
+
     export let path = of('');
 
+    type ViewMode = 'list' | 'grid';
     type EventArgs = { folderChange: string; fileSelect: StorageFile; };
+
     const dispatch = createEventDispatcher<EventArgs>();
 
+    let viewMode: ViewMode = 'list';
     let preview: StorageFile | undefined;
     let upload: HTMLInputElement;
     let prompt: HTMLInputElement;
@@ -26,7 +31,7 @@
     let isLoading = true;
 
     const items$ = combineLatest([
-        fromStore(currentStorage), 
+        fromStore(currentStorage),
         path.pipe(tap(() => isLoading = true))
     ]).pipe(
         switchMap(([storage, path]) => storage.listAll(path)),
@@ -40,20 +45,34 @@
     async function fileClicked(item: StorageItem) {
         dispatch('fileSelect', await withUrl(item));
     }
-    
+
     async function withUrl(item: StorageItem): Promise<StorageFile> {
         const url = await $currentStorage.getFileUrl(item.path);
         return { ...item, url };
     }
 
+    function toggleViewMode() {
+        viewMode = viewMode === 'list' ? 'grid' : 'list';
+    }
+
+    async function previewClicked(item: StorageItem) {
+        preview = await withUrl(item);
+    }
+
+    function deleteClicked(item: StorageItem) {
+        if (confirm('Delete?')) {
+            $currentStorage.deleteFile(item.path);
+        }
+    }
+
     async function showPrompt() {
         promptVisible = true;
-
+        
         await tick();
         prompt?.focus();
     }
 
-    function createFolder(event: Event & { currentTarget: EventTarget & HTMLInputElement; }) {
+    function createFolder(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
         $currentStorage.createFolder($path, event.currentTarget.value);
         promptVisible = false;
     }
@@ -70,7 +89,6 @@
             await $currentStorage.uploadFile($path, file);
         }
     }
-    
 </script>
 
 <header>
@@ -84,64 +102,59 @@
                 on:click|preventDefault={selectFile}>
                 <i class="bx bx-upload"></i>
             </button>
+            <button
+                class="icon clear"
+                title="Toggle to {viewMode === 'list' ? 'grid' : 'list'} view"
+                on:click={toggleViewMode}>
+                <i class="bx bx-{viewMode === 'list' ? 'grid-alt' : 'list-ul'}"></i>
+            </button>
         </span>
         <span slot="title">
-            <Breadcrumb path={$path} rootLabel="Media" on:navigate={({ detail: path }) => folderClicked(path)} />
+            <Breadcrumb
+                path={$path}
+                rootLabel="Media"
+                on:navigate={({ detail: path }) => folderClicked(path)} />
         </span>
     </Toolbar>
 </header>
 
-<section class="content-64">    
+<section class="content-64">
     <Loading {isLoading} title={$path}>
-        <div class="grid">
-            {#each $items$ as item (item.path)}
-            {#if item.type !== 'file'}
-            <span class="no-wrap colspan">
-                <i class="bx bx-{item.type === 'virtual' ? 'folder-plus' : 'folder'}"></i> 
-                <a href="#/" on:click|preventDefault={() => folderClicked(item.path)}>{item.name}</a>
-            </span>
-            {:else}
-            <span class="no-wrap">
-                <i class="bx bx-file"></i> 
-                <a href="#/" on:click|preventDefault={() => fileClicked(item)}> {item.name}</a>
-            </span>
-            <span>
-                <button class="icon clear" on:click|preventDefault={async () => preview = await withUrl(item)}>
-                    <i class="bx bx-search"></i>
-                </button>
-                <button class="icon clear" on:click|preventDefault={() => confirm('Delete?') && $currentStorage.deleteFile(item.path)}>
-                    <i class="bx bx-trash"></i>
-                </button>
-            </span>
-            {/if}
-            {/each}
-        </div>
+        {#if viewMode === 'list'}
+            <MediaList
+                items={$items$}
+                on:folderClick={({ detail }) => folderClicked(detail)}
+                on:fileClick={({ detail }) => fileClicked(detail)}
+                on:previewClick={({ detail }) => previewClicked(detail)}
+                on:deleteClick={({ detail }) => deleteClicked(detail)} />
+        {:else}
+            <MediaGrid
+                items={$items$}
+                on:folderClick={({ detail }) => folderClicked(detail)}
+                on:fileClick={({ detail }) => fileClicked(detail)}
+                on:previewClick={({ detail }) => previewClicked(detail)}
+                on:deleteClick={({ detail }) => deleteClicked(detail)} />
+        {/if}
     </Loading>
-    
 </section>
 
 <ImagePreview src={preview?.url} name={preview?.name} />
 
 <Modal open={promptVisible} width="12em" on:close={() => promptVisible = false}>
     <p>
-        <label for="prompt">Enter folder name</label>
+        <label for="folder-prompt">Enter folder name</label>
     </p>
-    <input id="prompt" type="text" bind:this={prompt} placeholder="Folder name" 
-        on:keyup={(ev) => confirmed(ev) && createFolder(ev)}>
+    <input
+        id="folder-prompt"
+        type="text"
+        bind:this={prompt}
+        placeholder="Folder name"
+        on:keyup={(ev) => confirmed(ev) && createFolder(ev)} />
 </Modal>
 
-<input type="file" bind:this={upload} on:change="{uploadFile}" accept="image/*" />
+<input type="file" bind:this={upload} on:change={uploadFile} accept="image/*" />
 
 <style lang="scss">
-    .grid {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 0 1rem;
-
-        .colspan {
-            grid-column: 1 / span 2;
-        }
-    }
 
     input[type="file"] {
         display: none;
