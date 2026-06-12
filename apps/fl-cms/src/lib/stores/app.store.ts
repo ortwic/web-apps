@@ -4,15 +4,16 @@ import type { Auth, User, UserCredential } from "firebase/auth";
 import { connectAuthEmulator, EmailAuthProvider, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut } from "firebase/auth";
 import { Firestore, connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
+import { getProjectKey, shouldUseEmulator } from "../utils/app.helper";
 import { showError, showInfo, showWarn } from "./notification.store";
-import type { AppSettings } from "./settings.type";
-import { EMULATOR_KEY, settingsStore } from "./settings.store";
+import { settingsStore } from "./settings.store";
+import type { AppConfig, AppSettings } from "./settings.type";
 
 export const appStore = derived(settingsStore, (settings) => new FirebaseAppAdapter(settings));
 export const currentClientUser = writable<User | null>(null);
 
-const currentStores = new WeakSet<Firestore>();
-const currentStorages = new WeakSet<FirebaseStorage>();
+const emulatedFirestores = new WeakSet<Firestore>();
+const emulatedStorages = new WeakSet<FirebaseStorage>();
 const currentAuths = new WeakSet<Auth>();
 const userForEmulator = {
     email: `john.doe@example.com`,
@@ -22,15 +23,15 @@ const userForEmulator = {
 
 class FirebaseAppAdapter {
     private app: FirebaseApp | null;
-    private config: FirebaseOptions;
-    private editRole: string | undefined;
-    readonly useEmulator: boolean;
+    private readonly config: AppConfig;
+    private readonly editRole: string | undefined;
+    readonly authEmulated: boolean;
 
     constructor(settings: AppSettings) {
         const { customEditRole, ...config } = settings.firebaseConfigs[settings.selectedProjectId] || {};
         this.config = config;
-        this.useEmulator = settings.selectedProjectId === EMULATOR_KEY;
-        this.editRole = !this.useEmulator ? customEditRole : undefined;
+        this.authEmulated = shouldUseEmulator(this.config.authDomain);
+        this.editRole = !this.authEmulated ? customEditRole : undefined;
         this.app = this.getClientApp(this.config);
     }
 
@@ -38,9 +39,9 @@ class FirebaseAppAdapter {
         return this.config && 'apiKey' in this.config && 'authDomain' in this.config && 'projectId' in this.config;
     }
 
-    private getClientApp(config: FirebaseOptions): FirebaseApp | null {
+    private getClientApp(config: AppConfig): FirebaseApp | null {
         if (config) {
-            const name = config.projectId ?? '[DEFAULT]';
+            const name = getProjectKey(config) ?? '[DEFAULT]';
             return getApps().find((app) => app.name === name) ?? initializeApp(config, name);
         }
         return null;
@@ -49,8 +50,8 @@ class FirebaseAppAdapter {
     getFirestore(): Firestore | null {
         if (this.app) {
             const store = getFirestore(this.app);
-            if (this.useEmulator && this.config.databaseURL && !currentStores.has(store)) {
-                this.emulateFirestore(store, new URL(this.config.databaseURL));
+            if (shouldUseEmulator(this.config.databaseURL) && !emulatedFirestores.has(store)) {
+                this.emulateFirestore(store);
             }
 
             return store;
@@ -58,24 +59,24 @@ class FirebaseAppAdapter {
         return null;
     }
 
-    private emulateFirestore(store: Firestore, url: URL) {
+    private emulateFirestore(store: Firestore) {
+        const url = new URL(this.config.databaseURL!);
         connectFirestoreEmulator(store, url.hostname, +url.port || 8080);
         showInfo(`Using emulator on ${url.host}`);
-        currentStores.add(store);
+        emulatedFirestores.add(store);
     }
 
     getStorage(): FirebaseStorage | null {
         if (this.app) {
             // define storage bucket, otherwise emulator will crash bc of invalid url "match /b/{bucket}/o" in storage.rules
-            const bucket = this.useEmulator ? EMULATOR_KEY : undefined;
+            const useEmulator = shouldUseEmulator(this.config.storageBucket);
+            const bucket = useEmulator ? this.config.projectId : undefined;
             const storage = getStorage(this.app, bucket);
-            if (this.useEmulator && this.config.storageBucket && !currentStorages.has(storage)) {
-                const url = new URL(this.config.storageBucket);
-                if (!url.hostname.match('^.+\.appspot\.com$')) {
-                    connectStorageEmulator(storage, url.hostname, +url.port || 8188);
-                    showInfo(`Using emulator on ${url.hostname}:${url.port}`);
-                    currentStorages.add(storage);
-                }
+            if (useEmulator && !emulatedStorages.has(storage)) {
+                const url = new URL(this.config.storageBucket!);
+                connectStorageEmulator(storage, url.hostname, +url.port || 8188);
+                showInfo(`Using emulator on ${url.hostname}:${url.port}`);
+                emulatedStorages.add(storage);
             }
 
             return storage;
@@ -88,11 +89,8 @@ class FirebaseAppAdapter {
             const auth = getAuth(this.app);
             if (!currentAuths.has(auth)) {
                 onAuthStateChanged(auth, this.setSufficientUser);
-                if (this.useEmulator) {
-                    if (!this.config.authDomain) {
-                        this.config.authDomain = 'http://localhost:9099';
-                    }
-                    connectAuthEmulator(auth, this.config.authDomain, { disableWarnings: true });
+                if (this.authEmulated) {
+                    connectAuthEmulator(auth, this.config.authDomain!, { disableWarnings: true });
                 }
                 currentAuths.add(auth);
             }
@@ -105,11 +103,10 @@ class FirebaseAppAdapter {
     async signIn(): Promise<void> {
         const auth = this.getAuth();
         if (auth) {
-            const credentials = auth && this.useEmulator 
+            const { user } = this.authEmulated 
                 ? await this.signInToEmulator(auth)
                 : await signInWithPopup(auth, new GoogleAuthProvider());
-
-            await this.setSufficientUser(credentials.user);
+            await this.setSufficientUser(user);
         }
     }
 
@@ -156,10 +153,11 @@ Set role to "${this.editRole}" with set-admin script and this uid: ${user.uid}`,
         }
     }
 
-    signOut() {        
+    async signOut() {        
         const auth = this.getAuth();
         if (auth) {
-            signOut(auth);
+            await signOut(auth);
+            currentAuths.delete(auth);
             showInfo('Signed out');
         }
     }

@@ -14,8 +14,8 @@
 
 <select style:width={width} {disabled} name="config" 
     value={$settingsStore.selectedProjectId} on:change={selectProject}>
-    {#each Object.keys($settingsStore.firebaseConfigs) as projectId}
-        <option value={projectId}>{projectId}</option>
+    {#each Object.entries($settingsStore.firebaseConfigs) as [value, config]}
+        <option {value}>{value}</option>
     {/each}
 </select>
 

@@ -3,8 +3,8 @@
     import { onMount } from 'svelte';
     import { derived } from 'svelte/store';
     import { querystring } from 'svelte-spa-router';
-    import type { FirebaseOptions } from 'firebase/app';
     import { removeFirebaseConfig, saveFirebaseConfig, settingsStore } from '../../stores/settings.store';
+    import type { AppConfig } from '../../stores/settings.type';
     import { showError, showInfo } from '../../stores/notification.store';
 
     export let disabled = false;
@@ -21,7 +21,7 @@
 };`;
 
     let textInput = '';
-    let config: FirebaseOptions | undefined;
+    let config: AppConfig | undefined;
 
     onMount(() => setConfigFromUrl());
 
@@ -40,7 +40,7 @@
         }
     }
 
-    function setCurrentConfig(config: FirebaseOptions) {
+    function setCurrentConfig(config: AppConfig) {
         textInput = config?.projectId ? json.stringify(config, null, 2) : '';
     }
 
@@ -48,7 +48,7 @@
         try {
             const configString = text?.match(/\{.+\}/s)?.at(0);
             if (configString) {
-                config = json.parse<FirebaseOptions>(configString);
+                config = json.parse<AppConfig>(configString);
                 return 'apiKey' in config && 'authDomain' in config && 'projectId' in config;
             }
         } catch {
@@ -68,14 +68,14 @@
 
     function save() {
         if (config?.projectId && valid) {
-            saveFirebaseConfig(config.projectId, config);
+            saveFirebaseConfig(config);
             showInfo(`Firebase config added for ${config.projectId}`);
         }
     }
 
     function remove() {
         if (config?.projectId) {
-            removeFirebaseConfig(config.projectId);
+            removeFirebaseConfig(config);
             textInput = '';
         }
     }

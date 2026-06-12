@@ -1,22 +1,20 @@
 import json from 'json5';
-import type { FirebaseOptions } from "firebase/app";
 import { writable } from 'svelte/store';
-import type { AppSettings } from './settings.type';
+import { EMULATOR_HOSTNAME, getProjectKey } from '../utils/app.helper';
+import type { AppConfig, AppSettings } from './settings.type';
 
 export const CONFIG_KEY = 'firelighter-settings';
-export const EMULATOR_KEY = 'emulator';
 export const DefaultAppSettings: AppSettings = {
     selectedProjectId: '',
     firebaseConfigs: {
-        [EMULATOR_KEY]: {
+        localhost: {
             apiKey: 'default',
-            authDomain: 'http://localhost:9099',
-            databaseURL: 'http://localhost:8080',
-            projectId: EMULATOR_KEY,
-            storageBucket: 'http://localhost:8188',
+            authDomain: `http://${EMULATOR_HOSTNAME}:9099`,
+            databaseURL: `http://${EMULATOR_HOSTNAME}:8080`,
+            projectId: 'your-project-id',
+            storageBucket: `http://${EMULATOR_HOSTNAME}:8188`,
             messagingSenderId: 'default',
-            appId: 'default',
-            customEditRole: 'admin'
+            appId: `1:2:${EMULATOR_HOSTNAME}:4`
         }
     }
 };
@@ -28,17 +26,23 @@ export function saveSelectedProjectId(projectId: string): AppSettings {
     return saveSettings(settings);
 }
 
-export function saveFirebaseConfig(projectId: string, config: FirebaseOptions): AppSettings {
+export function saveFirebaseConfig(config: AppConfig): AppSettings {
     const settings = loadSettings();
-    settings.firebaseConfigs[projectId] = config;
-    settings.selectedProjectId = projectId;
+
+    const key = getProjectKey(config);
+    settings.firebaseConfigs[key] = config;
+    settings.selectedProjectId = key;
+    
     return saveSettings(settings);
 }
 
-export function removeFirebaseConfig(projectId: string): AppSettings {
+export function removeFirebaseConfig(config: AppConfig): AppSettings {
     const settings = loadSettings();
-    delete settings.firebaseConfigs[projectId];
+    
+    const key = getProjectKey(config);
+    delete settings.firebaseConfigs[key];
     settings.selectedProjectId = Object.keys(settings.firebaseConfigs).at(0) ?? '';
+
     return saveSettings(settings);
 }
 
