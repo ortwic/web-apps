@@ -4,7 +4,7 @@
     import { push } from 'svelte-spa-router';
     import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
     import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
-    import type { CellComponent, TableView } from '@web-apps/svelte-tabulator';
+    import type { CellComponent, Options, TableView } from '@web-apps/svelte-tabulator';
     import { createDefault } from '../../utils/content.helper';
     import type { Entity, Collection } from '../../models/schema.type';
     import { currentClientUser } from '../../stores/app.store';
@@ -29,6 +29,7 @@
     let newEntryId: string;
 
     let showImportDialog = () => {};
+    let deleteRowsHandler = () => {};
     
     // for pagination
     let initialized = false;
@@ -42,6 +43,20 @@
     const isLoading = toStore(source$.pipe(switchMap(s => s.isLoading)));
     const hasMore = toStore(source$.pipe(switchMap(s => s.hasMore)));
     const totalCount = toStore(documentStore$.pipe(switchMap(s => s.countDocuments())));
+    const options: Options = {
+        selectableRows: 'highlight',
+        rowHeader: {
+            headerSort: false,
+            resizable: false,
+            frozen: true,
+            minWidth: 70,
+            formatter: "rowSelection",
+            titleFormatter: "rowSelection",
+            cellClick(e: MouseEvent, cell: CellComponent) {
+                cell.getRow().toggleSelect();
+            }
+        }
+    };
 
     onDestroy(() => {
         $source$.destroy();
@@ -54,19 +69,6 @@
         maxHeight: 300,
         updateHandler: updateEntry, 
         actions: [
-            {
-                disabled,
-                label: '<i class="bx bx-trash"></i>',
-                menu: [
-                    { 
-                        label: '<i class="bx bx-check"></i> Confirm', 
-                        action: removeEntry
-                    },
-                    {
-                        label: '<i class="bx bx-x"></i> Cancel'
-                    }
-                ]
-            },
             {
                 label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
@@ -106,9 +108,15 @@
     function tableInit(view: TableView) {
         appendColumnSelectorMenu(view);
         const holder = view.table.rowManager.element;
-        view.table.on('scrollVertical', (top) => handleInfiniteScroll(holder, top));
+        view.table.on('scrollVertical', (top: number) => handleInfiniteScroll(holder, top));
         view.table.on('dataFiltered', () => handleInfiniteScroll(holder, holder.scrollTop));
-
+        deleteRowsHandler = () => {
+            const selectedRows = view.table.getSelectedRows();
+            const ids = selectedRows.map(row => row.getData()['id']);
+            $documentStore$.removeDocuments(...ids)
+                .then(() => selectedRows.forEach(row => row.delete()))
+                .then(() => showInfo(`Deleted ${ids.length} entries.`));
+        };
         initialized = true;
     }
 
@@ -136,17 +144,6 @@
         } catch (error: any) {
             showError(`Failed to update document: ${error?.message}`);
         }
-    }
-
-    async function removeEntry(e: MouseEvent, cell: CellComponent) {
-        const id = cell.getData()['id'];
-        if (await $documentStore$.removeDocuments(id)) {
-            showInfo(`Entity ${id} was removed!`);
-            cell.getRow().delete();
-        } else {
-            showError(`Unable to remove entity ${id}`);
-        }
-                        
     }
 
     function importDocuments(importData: Entity[]) {
@@ -180,6 +177,9 @@
         <button title="Add new entry" {disabled} class="icon clear" on:click={() => showAddEntry = true}>
             <i class="bx bx-plus hl"></i>
         </button>
+        <button title="Delete selected rows" {disabled} class="icon clear" on:click={deleteRowsHandler}>
+            <i class="bx bx-trash"></i>
+        </button>
         <button title="Import from YAML" {disabled} class="icon clear" on:click={showImportDialog}>
             <i class="bx bx-import"></i>
         </button>
@@ -205,7 +205,7 @@
         <CollectionImport bind:showSelectFile={showImportDialog} on:confirmed={({ detail }) => importDocuments(detail)}>
             <!-- on path change columns must be invalidated to keep them in sync -->
             {#key $columns$}
-            <Table idField="id" columns={$columns$} data={documents} persistenceID={$persistenceID$}
+            <Table idField="id" columns={$columns$} data={documents} {options} persistenceID={$persistenceID$}
                 on:init={({ detail }) => tableInit(detail)} />
             {/key}
         </CollectionImport>

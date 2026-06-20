@@ -23,6 +23,7 @@
     ResizeColumnsModule, 
     ResizeRowsModule,
     ResizeTableModule,
+    SelectRowModule,
     SortModule, 
     ValidateModule
   } from 'tabulator-tables';
@@ -57,6 +58,7 @@
     ResizeRowsModule,
     ResizeTableModule,
     ResponsiveLayoutModule,
+    SelectRowModule,
     SortModule,
     ValidateModule
   ]);
@@ -79,6 +81,7 @@
   export let groupHeader: GroupFormatter | undefined = undefined;
   export let detailFormatter: DetailFormatter | undefined = undefined;
   export const isGroupedBy = (field: string) => field in rowGroups;
+  export let options = {} as Options;
   export let persistenceID = '';
   export let enableResponsiveLayoutSupport = false;
   let useResponsiveLayout = false;
@@ -107,7 +110,7 @@
   ];
   
   const usePersistance = !!persistenceID;
-  const options: Options = {
+  const defaultOptions: Options = {
     columns,
     placeholder,
     clipboard: true,
@@ -156,11 +159,12 @@
     };
 
     const tableInstance = new Tabulator(tableContainer, {
-      ...options,
+      ...defaultOptions,
       layout: useResponsiveLayout ? 'fitDataStretch' : 'fitData',
       headerVisible: !useResponsiveLayout,
       responsiveLayout: useResponsiveLayout ? 'collapse' : undefined,
-      persistence
+      persistence,
+      ...options
     });
     table = fromEvent(tableInstance, 'tableBuilt').pipe(take(1), map(() => handleTableBuilt(tableInstance, useResponsiveLayout)));
   }

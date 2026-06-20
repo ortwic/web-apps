@@ -12,6 +12,20 @@
     color: var(--color-text);
 }
 
+.tabulator-row.tabulator-selected,
+.tabulator-row.tabulator-row-even.tabulator-selected {
+    background-color: var(--color-theme-2) !important;
+    color: var(--color-text) !important;
+}
+
+.tabulator .tabulator-cell.tabulator-row-header input[type="checkbox"],
+.tabulator .tabulator-header .tabulator-col.tabulator-row-header input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+    accent-color: var(--color-theme-1); // optional: Häkchen-Farbe
+}
+
 .tabulator-row.tabulator-row-even {
     background-color: var(--color-bg-2) !important;
 }
@@ -40,5 +54,20 @@
     .tabulator-header,
     .tabulator-cell {
       border-color: #2b2b2b !important;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tabulator-row.tabulator-selectable:hover {
+        background-color: var(--color-bg-0) !important;
+        cursor: pointer;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tabulator-row.tabulator-selected:hover,
+    .tabulator-row.tabulator-row-even.tabulator-selected:hover {
+        background-color: var(--color-theme-1) !important;
+        color: var(--color-text-hl) !important;
     }
 }
