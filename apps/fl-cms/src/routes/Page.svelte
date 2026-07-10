@@ -1,5 +1,6 @@
 <script lang="ts">
     import { link, params } from 'svelte-spa-router';
+    import { derived } from 'svelte/store';
     import { combineLatest, map, switchMap } from 'rxjs';
     import type { Content } from '../lib/models/content.type';
     import { ContentService } from '../lib/stores/db/content.service';
@@ -17,7 +18,7 @@
         id?: string;
     };
 
-    const pathInfo$ = fromStore(params).pipe(map((p) => parsePath(p?.wild)));
+    const pathInfo$ = fromStore(derived(params, (p) => parsePath(p?.wild)));
     const documentStore$ = createDocumentStore<Content>(pathInfo$.pipe(map((p) => p?.path)));
     const schema$ = combineLatest([fromStore(createSchemaStore()), pathInfo$]).pipe(
         switchMap(([store, info]) => store.getCollectionFromFullPath(info?.path)),

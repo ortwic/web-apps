@@ -59,7 +59,7 @@
     };
 
     onDestroy(() => {
-        $source$.destroy();
+        $source$?.destroy();
     });
 
     const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));

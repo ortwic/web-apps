@@ -95,6 +95,7 @@
 
 <Loading isLoading={!items} title={title}>
     <div class="x-flex">
+        <!-- Using a key-value map here is a bad configuration. A key-value map is already dynamic, so need for an array. -->
         {#each withKey(items) as { item, key }, i (key)}
         <div class="card" animate:flip={{ duration: 300 }}>
             {#if isTyped(item)}

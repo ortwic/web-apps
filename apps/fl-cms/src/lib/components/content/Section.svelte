@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
-    import type { AnyProperty, CMSType } from '../../packages/firecms_core/types/properties.simple';
+    import type { AnyProperty, CMSType, StringProperty } from '../../packages/firecms_core/types/properties.simple';
     import type { UpdateArgs } from "../../models/schema.type";
     import CodeEditor from '../ui/CodeEditor.svelte';
     import Expand from '../ui/Expand.svelte';
@@ -20,11 +20,14 @@
     export let disabled = false;
 
     const dispatch = createEventDispatcher<{ changed: UpdateArgs<T> }>();
+    const keyValueProperty: Record<string, StringProperty> = { key: { dataType: "string" }, value: { dataType: "string" } };
 
     function getProperties(prop: AnyProperty): Record<string, AnyProperty> {
         if (prop) {
             if (isMapProperty(prop)) {
-                return Object.fromEntries(sortByOrder(prop.properties as Record<string, AnyProperty>));
+                return prop.keyValue 
+                    ? keyValueProperty 
+                    : Object.fromEntries(sortByOrder(prop.properties as Record<string, AnyProperty>));
             }
             if (isBlockSetProperty(prop)) {
                 return Object.fromEntries(sortByOrder(prop.oneOf?.properties as Record<string, AnyProperty>));
