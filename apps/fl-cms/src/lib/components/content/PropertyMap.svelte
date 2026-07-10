@@ -169,7 +169,7 @@
         {/each}
     </ul>
 {:else if !document}
-    <h2 class="emphasis no-wrap">Missing data node</h2>
+    <h2 class="emphasis no-wrap">Missing data node ({document})</h2>
 {:else}
     <h2 class="emphasis no-wrap">Unsupported data structure</h2>
     <pre>{JSON.stringify(document, null, 2)}</pre>

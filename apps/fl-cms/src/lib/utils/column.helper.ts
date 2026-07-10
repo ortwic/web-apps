@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import { get } from "svelte/store";
 import { autoFilter, label, timestamp } from "@web-apps/svelte-tabulator";
 import type { ColumnDefinition, CellComponent, Editor, MenuObject } from "@web-apps/svelte-tabulator";
 import type { Collection } from "../models/schema.type";
@@ -8,7 +9,7 @@ import { arrayToSectionMap, isFileType, isUrlProperty, isMarkdown, sortByOrder }
 import { currentStorage } from "../stores/storage/storage.service";
 import type { SectionType } from "../models/content.type";
 import { isRelativeUrl } from "./string.helper";
-import { get } from "svelte/store";
+import { arrayInputEditor } from "./tabulator/input.editor";
 
 export function prepareColumnDefinitions<T>(schema: Collection | null, options: ColumnOptions<T>): ColumnDefinition[] {
     const storage = get(currentStorage);
@@ -100,7 +101,7 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                 if (prop.of?.dataType === 'string') {
                     return {
                         ...label(),
-                        ...editor('input'),
+                        ...editor(arrayInputEditor),
                     };
                 }
 
@@ -223,3 +224,5 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
         return img;
     }
 }
+
+
