@@ -4,7 +4,8 @@
     import { createEventDispatcher } from 'svelte';
     import ImageSelectDialog from '../media/ImageDialog.svelte';
     import { currentStorage } from '../../stores/storage/storage.service';
-    import { imageSelectPlugin, resolveImagesPlugin } from '../../extensions/bytemd.plugins';
+    import { imageSelectPlugin, resolveImagesPlugin } from '../../extensions/bytemd-images.plugins';
+    import { purgeHtmlPlugin } from '../../extensions/bytemd-turndown.plugin';
     import { debounce } from '../../utils/input.helper';
 
     export let value = '';
@@ -19,6 +20,12 @@
 
     const dispatch = createEventDispatcher<{ changed: string }>();
 	const handleChange = debounce((value) => dispatch("changed", value), debounceInMs);
+    const viewerPlugins = [resolveImagesPlugin($currentStorage)];
+    const editorPlugins = [
+        imageSelectPlugin(selectImage), 
+        resolveImagesPlugin($currentStorage),
+        purgeHtmlPlugin()
+    ];
 
     function selectImage(): Promise<string> {
         showImageSelector = true;
@@ -38,11 +45,11 @@
 
 {#if disabled}
 <div class="input">
-    <Viewer {value} plugins={[resolveImagesPlugin($currentStorage)]}/>
+    <Viewer {value} plugins={viewerPlugins}/>
 </div>
 {:else}
 <Editor {value} {placeholder}
-    plugins={[imageSelectPlugin(selectImage), resolveImagesPlugin($currentStorage)]} 
+    plugins={editorPlugins} 
     on:change={({ detail }) => handleChange(detail['value'])}/>
 
 <ImageSelectDialog bind:this={imageSelect} open={showImageSelector} path={mediaPath} />
