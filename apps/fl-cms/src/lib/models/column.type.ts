@@ -5,5 +5,5 @@ export interface ColumnOptions<T> {
     maxWidth?: number;
     maxHeight?: number;
     actions?: Array<MenuObject<CellComponent> | MenuSeparator>;
-    updateHandler?: (data: T, cell: CellComponent) => void;
+    updateHandler?: (ids: string[], field: keyof T, value: unknown) => void;
 }

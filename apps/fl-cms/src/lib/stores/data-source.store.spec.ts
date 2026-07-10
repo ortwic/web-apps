@@ -17,11 +17,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BehaviorSubject, firstValueFrom, Observable, of } from 'rxjs';
 import type { DocumentStore } from '../stores/db/document.service';
 import type { Entity } from '../models/schema.type';
-import {
-    createDocumentSource,
-    type DocumentSource,
-    type DocumentSourceOptions,
-} from './data-source.store';
+import { createDocumentSource } from './data-source.store';
+import type { DocumentSource, DocumentSourceOptions } from './data-source.types';
 
 // ---------------------------------------------------------------------------
 // Types & helpers
@@ -82,7 +79,7 @@ afterEach(() => vi.restoreAllMocks());
 // ===========================================================================
 
 describe('createRealtimeSource (count ≤ threshold)', () => {
-    const OPTIONS: DocumentSourceOptions = { pageSize: 10, realtimeThreshold: 30 };
+    const OPTIONS: DocumentSourceOptions = { pageSize: 10, realtimeThreshold: 30, idField: 'id' };
 
     it('should emit a DocumentSource that proxies getDocuments() emissions', async () => {
         // Arrange
@@ -187,7 +184,7 @@ describe('createRealtimeSource (count ≤ threshold)', () => {
 // ===========================================================================
 
 describe('createPaginatedSource (count > threshold)', () => {
-    const OPTIONS: DocumentSourceOptions = { pageSize: 3, realtimeThreshold: 5 };
+    const OPTIONS: DocumentSourceOptions = { pageSize: 3, realtimeThreshold: 5, idField: 'id' };
 
     async function buildPaginatedSource(
         initialDocs: TestDoc[],
@@ -307,7 +304,7 @@ describe('createPaginatedSource (count > threshold)', () => {
 // ===========================================================================
 
 describe('loadNextPage — pagination accumulation', () => {
-    const OPTIONS: DocumentSourceOptions = { pageSize: 2, realtimeThreshold: 5 };
+    const OPTIONS: DocumentSourceOptions = { pageSize: 2, realtimeThreshold: 5, idField: 'id' };
 
     it('should accumulate documents across multiple loadNextPage calls', async () => {
         // Arrange
@@ -416,7 +413,7 @@ describe('loadNextPage — pagination accumulation', () => {
 // ===========================================================================
 
 describe('createDocumentSource — routing between realtime and paginated', () => {
-    const OPTIONS: DocumentSourceOptions = { pageSize: 5, realtimeThreshold: 10 };
+    const OPTIONS: DocumentSourceOptions = { pageSize: 5, realtimeThreshold: 10, idField: 'id' };
 
     it('should use realtime source when count equals threshold exactly', async () => {
         // Arrange: count = threshold → boundary condition → realtime
@@ -533,7 +530,7 @@ describe('createDocumentSource — routing between realtime and paginated', () =
 // ===========================================================================
 
 describe('destroy()', () => {
-    const OPTIONS: DocumentSourceOptions = { pageSize: 5, realtimeThreshold: 10 };
+    const OPTIONS: DocumentSourceOptions = { pageSize: 5, realtimeThreshold: 10, idField: 'id' };
 
     it('should complete isLoading and hasMore observables on destroy', async () => {
         // Arrange

@@ -1,9 +1,10 @@
 <script lang="ts">
+    import '../../../styles/tabulator.css';
     import yaml from 'js-yaml';
     import { onDestroy } from 'svelte';
     import { push } from 'svelte-spa-router';
     import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
-    import { Table, appendColumnSelectorMenu } from '@web-apps/svelte-tabulator';
+    import { Table, appendColumnSelectorMenu, tableView as view } from '@web-apps/svelte-tabulator';
     import type { CellComponent, Options, TableView } from '@web-apps/svelte-tabulator';
     import { createDefault } from '../../utils/content.helper';
     import type { Entity, Collection } from '../../models/schema.type';
@@ -11,18 +12,21 @@
     import { DocumentStore } from '../../stores/db/document.service';
     import { timestampToIsoDate } from '../../stores/db/firestore.helper';
     import { createDocumentSource } from '../../stores/data-source.store';
+    import type { DocumentSourceOptions } from '../../stores/data-source.types';
     import { showError, showInfo } from '../../stores/notification.store';
     import { prepareColumnDefinitions } from '../../utils/column.helper';
+    import { toStore } from '../../utils/rx.store';
     import Breadcrumb from '../ui/Breadcrumb.svelte';
     import Toolbar from '../ui/Toolbar.svelte';
     import Loading from '../ui/Loading.svelte';
     import Modal from '../ui/Modal.svelte';
-    import '../../../styles/tabulator.css';
+    import PopupMenu from '../ui/PopupMenu.svelte';
     import CollectionImport from './CollectionImport.svelte';
-    import { toStore } from '../../utils/rx.store';
     
     export let schema$ = of<Collection | null>(null);
     export let documentStore$: Observable<DocumentStore<Entity>>;
+
+    let moreMenu: PopupMenu;
 
     // for adding entries
     let showAddEntry = false;
@@ -38,7 +42,14 @@
     $: disabled = !$currentClientUser;
 
     const INFINITE_SCROLL_THRESHOLD_PX = 400;
-    const source$ = createDocumentSource(documentStore$);
+    const idField = 'id';
+    const dsOptions: DocumentSourceOptions = { 
+        idField,
+        pageSize: 100,
+        realtimeThreshold: 250,
+        bulkEditUpdateSameValuesOnly: false,
+    };
+    const source$ = createDocumentSource(documentStore$, dsOptions);
     const documents = toStore(source$.pipe(switchMap(s => s)));
     const isLoading = toStore(source$.pipe(switchMap(s => s.isLoading)));
     const hasMore = toStore(source$.pipe(switchMap(s => s.hasMore)));
@@ -64,15 +75,15 @@
 
     const persistenceID$ = documentStore$.pipe(map(s => s.path?.split('/').filter((_, i) => i % 2 === 0).join('_')));
     const columns$ = schema$.pipe(map(s => prepareColumnDefinitions(s, { 
-        idField: 'id',
+        idField,
         maxWidth: 800, 
         maxHeight: 300,
-        updateHandler: updateEntry, 
+        updateHandler: (...args) => $source$.updateEntries(...args), 
         actions: [
             {
                 label: '<i class="bx bx-edit"></i>',
                 action: (e: MouseEvent, cell: CellComponent) => {
-                    const id = cell.getData()['id'];
+                    const id = cell.getData()[idField];
                     push(`/page/${$documentStore$.path}/${id}`);
                 }
             }
@@ -112,7 +123,7 @@
         view.table.on('dataFiltered', () => handleInfiniteScroll(holder, holder.scrollTop));
         deleteRowsHandler = () => {
             const selectedRows = view.table.getSelectedRows();
-            const ids = selectedRows.map(row => row.getData()['id']);
+            const ids = selectedRows.map(row => row.getData()[idField]);
             $documentStore$.removeDocuments(...ids)
                 .then(() => selectedRows.forEach(row => row.delete()))
                 .then(() => showInfo(`Deleted ${ids.length} entries.`));
@@ -132,18 +143,6 @@
         await $documentStore$.setDocument(doc, true);
         showAddEntry = false;
         newEntryId = '';
-    }
-
-    async function updateEntry<T extends Entity>(doc: T) {
-        try {
-            if (await $documentStore$.setDocument(doc, true)) {
-                showInfo(`Updated document ${JSON.stringify(doc)}`);
-            } else {
-                showError(`Unable to update document ${JSON.stringify(doc)}`);
-            }
-        } catch (error: any) {
-            showError(`Failed to update document: ${error?.message}`);
-        }
     }
 
     function importDocuments(importData: Entity[]) {
@@ -187,6 +186,9 @@
             <i class="bx bx-export"></i>
         </button>
         <slot name="commands"></slot>
+        <button title="Settings" class="icon clear" on:click={(ev) => moreMenu.showPopupMenu(ev)}>
+            <i class="bx bx-dots-vertical"></i>
+        </button>
         <span slot="title">
             <Breadcrumb path={$documentStore$.path ?? ''} rootPath="/page" on:navigate={({ detail: path }) => push(`/${path}`)} />
         </span>
@@ -205,7 +207,7 @@
         <CollectionImport bind:showSelectFile={showImportDialog} on:confirmed={({ detail }) => importDocuments(detail)}>
             <!-- on path change columns must be invalidated to keep them in sync -->
             {#key $columns$}
-            <Table idField="id" columns={$columns$} data={documents} {options} persistenceID={$persistenceID$}
+            <Table {idField} columns={$columns$} data={documents} {options} persistenceID={$persistenceID$}
                 on:init={({ detail }) => tableInit(detail)} />
             {/key}
         </CollectionImport>
@@ -224,4 +226,29 @@
     </button>
 </Modal>
 {/await}
+
+<PopupMenu bind:this={moreMenu}>
+    <div class="small popup-menu no-wrap y-flex">
+        <span class="menu-item no-wrap">
+            <input type="checkbox" id="bulk-edit-override" bind:checked={dsOptions.bulkEditUpdateSameValuesOnly} />
+            <label for="bulk-edit-override">Only update same values in bulk edit mode</label>
+        </span>
+        {#each $columns$ as col}
+            {#if col.title}
+            <span class="menu-item no-wrap">
+                <input type="checkbox" id={col.field} 
+                    checked={col.field && $view.table.getColumn(col.field).isVisible() || false} 
+                    on:change={() => col.field && $view.table.getColumn(col.field).toggle()} />
+                <label for={col.field}>{col.title}</label>
+            </span>
+            {/if}
+        {/each}
+    </div>
+</PopupMenu>
+
+<style lang="scss">
+    .menu-item {
+        padding: .2rem .6rem;
+    }
+</style>
 

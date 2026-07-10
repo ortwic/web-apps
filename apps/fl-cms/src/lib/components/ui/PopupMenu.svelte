@@ -22,13 +22,15 @@
     visible = true;
   };
 
-  $: top = clientY + offsetHeight > window.innerHeight 
-    ? `${clientY - offsetHeight}px`
-    : `${clientY}px`;
-    
-  $: left = clientX + offsetWidth > window.innerWidth 
-      ? `${clientX - offsetWidth}px`
-      : `${clientX}px`;
+  const withinBounds = (cur: number, max: number) => Math.max(0, Math.min(cur, max));
+
+  $: overflowY = clientY + offsetHeight > window.innerHeight;
+  $: maxHeight = window.innerHeight - offsetHeight;
+  $: top = `${withinBounds(overflowY ? clientY - offsetHeight : clientY, maxHeight)}px`;
+
+  $: overflowX = clientX + offsetWidth > window.innerWidth;
+  $: maxWidth = window.innerWidth - offsetWidth;
+  $: left = `${withinBounds(overflowX ? clientX - offsetWidth : clientX, maxWidth)}px`;
 
   function clickOutside({ target }: { target: any }) {
     if (!menu.contains(target)) {
@@ -61,6 +63,7 @@
       flex-direction: column;
       border: 1px solid var(--color-bg-0);
       box-shadow: .1em .1em .4em #00000080;
+      max-height: 90vh;
     }
   }
 </style>

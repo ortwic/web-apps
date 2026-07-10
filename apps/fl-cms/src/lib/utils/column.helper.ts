@@ -68,6 +68,15 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
             element.style.maxHeight = options?.maxHeight ? `${options.maxHeight}px` : 'auto';
             return cell.getValue();
         };
+        const getAffectedRowIds = <T>(cell: CellComponent, idField: string & keyof T): string[] => {
+            const table = cell.getTable();
+            const selectedRows = table.getSelectedRows();
+            const editedRow = cell.getRow();
+            const rows = selectedRows.length > 1 && selectedRows.includes(editedRow)
+                ? selectedRows
+                : [editedRow];
+            return rows.map(row => row.getData()[idField]);
+        };
         const editor = <TValue>(editor: Editor, values?: TValue[]): Partial<ColumnDefinition> => {
             if (!prop.readOnly) {
                 return {
@@ -77,12 +86,8 @@ export function prepareColumnDefinitions<T>(schema: Collection | null, options: 
                     },
                     cellEdited(cell: CellComponent) {
                         if (options?.updateHandler) {
-                            const id = cell.getData()[options.idField];
-                            const value = cell.getValue();
-                            options.updateHandler({
-                                [options.idField]: id, 
-                                [field]: value 
-                            } as T, cell);
+                            const ids = getAffectedRowIds(cell, options.idField);
+                            options.updateHandler(ids, field as keyof T, cell.getValue());
                         }
                     }
                 };
